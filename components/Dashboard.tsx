@@ -396,7 +396,7 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage }) => {
             </div>
 
             {/* Wochen-Einnahmen Block */}
-            <div className={`bg-white p-6 md:p-10 rounded-2xl md:rounded-[3rem] border shadow-xl flex flex-col justify-center relative overflow-hidden group transition-all duration-700 ${!isCurrentView ? 'blur-md opacity-30 grayscale pointer-events-none scale-95' : ''}`}>
+            <div className={`bg-white p-6 md:p-10 rounded-2xl md:rounded-[3rem] border shadow-xl flex flex-col justify-center relative overflow-hidden group transition-all duration-700 ${!isCurrentView ? 'blur-md opacity-50 grayscale pointer-events-none scale-95' : ''}`}>
                {!isCurrentView && (
                  <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/10 backdrop-blur-xs">
                    <span className="bg-gray-900 text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-xl">Live-Modus inaktiv</span>
@@ -518,7 +518,7 @@ const PensumCard = ({ label, percent, hours, capacity, isOutOfContext }: { label
       : 'text-slate-600 border-slate-100 bg-slate-50/30';
 
   return (
-    <div className={`p-5 md:p-6 rounded-2xl md:rounded-[2rem] border shadow-sm transition-all duration-700 relative overflow-hidden group hover:shadow-md ${colorClass} ${isOutOfContext ? 'blur-lg opacity-30 grayscale pointer-events-none scale-95' : ''}`}>
+    <div className={`p-5 md:p-6 rounded-2xl md:rounded-[2rem] border shadow-sm transition-all duration-700 relative overflow-hidden group hover:shadow-md ${colorClass} ${isOutOfContext ? 'blur-md opacity-50 grayscale pointer-events-none scale-95' : ''}`}>
       {isOutOfContext && (
         <div className="absolute inset-0 z-10 bg-white/20 flex items-center justify-center">
            <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 bg-white/80 px-2 py-1 rounded shadow-sm">Live-Statistik</span>
@@ -565,7 +565,7 @@ const StatCard = ({ title, value, pensum, subText, icon: Icon, color, isOutOfCon
   const isOver = pensum !== undefined && pensum > 50;
 
   return (
-    <div className={`bg-white p-5 md:p-6 rounded-2xl md:rounded-[2.5rem] border shadow-sm group hover:shadow-md transition-all duration-700 relative overflow-hidden ${isOutOfContext ? 'blur-lg opacity-30 grayscale pointer-events-none scale-95' : ''}`}>
+    <div className={`bg-white p-5 md:p-6 rounded-2xl md:rounded-[2.5rem] border shadow-sm group hover:shadow-md transition-all duration-700 relative overflow-hidden ${isOutOfContext ? 'blur-md opacity-50 grayscale pointer-events-none scale-95' : ''}`}>
       {isOutOfContext && (
         <div className="absolute inset-0 z-10 bg-white/10 flex items-center justify-center">
            <span className="text-[7px] font-black uppercase tracking-widest text-slate-400 bg-white/80 px-2 py-0.5 rounded shadow-sm">Inaktiv</span>

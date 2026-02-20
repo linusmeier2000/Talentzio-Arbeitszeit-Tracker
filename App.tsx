@@ -22,7 +22,8 @@ import {
   Wallet,
   ArrowUp,
   ArrowDown,
-  Timer
+  Timer,
+  Trash2
 } from 'lucide-react';
 import { calculateWageBreakdown, formatCurrency, calculateTotalHours, roundTo } from './utils';
 import { generateWorkComment } from './services/geminiService';
@@ -183,7 +184,7 @@ const App: React.FC = () => {
               <div className={`h-1 md:h-2 w-full transition-colors duration-500 ${quickEditStep === 'times' ? 'bg-emerald-500' : quickEditStep === 'splits' ? 'bg-brand-500' : 'bg-slate-800'}`} />
               
               <div className="p-4 md:p-10 flex flex-col flex-1">
-                <div className="flex items-center justify-between mb-4 md:mb-10">
+                    <div className="flex items-center justify-between mb-4 md:mb-10">
                   <div className="flex items-center space-x-2 md:space-x-4">
                     <div className={`p-2 md:p-3 rounded-lg md:rounded-2xl ${quickEditStep === 'times' ? 'bg-emerald-50 text-emerald-600' : quickEditStep === 'splits' ? 'bg-brand-50 text-brand-600' : 'bg-slate-100 text-slate-600'}`}>
                       {quickEditStep === 'times' && <Timer className="w-4 h-4 md:w-6 md:h-6" />}
@@ -192,9 +193,21 @@ const App: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="text-lg md:text-2xl font-black text-gray-900 tracking-tight">Heute im Blick</h3>
-                      <p className="text-[8px] md:text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
-                        {quickEditStep === 'times' ? 'Zeiten' : quickEditStep === 'splits' ? 'Split' : 'Notiz'}
-                      </p>
+                      <div className="flex items-center space-x-2">
+                        <p className="text-[8px] md:text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                          {quickEditStep === 'times' ? 'Zeiten' : quickEditStep === 'splits' ? 'Split' : 'Notiz'}
+                        </p>
+                        {quickEditStep === 'times' && (
+                          <button 
+                            onClick={() => setQuickEditData({...quickEditData, startM: '', lunch: '', startN: '', end: ''})}
+                            className="flex items-center space-x-1 text-[8px] md:text-[10px] font-black text-gray-300 hover:text-red-400 transition-colors uppercase tracking-widest"
+                            title="Zeiten leeren"
+                          >
+                            <Trash2 className="w-2.5 h-2.5" />
+                            <span>Leeren</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                   {quickEditData && (
