@@ -5,6 +5,7 @@ import Dashboard from './components/Dashboard';
 import EntryForm from './components/EntryForm';
 import HistoryList from './components/HistoryList';
 import ExportPanel from './components/ExportPanel';
+import TimePicker from './components/TimePicker';
 import { TimeEntry, UserSettings, CompanySplit, CompanyComments } from './types';
 import { DEFAULT_SETTINGS, INITIAL_IMPORT_DATA, COMPANIES } from './constants';
 import { 
@@ -338,11 +339,9 @@ const App: React.FC = () => {
 const QuickInputLarge = ({ label, value, onChange }: { label: string, value: string, onChange: (v: string) => void }) => (
   <div className="space-y-3 group">
     <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 group-focus-within:text-emerald-500 transition-colors">{label}</label>
-    <input 
-      type="time" 
+    <TimePicker 
       value={value} 
-      onChange={e => onChange(e.target.value)}
-      className="w-full p-6 bg-gray-50 border-2 border-transparent rounded-[1.5rem] outline-none focus:bg-white focus:border-emerald-200 focus:ring-4 focus:ring-emerald-50 font-black text-xl transition-all shadow-sm" 
+      onChange={onChange}
     />
   </div>
 );

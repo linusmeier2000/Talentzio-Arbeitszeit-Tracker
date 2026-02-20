@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { TimeEntry, CompanySplit, CompanyComments } from '../types';
+import TimePicker from './TimePicker';
 import { 
   DEFAULT_SETTINGS, 
   COMPANIES 
@@ -320,11 +321,10 @@ const TimeInputLarge = ({ label, value, onChange, placeholder, icon }: { label: 
       <span className="text-lg">{icon}</span>
       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{label}</label>
     </div>
-    <input 
-      type="time" 
+    <TimePicker 
       value={value} 
-      onChange={(e) => onChange(e.target.value)}
-      className="w-full px-5 py-5 bg-white border border-gray-100 rounded-[1.5rem] focus:ring-4 focus:ring-brand-50 outline-none text-xl font-black shadow-sm"
+      onChange={onChange}
+      placeholder={placeholder}
     />
   </div>
 );

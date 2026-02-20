@@ -446,8 +446,7 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage }) => {
                     <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] flex items-center">
                       <Info className="w-4 h-4 mr-2" /> Repräsentative Werte
                     </h3>
-                    <span className="text-[8px] font-bold text-gray-300 uppercase bg-white px-2 py-0.5 rounded-full border border-gray-100">Tage {">"} 6h
-</span>
+                    <span className="text-[8px] font-bold text-gray-300 uppercase bg-white px-2 py-0.5 rounded-full border border-gray-100">Tage &gt; 6h</span>
                   </div>
                   
                   <div className="grid grid-cols-1 gap-4">
