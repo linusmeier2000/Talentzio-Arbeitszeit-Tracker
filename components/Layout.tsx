@@ -25,10 +25,10 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, noti
     { id: 'settings', label: 'Einstellungen', icon: SettingsIcon },
   ];
 
- return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gray-50 print:bg-white print:block">
+  return (
+    <div className="min-h-screen flex flex-col md:flex-row bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-slate-100 transition-colors duration-300 print:bg-white print:block">
       {/* Sidebar - Desktop */}
-      <aside className="hidden md:flex flex-col w-64 bg-slate-900 text-white sticky top-0 h-screen no-print">
+      <aside className="hidden md:flex flex-col w-64 bg-slate-900 dark:bg-slate-900 text-white sticky top-0 h-screen no-print">
         <div className="p-6">
           <h1 className="text-xl font-black tracking-tighter uppercase">Arbeitszeit</h1>
           <p className="text-[10px] text-slate-500 font-bold mt-1 uppercase tracking-widest">Linus Meier • Talentzio</p>
@@ -66,8 +66,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, noti
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 print:block print:w-full print:static">
-        <header className="bg-white/80 backdrop-blur-md border-b h-14 md:h-16 flex items-center px-4 md:px-8 sticky top-0 z-40 justify-between no-print">
-           <h2 className="text-xs md:text-sm font-black text-gray-900 uppercase tracking-widest">
+        <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b dark:border-slate-800 h-14 md:h-16 flex items-center px-4 md:px-8 sticky top-0 z-40 justify-between no-print">
+           <h2 className="text-xs md:text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest">
              {menuItems.find(m => m.id === activeTab)?.label}
            </h2>
         </header>
@@ -77,13 +77,13 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, noti
         </div>
 
         {/* Navigation - Mobile */}
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t flex justify-around p-2 z-50 no-print">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border-t dark:border-slate-800 flex justify-around p-2 z-50 no-print">
           {menuItems.map((item) => (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
               className={`flex flex-col items-center p-2 rounded-xl transition-all ${
-                activeTab === item.id ? 'text-brand-500 bg-brand-50' : 'text-gray-400'
+                activeTab === item.id ? 'text-brand-500 bg-brand-50 dark:bg-brand-500/10' : 'text-gray-400 dark:text-slate-500'
               }`}
             >
               <item.icon className="w-5 h-5" />
@@ -105,4 +105,3 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, noti
 };
 
 export default Layout;
-
