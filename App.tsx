@@ -23,7 +23,9 @@ import {
   ArrowUp,
   ArrowDown,
   Timer,
-  Trash2
+  Trash2,
+  Moon,
+  Sun
 } from 'lucide-react';
 import { calculateWageBreakdown, formatCurrency, calculateTotalHours, roundTo } from './utils';
 import { generateWorkComment } from './services/geminiService';
@@ -65,6 +67,11 @@ const App: React.FC = () => {
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(settings));
+    if (settings.darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   }, [settings]);
 
   // Initialisiere Quick-Edit wenn ein heutiger Eintrag gefunden wird
