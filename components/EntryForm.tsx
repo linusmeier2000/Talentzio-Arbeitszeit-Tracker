@@ -158,17 +158,17 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
   };
 
   return (
-    <div className="bg-white rounded-[2.5rem] shadow-2xl border border-gray-100 overflow-hidden max-w-2xl mx-auto flex flex-col min-h-[600px]">
+    <div className="bg-white rounded-xl md:rounded-[2.5rem] shadow-2xl border border-gray-100 overflow-hidden max-w-2xl mx-auto flex flex-col min-h-[400px] md:min-h-[600px]">
       {/* Header with Progress */}
-      <div className="bg-slate-900 p-8 text-white">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center space-x-3">
-             <div className="p-2 bg-brand-500 rounded-xl shadow-lg shadow-brand-500/20">
-               {React.createElement(steps[currentStepIndex].icon, { className: "w-5 h-5" })}
+      <div className="bg-slate-900 p-4 md:p-8 text-white">
+        <div className="flex justify-between items-center mb-3 md:mb-6">
+          <div className="flex items-center space-x-2 md:space-x-3">
+             <div className="p-1.5 md:p-2 bg-brand-500 rounded-lg md:rounded-xl shadow-lg shadow-brand-500/20">
+               {React.createElement(steps[currentStepIndex].icon, { className: "w-4 h-4 md:w-5 md:h-5" })}
              </div>
              <div>
-               <h2 className="text-xl font-black tracking-tight">{steps[currentStepIndex].label}</h2>
-               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">Schritt {currentStepIndex + 1} von {steps.length}</p>
+               <h2 className="text-sm md:text-xl font-black tracking-tight">{steps[currentStepIndex].label}</h2>
+               <p className="text-[8px] md:text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">Schritt {currentStepIndex + 1}/{steps.length}</p>
              </div>
           </div>
           <button onClick={onCancel} className="p-2 hover:bg-slate-800 rounded-full transition-colors">
@@ -188,22 +188,22 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 p-8 overflow-y-auto">
+      <div className="flex-1 p-4 md:p-8 overflow-y-auto">
         <form onSubmit={handleSubmit} className="h-full flex flex-col">
           {currentStep === 'basis' && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-               <div className="text-center space-y-2">
-                 <h3 className="text-2xl font-black text-gray-900">Wann war dieser Einsatz?</h3>
-                 <p className="text-sm text-gray-400 font-medium">Wähle das Datum deines Arbeitstages.</p>
+            <div className="space-y-4 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+               <div className="text-center space-y-1">
+                 <h3 className="text-lg md:text-2xl font-black text-gray-900">Datum wählen</h3>
+                 <p className="text-[10px] md:text-sm text-gray-400 font-medium">Wann war dein Einsatz?</p>
                </div>
-               <div className="space-y-6 pt-4">
-                 <div className="space-y-3">
-                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Arbeitsdatum</label>
+               <div className="space-y-3 md:space-y-6 pt-1 md:pt-4">
+                 <div className="space-y-1.5 md:space-y-3">
+                    <label className="text-[9px] md:text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Arbeitsdatum</label>
                     <input 
                       type="date" 
                       value={formData.date} 
                       onChange={(e) => handleChange('date', e.target.value)}
-                      className="w-full px-6 py-5 bg-gray-50 border-none rounded-3xl focus:ring-4 focus:ring-brand-100 outline-none font-bold text-lg"
+                      className="w-full px-4 md:px-6 py-3 md:py-5 bg-gray-50 border-none rounded-xl md:rounded-3xl focus:ring-4 focus:ring-brand-100 outline-none font-bold text-sm md:text-lg"
                     />
                  </div>
                </div>
@@ -211,43 +211,43 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
           )}
 
           {currentStep === 'times' && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-               <div className="text-center space-y-2">
-                 <h3 className="text-2xl font-black text-gray-900">Arbeitszeiten erfassen</h3>
-                 <p className="text-sm text-gray-400 font-medium">Bitte trage deine Präsenzzeiten ein. Für Kurzeinsätze reicht ein Block (z.B. Beginn & Mittag).</p>
+            <div className="space-y-4 md:space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+               <div className="text-center space-y-1">
+                 <h3 className="text-lg md:text-2xl font-black text-gray-900">Zeiten erfassen</h3>
+                 <p className="text-[10px] md:text-sm text-gray-400 font-medium">Trage deine Präsenzzeiten ein.</p>
                </div>
-               <div className="bg-brand-500 p-6 rounded-[2rem] text-white flex justify-between items-center shadow-xl shadow-brand-200 mb-4">
+               <div className="bg-brand-500 p-4 md:p-6 rounded-xl md:rounded-[2rem] text-white flex justify-between items-center shadow-lg shadow-brand-200 mb-1 md:mb-4">
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-brand-200">Berechnetes Total</p>
-                    <p className="text-3xl font-black">{formData.totalHours?.toFixed(2)} h</p>
+                    <p className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-brand-200">Total</p>
+                    <p className="text-xl md:text-3xl font-black">{formData.totalHours?.toFixed(2)} h</p>
                   </div>
-                  <Clock className="w-8 h-8 opacity-40" />
+                  <Clock className="w-5 h-5 md:w-8 md:h-8 opacity-40" />
                </div>
-               <div className="grid grid-cols-2 gap-4">
+               <div className="grid grid-cols-2 gap-2 md:gap-4">
                  <TimeInputLarge label="Morgens" value={formData.startM!} onChange={(v) => handleChange('startM', v)} icon="☀️" />
                  <TimeInputLarge label="Mittag" value={formData.lunch!} onChange={(v) => handleChange('lunch', v)} icon="🥗" />
-                 <TimeInputLarge label="Nachmittag" value={formData.startN!} onChange={(v) => handleChange('startN', v)} placeholder="Optional" icon="☕" />
-                 <TimeInputLarge label="Feierabend" value={formData.end!} onChange={(v) => handleChange('end', v)} icon="🌙" />
+                 <TimeInputLarge label="Nachmittag" value={formData.startN!} onChange={(v) => handleChange('startN', v)} placeholder="Opt." icon="☕" />
+                 <TimeInputLarge label="Ende" value={formData.end!} onChange={(v) => handleChange('end', v)} icon="🌙" />
                </div>
             </div>
           )}
 
           {currentStep === 'splits' && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-               <div className="text-center space-y-2">
-                 <h3 className="text-2xl font-black text-gray-900">Projekt-Verteilung</h3>
-                 <p className="text-sm text-gray-400 font-medium">Verteile deine {formData.totalHours?.toFixed(2)}h auf die Firmen.</p>
+            <div className="space-y-4 md:space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+               <div className="text-center space-y-1">
+                 <h3 className="text-lg md:text-2xl font-black text-gray-900">Verteilung</h3>
+                 <p className="text-[10px] md:text-sm text-gray-400 font-medium">Verteile {formData.totalHours?.toFixed(2)}h.</p>
                </div>
-               <div className="space-y-4">
+               <div className="space-y-2 md:space-y-4">
                   <SplitInputStep label={COMPANIES.MED} hours={formData.splits?.med!} comment={formData.comments?.med!} onHourChange={(v) => handleSplitChange('med', v)} onCommentChange={(v) => handleCommentChange('med', v)} onGenerate={() => triggerAiComment('med', COMPANIES.MED)} isLoading={aiLoading.med} showRequired={!formData.id?.startsWith('import-')} />
                   <SplitInputStep label={COMPANIES.BAU} hours={formData.splits?.bau!} comment={formData.comments?.bau!} onHourChange={(v) => handleSplitChange('bau', v)} onCommentChange={(v) => handleCommentChange('bau', v)} onGenerate={() => triggerAiComment('bau', COMPANIES.BAU)} isLoading={aiLoading.bau} showRequired={!formData.id?.startsWith('import-')} />
                   <SplitInputStep label={COMPANIES.CURSUM} hours={formData.splits?.cursum!} comment={formData.comments?.cursum!} onHourChange={(v) => handleSplitChange('cursum', v)} onCommentChange={(v) => handleCommentChange('cursum', v)} onGenerate={() => triggerAiComment('cursum', COMPANIES.CURSUM)} isLoading={aiLoading.cursum} showRequired={!formData.id?.startsWith('import-')} />
-                  <div className="p-6 bg-slate-900 rounded-3xl flex justify-between items-center text-white shadow-xl">
+                  <div className="p-4 md:p-6 bg-slate-900 rounded-xl md:rounded-3xl flex justify-between items-center text-white shadow-lg">
                     <div>
-                      <p className="font-black">Rest: {COMPANIES.MAIN}</p>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Wird automatisch verbucht</p>
+                      <p className="font-black text-xs md:text-base">Rest: {COMPANIES.MAIN}</p>
+                      <p className="text-[8px] md:text-[10px] text-slate-400 font-bold uppercase tracking-widest">Auto-verbucht</p>
                     </div>
-                    <div className="text-2xl font-black text-brand-400">{formData.splits?.talentzio.toFixed(2)} h</div>
+                    <div className="text-lg md:text-2xl font-black text-brand-400">{formData.splits?.talentzio.toFixed(2)} h</div>
                   </div>
                </div>
             </div>
@@ -280,14 +280,14 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
       </div>
 
       {/* Footer Navigation */}
-      <div className="p-8 bg-gray-50/50 border-t border-gray-100 flex flex-col gap-3">
-         <div className="flex gap-3">
+      <div className="p-4 md:p-8 bg-gray-50/50 border-t border-gray-100 flex flex-col gap-2">
+         <div className="flex gap-2">
            {currentStepIndex > 0 && (
              <button 
                onClick={prevStep}
-               className="flex-1 bg-white border border-gray-200 text-gray-600 font-black py-5 rounded-3xl flex items-center justify-center transition-all hover:bg-gray-50 active:scale-95"
+               className="flex-1 bg-white border border-gray-200 text-gray-600 font-black py-3 md:py-5 rounded-xl md:rounded-3xl flex items-center justify-center transition-all hover:bg-gray-50 active:scale-95 text-xs md:text-base"
              >
-               <ChevronLeft className="w-5 h-5 mr-2" />
+               <ChevronLeft className="w-3.5 h-3.5 md:w-5 md:h-5 mr-1 md:mr-2" />
                Zurück
              </button>
            )}
@@ -295,17 +295,17 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
              <button 
                onClick={nextStep}
                disabled={!validateStep(currentStep)}
-               className="flex-[2] bg-brand-500 hover:bg-brand-600 disabled:bg-gray-200 disabled:text-gray-400 text-white font-black py-5 rounded-3xl flex items-center justify-center transition-all shadow-xl shadow-brand-500/20 active:scale-95"
+               className="flex-[2] bg-brand-500 hover:bg-brand-600 disabled:bg-gray-200 disabled:text-gray-400 text-white font-black py-3 md:py-5 rounded-xl md:rounded-3xl flex items-center justify-center transition-all shadow-lg shadow-brand-500/20 active:scale-95 text-xs md:text-base"
              >
                Weiter
-               <ChevronRight className="w-5 h-5 ml-2" />
+               <ChevronRight className="w-3.5 h-3.5 md:w-5 md:h-5 ml-1 md:mr-2" />
              </button>
            ) : (
              <button 
                onClick={handleSubmit}
-               className="flex-[2] bg-emerald-600 hover:bg-emerald-700 text-white font-black py-5 rounded-3xl flex items-center justify-center transition-all shadow-xl shadow-emerald-500/20 active:scale-95"
+               className="flex-[2] bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 md:py-5 rounded-xl md:rounded-3xl flex items-center justify-center transition-all shadow-lg shadow-emerald-500/20 active:scale-95 text-xs md:text-base"
              >
-               <Save className="w-5 h-5 mr-2" />
+               <Save className="w-3.5 h-3.5 md:w-5 md:h-5 mr-1 md:mr-2" />
                Speichern
              </button>
            )}
@@ -332,19 +332,19 @@ const TimeInputLarge = ({ label, value, onChange, placeholder, icon }: { label: 
 const SplitInputStep = ({ label, hours, comment, onHourChange, onCommentChange, onGenerate, isLoading, showRequired }: { 
   label: string, hours: number, comment: string, onHourChange: (v: string) => void, onCommentChange: (v: string) => void, onGenerate: () => void, isLoading?: boolean, showRequired?: boolean
 }) => (
-  <div className="p-5 rounded-3xl border-2 bg-white border-gray-100">
-     <div className="flex justify-between items-center mb-4">
-       <span className="font-black text-gray-900 tracking-tight">{label}</span>
-       <div className="relative w-24">
-         <input type="number" step="0.25" value={hours || ''} onChange={(e) => onHourChange(e.target.value)} placeholder="0.00" className="w-full bg-gray-50 border-none rounded-xl px-3 py-2 text-right font-black text-sm focus:ring-2 focus:ring-brand-500" />
-         <span className="absolute left-2 top-2.5 text-[10px] font-bold text-gray-400">h</span>
+  <div className="p-4 md:p-5 rounded-2xl md:rounded-3xl border-2 bg-white border-gray-100">
+     <div className="flex justify-between items-center mb-3 md:mb-4">
+       <span className="font-black text-gray-900 tracking-tight text-sm md:text-base">{label}</span>
+       <div className="relative w-20 md:w-24">
+         <input type="number" step="0.25" value={hours || ''} onChange={(e) => onHourChange(e.target.value)} placeholder="0.00" className="w-full bg-gray-50 border-none rounded-lg md:rounded-xl px-2 md:px-3 py-1.5 md:py-2 text-right font-black text-xs md:text-sm focus:ring-2 focus:ring-brand-500" />
+         <span className="absolute left-1.5 md:left-2 top-2 md:top-2.5 text-[8px] md:text-[10px] font-bold text-gray-400">h</span>
        </div>
      </div>
      <div className="relative">
-        <input type="text" value={comment} onChange={(e) => onCommentChange(e.target.value)} placeholder={hours > 0 ? (showRequired ? "Nachweis schreiben..." : "Optionaler Kommentar...") : "Keine Zeit erfasst"} disabled={hours === 0} className={`w-full px-5 py-4 rounded-2xl border-none outline-none text-sm font-medium pr-12 ${hours > 0 ? (comment ? 'bg-gray-50' : (showRequired ? 'bg-orange-50 ring-2 ring-orange-200' : 'bg-gray-50')) : 'bg-gray-100 text-gray-300'}`} />
+        <input type="text" value={comment} onChange={(e) => onCommentChange(e.target.value)} placeholder={hours > 0 ? (showRequired ? "Nachweis schreiben..." : "Optionaler Kommentar...") : "Keine Zeit erfasst"} disabled={hours === 0} className={`w-full px-4 md:px-5 py-3 md:py-4 rounded-xl md:rounded-2xl border-none outline-none text-xs font-medium pr-10 md:pr-12 ${hours > 0 ? (comment ? 'bg-gray-50' : (showRequired ? 'bg-orange-50 ring-2 ring-orange-200' : 'bg-gray-50')) : 'bg-gray-100 text-gray-300'}`} />
         {hours > 0 && (
-          <button type="button" onClick={onGenerate} disabled={!comment || isLoading} className="absolute right-3 top-4 text-brand-500 hover:text-brand-700">
-            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+          <button type="button" onClick={onGenerate} disabled={!comment || isLoading} className="absolute right-2.5 md:right-3 top-3 md:top-4 text-brand-500 hover:text-brand-700">
+            {isLoading ? <Loader2 className="w-3 h-3 md:w-4 md:h-4 animate-spin" /> : <Sparkles className="w-3 h-3 md:w-4 md:h-4" />}
           </button>
         )}
      </div>

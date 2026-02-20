@@ -159,41 +159,41 @@ const App: React.FC = () => {
     switch (activeTab) {
       case 'dashboard': return <Dashboard entries={entries} hourlyWage={settings.wages[0].rate} />;
       case 'track': return (
-        <div className="flex flex-col space-y-12 py-12 no-print max-w-6xl mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-stretch">
+        <div className="flex flex-col space-y-4 md:space-y-12 py-4 md:py-12 no-print max-w-6xl mx-auto px-0.5 md:px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-10 items-stretch">
             {/* Box 1: Neuer Eintrag */}
-            <div className="bg-white p-12 rounded-[3rem] border border-gray-100 shadow-2xl shadow-brand-100/20 text-center flex flex-col justify-center transition-all hover:scale-[1.01] hover:shadow-brand-100/30">
-              <div className="w-24 h-24 bg-brand-50 rounded-full flex items-center justify-center mx-auto mb-8 text-brand-600 shadow-inner">
-                <PlusCircle className="w-12 h-12" />
+            <div className="bg-white p-6 md:p-12 rounded-xl md:rounded-[3rem] border border-gray-100 shadow-xl shadow-brand-100/10 text-center flex flex-col justify-center transition-all hover:scale-[1.01]">
+              <div className="w-12 h-12 md:w-24 md:h-24 bg-brand-50 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-8 text-brand-600 shadow-inner">
+                <PlusCircle className="w-6 h-6 md:w-12 md:h-12" />
               </div>
-              <h3 className="text-3xl font-black text-gray-900 tracking-tighter">Zeit erfassen</h3>
-              <p className="text-sm font-bold text-gray-400 mt-3 mb-10 uppercase tracking-widest">Neuen Arbeitstag dokumentieren</p>
+              <h3 className="text-xl md:text-3xl font-black text-gray-900 tracking-tighter">Zeit erfassen</h3>
+              <p className="text-[9px] md:text-sm font-bold text-gray-400 mt-1 md:mt-3 mb-4 md:mb-10 uppercase tracking-widest">Neuer Arbeitstag</p>
               <button 
                 onClick={() => setShowForm(true)} 
-                className="w-full bg-brand-500 hover:bg-brand-600 text-white font-black py-6 rounded-[2rem] transition-all shadow-xl shadow-brand-500/30 active:scale-95 flex items-center justify-center space-x-3 text-lg"
+                className="w-full bg-brand-500 hover:bg-brand-600 text-white font-black py-3 md:py-6 rounded-xl md:rounded-[2rem] transition-all shadow-lg shadow-brand-500/20 active:scale-95 flex items-center justify-center space-x-2 text-sm md:text-lg"
               >
-                <PlusCircle className="w-6 h-6" />
+                <PlusCircle className="w-4 h-4 md:w-6 md:h-6" />
                 <span>Jetzt starten</span>
               </button>
             </div>
 
             {/* Box 2: Heute im Blick - Luxury Mini-Editor */}
-            <div className="bg-white rounded-[3rem] border border-gray-100 shadow-2xl shadow-emerald-100/20 relative overflow-hidden flex flex-col min-h-[600px] transition-all hover:scale-[1.01]">
+            <div className="bg-white rounded-xl md:rounded-[3rem] border border-gray-100 shadow-xl shadow-emerald-100/10 relative overflow-hidden flex flex-col min-h-[400px] md:min-h-[600px] transition-all hover:scale-[1.01]">
               {/* Header Accent Bar */}
-              <div className={`h-2 w-full transition-colors duration-500 ${quickEditStep === 'times' ? 'bg-emerald-500' : quickEditStep === 'splits' ? 'bg-brand-500' : 'bg-slate-800'}`} />
+              <div className={`h-1 md:h-2 w-full transition-colors duration-500 ${quickEditStep === 'times' ? 'bg-emerald-500' : quickEditStep === 'splits' ? 'bg-brand-500' : 'bg-slate-800'}`} />
               
-              <div className="p-10 flex flex-col flex-1">
-                <div className="flex items-center justify-between mb-10">
-                  <div className="flex items-center space-x-4">
-                    <div className={`p-3 rounded-2xl ${quickEditStep === 'times' ? 'bg-emerald-50 text-emerald-600' : quickEditStep === 'splits' ? 'bg-brand-50 text-brand-600' : 'bg-slate-100 text-slate-600'}`}>
-                      {quickEditStep === 'times' && <Timer className="w-6 h-6" />}
-                      {quickEditStep === 'splits' && <PlusCircle className="w-6 h-6" />}
-                      {quickEditStep === 'notes' && <FileText className="w-6 h-6" />}
+              <div className="p-4 md:p-10 flex flex-col flex-1">
+                <div className="flex items-center justify-between mb-4 md:mb-10">
+                  <div className="flex items-center space-x-2 md:space-x-4">
+                    <div className={`p-2 md:p-3 rounded-lg md:rounded-2xl ${quickEditStep === 'times' ? 'bg-emerald-50 text-emerald-600' : quickEditStep === 'splits' ? 'bg-brand-50 text-brand-600' : 'bg-slate-100 text-slate-600'}`}>
+                      {quickEditStep === 'times' && <Timer className="w-4 h-4 md:w-6 md:h-6" />}
+                      {quickEditStep === 'splits' && <PlusCircle className="w-4 h-4 md:w-6 md:h-6" />}
+                      {quickEditStep === 'notes' && <FileText className="w-4 h-4 md:w-6 md:h-6" />}
                     </div>
                     <div>
-                      <h3 className="text-2xl font-black text-gray-900 tracking-tight">Heute im Blick</h3>
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
-                        {quickEditStep === 'times' ? 'Präsenzzeit anpassen' : quickEditStep === 'splits' ? 'Leistungs-Verteilung' : 'Persönliche Notizen'}
+                      <h3 className="text-lg md:text-2xl font-black text-gray-900 tracking-tight">Heute im Blick</h3>
+                      <p className="text-[8px] md:text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                        {quickEditStep === 'times' ? 'Zeiten' : quickEditStep === 'splits' ? 'Split' : 'Notiz'}
                       </p>
                     </div>
                   </div>
@@ -210,18 +210,18 @@ const App: React.FC = () => {
                   <div className="flex-1 flex flex-col">
                     <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
                       {quickEditStep === 'times' && (
-                        <div className="grid grid-cols-2 gap-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                        <div className="grid grid-cols-2 gap-3 md:gap-6 animate-in fade-in slide-in-from-right-4 duration-300">
                           <QuickInputLarge label="Beginn M" value={quickEditData.startM} onChange={v => setQuickEditData({...quickEditData, startM: v})} />
                           <QuickInputLarge label="Mittag" value={quickEditData.lunch} onChange={v => setQuickEditData({...quickEditData, lunch: v})} />
                           <QuickInputLarge label="Beginn N" value={quickEditData.startN} onChange={v => setQuickEditData({...quickEditData, startN: v})} />
                           <QuickInputLarge label="Ende" value={quickEditData.end} onChange={v => setQuickEditData({...quickEditData, end: v})} />
-                          <div className="col-span-2 mt-8 p-6 bg-emerald-50/50 rounded-[2rem] flex justify-between items-center border border-emerald-100/50 group">
+                          <div className="col-span-2 mt-3 md:mt-8 p-4 md:p-6 bg-emerald-50/50 rounded-xl md:rounded-[2rem] flex justify-between items-center border border-emerald-100/50 group">
                             <div>
-                              <span className="text-[10px] font-black text-emerald-800/60 uppercase tracking-widest block mb-1">Total Stunden</span>
-                              <span className="text-4xl font-black text-emerald-900 tracking-tighter">{calculateTotalHours(quickEditData.startM, quickEditData.lunch, quickEditData.startN, quickEditData.end).toFixed(2)} h</span>
+                              <span className="text-[8px] md:text-[10px] font-black text-emerald-800/60 uppercase tracking-widest block mb-0.5">Total</span>
+                              <span className="text-2xl md:text-4xl font-black text-emerald-900 tracking-tighter">{calculateTotalHours(quickEditData.startM, quickEditData.lunch, quickEditData.startN, quickEditData.end).toFixed(2)} h</span>
                             </div>
-                            <div className="p-4 bg-white rounded-2xl shadow-sm group-hover:scale-110 transition-transform">
-                              <Clock className="w-8 h-8 text-emerald-500" />
+                            <div className="p-2 md:p-4 bg-white rounded-lg md:rounded-2xl shadow-sm group-hover:scale-110 transition-transform">
+                              <Clock className="w-5 h-5 md:w-8 md:h-8 text-emerald-500" />
                             </div>
                           </div>
                         </div>
@@ -243,30 +243,30 @@ const App: React.FC = () => {
                           <textarea 
                             value={quickEditData.note} 
                             onChange={e => setQuickEditData({...quickEditData, note: e.target.value})}
-                            placeholder="Möchtest du etwas zum heutigen Tag festhalten? (Notiz...)"
-                            className="w-full h-64 p-8 bg-gray-50/50 rounded-[2.5rem] border-none outline-none focus:ring-2 focus:ring-slate-200 font-medium text-lg resize-none leading-relaxed placeholder:text-gray-300"
+                            placeholder="Notiz..."
+                            className="w-full h-32 md:h-64 p-4 md:p-8 bg-gray-50/50 rounded-xl md:rounded-[2.5rem] border-none outline-none focus:ring-2 focus:ring-slate-200 font-medium text-sm md:text-lg resize-none leading-relaxed placeholder:text-gray-300"
                           />
                         </div>
                       )}
                     </div>
 
-                    <div className="pt-10 flex gap-4 no-print">
+                    <div className="pt-4 md:pt-10 flex gap-2 md:gap-4 no-print">
                       <button 
                         onClick={() => {
                           if (quickEditStep === 'times') setQuickEditStep('notes');
                           else if (quickEditStep === 'splits') setQuickEditStep('times');
                           else setQuickEditStep('notes');
                         }}
-                        className="p-5 bg-gray-100 text-gray-500 rounded-[1.5rem] hover:bg-gray-200 transition-all active:scale-90"
+                        className="p-3 md:p-5 bg-gray-100 text-gray-500 rounded-lg md:rounded-[1.5rem] hover:bg-gray-200 transition-all active:scale-90"
                       >
-                        <ChevronLeft className="w-6 h-6" />
+                        <ChevronLeft className="w-4 h-4 md:w-6 md:h-6" />
                       </button>
                       
                       <button 
                         onClick={handleQuickSave}
-                        className="flex-1 bg-slate-900 hover:bg-black text-white font-black rounded-[1.5rem] transition-all shadow-xl flex items-center justify-center space-x-3 active:scale-95 text-sm uppercase tracking-[0.2em]"
+                        className="flex-1 bg-slate-900 hover:bg-black text-white font-black rounded-lg md:rounded-[1.5rem] transition-all shadow-xl flex items-center justify-center space-x-2 active:scale-95 text-[9px] md:text-sm uppercase tracking-[0.2em]"
                       >
-                        <Save className="w-5 h-5" />
+                        <Save className="w-3.5 h-3.5 md:w-5 md:h-5" />
                         <span>Sichern</span>
                       </button>
 
@@ -276,9 +276,9 @@ const App: React.FC = () => {
                           else if (quickEditStep === 'splits') setQuickEditStep('notes');
                           else setQuickEditStep('times');
                         }}
-                        className={`p-5 text-white rounded-[1.5rem] transition-all active:scale-90 shadow-lg ${quickEditStep === 'times' ? 'bg-emerald-500 shadow-emerald-500/20' : 'bg-brand-500 shadow-brand-500/20'}`}
+                        className={`p-3 md:p-5 text-white rounded-lg md:rounded-[1.5rem] transition-all active:scale-90 shadow-lg ${quickEditStep === 'times' ? 'bg-emerald-500 shadow-emerald-500/20' : 'bg-brand-500 shadow-brand-500/20'}`}
                       >
-                        <ChevronRight className="w-6 h-6" />
+                        <ChevronRight className="w-4 h-4 md:w-6 md:h-6" />
                       </button>
                     </div>
                   </div>
@@ -324,10 +324,10 @@ const App: React.FC = () => {
       {!showForm && activeTab !== 'track' && (
         <button 
           onClick={() => setShowForm(true)} 
-          className="fixed bottom-24 right-6 md:bottom-12 md:right-12 w-20 h-20 bg-slate-900 text-white rounded-full shadow-[0_30px_60px_rgba(0,0,0,0.4)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-30 no-print" 
+          className="fixed bottom-14 right-3 md:bottom-12 md:right-12 w-12 h-12 md:w-20 md:h-20 bg-slate-900 text-white rounded-full shadow-[0_15px_30px_rgba(0,0,0,0.3)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-30 no-print" 
           title="Schnellerfassung"
         >
-          <PlusCircle className="w-10 h-10" />
+          <PlusCircle className="w-6 h-6 md:w-10 md:h-10" />
         </button>
       )}
     </Layout>
@@ -350,24 +350,24 @@ const QuickSplitCard = ({ label, color, hours, comment, onHourChange, onCommentC
   const isSelected = hours > 0;
   
   return (
-    <div className={`p-6 rounded-[2rem] border-2 transition-all duration-300 ${
+    <div className={`p-4 md:p-6 rounded-2xl md:rounded-[2rem] border-2 transition-all duration-300 ${
       isSelected 
         ? 'bg-white shadow-xl border-gray-100' 
         : 'bg-gray-50/50 border-transparent opacity-60'
     }`}>
-      <div className="flex justify-between items-center mb-5">
-        <div className="flex items-center space-x-3">
-          <div className="w-4 h-4 rounded-full shadow-sm" style={{ backgroundColor: color }} />
-          <span className="text-sm font-black uppercase tracking-widest text-gray-900">{label}</span>
+      <div className="flex justify-between items-center mb-4 md:mb-5">
+        <div className="flex items-center space-x-2 md:space-x-3">
+          <div className="w-3 h-3 md:w-4 md:h-4 rounded-full shadow-sm" style={{ backgroundColor: color }} />
+          <span className="text-[10px] md:text-sm font-black uppercase tracking-widest text-gray-900">{label}</span>
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 md:space-x-3">
           <div className="relative">
             <input 
               type="number" step="0.25" placeholder="0.00" value={hours || ''} 
               onChange={e => onHourChange(e.target.value)}
-              className="w-20 bg-gray-50 border-none rounded-xl px-3 py-2 text-right font-black text-sm focus:ring-2 focus:ring-brand-500 outline-none"
+              className="w-16 md:w-20 bg-gray-50 border-none rounded-lg md:rounded-xl px-2 md:px-3 py-1.5 md:py-2 text-right font-black text-xs md:text-sm focus:ring-2 focus:ring-brand-500 outline-none"
             />
-            <span className="absolute -right-5 top-2.5 text-[10px] font-black text-gray-300 uppercase">h</span>
+            <span className="absolute -right-4 md:-right-5 top-2 md:top-2.5 text-[8px] md:text-[10px] font-black text-gray-300 uppercase">h</span>
           </div>
         </div>
       </div>

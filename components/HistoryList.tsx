@@ -35,88 +35,130 @@ const HistoryList: React.FC<HistoryListProps> = ({ entries, onEdit }) => {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border shadow-sm overflow-hidden overflow-x-auto">
-        <table className="w-full text-left border-collapse min-w-[800px]">
-          <thead className="bg-gray-50 text-gray-500 text-xs font-bold uppercase tracking-wider border-b">
-            <tr>
-              <th className="px-6 py-4">Datum / Wochentag</th>
-              <th className="px-6 py-4">Zeiten (M / P / N / E)</th>
-              <th className="px-6 py-4 text-center">Stunden</th>
-              <th className="px-6 py-4">Splits (Hover für Kommentare)</th>
-              <th className="px-6 py-4 text-right">Aktion</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {filteredEntries.map((entry) => (
-              <tr key={entry.id} className="hover:bg-brand-50/30 transition-colors group/row">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="font-semibold text-gray-900">{formatDate(entry.date)}</div>
-                  <div className="text-xs text-gray-400">{getWeekday(entry.date)}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                  <span className="font-medium">{entry.startM} - {entry.lunch}</span>
-                  <span className="mx-2 text-gray-300">|</span>
-                  <span className="font-medium">{entry.startN || '-'} - {entry.end}</span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">
-                  <span className={`px-2.5 py-1 rounded-lg text-xs font-black ${entry.totalHours > 0 ? 'bg-brand-100 text-brand-700' : 'bg-gray-100 text-gray-500'}`}>
+      <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[800px]">
+            <thead className="bg-gray-50 text-gray-500 text-xs font-bold uppercase tracking-wider border-b">
+              <tr>
+                <th className="px-6 py-4">Datum / Wochentag</th>
+                <th className="px-6 py-4">Zeiten (M / P / N / E)</th>
+                <th className="px-6 py-4 text-center">Stunden</th>
+                <th className="px-6 py-4">Splits (Hover für Kommentare)</th>
+                <th className="px-6 py-4 text-right">Aktion</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {filteredEntries.map((entry) => (
+                <tr key={entry.id} className="hover:bg-brand-50/30 transition-colors group/row">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="font-semibold text-gray-900">{formatDate(entry.date)}</div>
+                    <div className="text-xs text-gray-400">{getWeekday(entry.date)}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <span className="font-medium">{entry.startM} - {entry.lunch}</span>
+                    <span className="mx-2 text-gray-300">|</span>
+                    <span className="font-medium">{entry.startN || '-'} - {entry.end}</span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <span className={`px-2.5 py-1 rounded-lg text-xs font-black ${entry.totalHours > 0 ? 'bg-brand-100 text-brand-700' : 'bg-gray-100 text-gray-500'}`}>
+                      {entry.totalHours.toFixed(2)} h
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center space-x-2">
+                      <SplitTag 
+                        bgColor="#10183c" 
+                        textColor="text-white"
+                        label="Med" 
+                        fullName="Talentzio Med AG"
+                        hours={entry.splits.med} 
+                        comment={entry.comments.med} 
+                      />
+                      <SplitTag 
+                        bgColor="#ff501a" 
+                        textColor="text-white"
+                        label="Bau" 
+                        fullName="Talentzio Bau AG"
+                        hours={entry.splits.bau} 
+                        comment={entry.comments.bau} 
+                      />
+                      <SplitTag 
+                        bgColor="#4bf6bb" 
+                        textColor="text-[#10183c]"
+                        label="Cursum" 
+                        fullName="Cursum AG"
+                        hours={entry.splits.cursum} 
+                        comment={entry.comments.cursum} 
+                      />
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right">
+                    {entry.isLocked ? (
+                      <div className="flex items-center justify-end text-gray-300">
+                        <Lock className="w-4 h-4 mr-1" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest">Gesperrt</span>
+                      </div>
+                    ) : (
+                      <button 
+                        onClick={() => onEdit(entry)}
+                        className="p-2 text-brand-600 hover:bg-brand-100 rounded-lg transition-all transform hover:scale-110 active:scale-95"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden divide-y">
+          {filteredEntries.map((entry) => (
+            <div key={entry.id} className="p-4 space-y-3 hover:bg-gray-50 transition-colors">
+              <div className="flex justify-between items-start">
+                <div>
+                  <div className="font-bold text-gray-900">{formatDate(entry.date)}</div>
+                  <div className="text-[10px] text-gray-400 font-black uppercase tracking-widest">{getWeekday(entry.date)}</div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black ${entry.totalHours > 0 ? 'bg-brand-100 text-brand-700' : 'bg-gray-100 text-gray-500'}`}>
                     {entry.totalHours.toFixed(2)} h
                   </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center space-x-2">
-                    <SplitTag 
-                      bgColor="#10183c" 
-                      textColor="text-white"
-                      label="Med" 
-                      fullName="Talentzio Med AG"
-                      hours={entry.splits.med} 
-                      comment={entry.comments.med} 
-                    />
-                    <SplitTag 
-                      bgColor="#ff501a" 
-                      textColor="text-white"
-                      label="Bau" 
-                      fullName="Talentzio Bau AG"
-                      hours={entry.splits.bau} 
-                      comment={entry.comments.bau} 
-                    />
-                    <SplitTag 
-                      bgColor="#4bf6bb" 
-                      textColor="text-[#10183c]"
-                      label="Cursum" 
-                      fullName="Cursum AG"
-                      hours={entry.splits.cursum} 
-                      comment={entry.comments.cursum} 
-                    />
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right">
-                  {entry.isLocked ? (
-                    <div className="flex items-center justify-end text-gray-300">
-                      <Lock className="w-4 h-4 mr-1" />
-                      <span className="text-[10px] font-bold uppercase tracking-widest">Gesperrt</span>
-                    </div>
-                  ) : (
+                  {!entry.isLocked && (
                     <button 
                       onClick={() => onEdit(entry)}
-                      className="p-2 text-brand-600 hover:bg-brand-100 rounded-lg transition-all transform hover:scale-110 active:scale-95"
+                      className="p-2 text-brand-600 bg-brand-50 rounded-lg"
                     >
-                      <Edit2 className="w-4 h-4" />
+                      <Edit2 className="w-3.5 h-3.5" />
                     </button>
                   )}
-                </td>
-              </tr>
-            ))}
-            {filteredEntries.length === 0 && (
-              <tr>
-                <td colSpan={5} className="px-6 py-12 text-center text-gray-400 italic">
-                  Keine Einträge gefunden.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                  {entry.isLocked && <Lock className="w-3.5 h-3.5 text-gray-300" />}
+                </div>
+              </div>
+
+              <div className="flex items-center text-xs text-gray-600 bg-gray-50 p-2 rounded-xl">
+                <span className="font-bold">{entry.startM} - {entry.lunch}</span>
+                <span className="mx-2 text-gray-300">|</span>
+                <span className="font-bold">{entry.startN || '-'} - {entry.end}</span>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <SplitTag label="Med" hours={entry.splits.med} bgColor="#10183c" textColor="text-white" fullName="Med AG" comment={entry.comments.med} />
+                <SplitTag label="Bau" hours={entry.splits.bau} bgColor="#ff501a" textColor="text-white" fullName="Bau AG" comment={entry.comments.bau} />
+                <SplitTag label="Cursum" hours={entry.splits.cursum} bgColor="#4bf6bb" textColor="text-[#10183c]" fullName="Cursum AG" comment={entry.comments.cursum} />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {filteredEntries.length === 0 && (
+          <div className="px-6 py-12 text-center text-gray-400 italic text-sm">
+            Keine Einträge gefunden.
+          </div>
+        )}
       </div>
     </div>
   );
