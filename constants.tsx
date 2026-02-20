@@ -31,8 +31,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   defaultLunch: '12:05',
   defaultStartN: '12:50',
   defaultEnd: '17:50',
-  lastExportDate: null,
-  darkMode: false
+  lastExportDate: null
 };
 
 export const WEEKDAYS = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
