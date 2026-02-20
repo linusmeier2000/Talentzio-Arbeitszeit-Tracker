@@ -229,23 +229,7 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage }) => {
       {activeSubTab === 'times' ? (
         <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
           {/* Haupt-Metriken */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-4">
-            <StatCard 
-              title={`Stunden ${getMonthName(viewMonth)}`} 
-              value={`${stats.hoursMonth.toFixed(2)} h`} 
-              pensum={stats.pensumMonth}
-              icon={Clock} 
-              color="brand" 
-              subText="Monatstotal" 
-            />
-            <StatCard 
-              title="Ø pro Woche" 
-              value={`${stats.avgHoursPerWeek.toFixed(1)} h`} 
-              pensum={stats.pensumAvgWeek}
-              icon={TrendingUp} 
-              color="brand" 
-              subText={`Schnitt ${viewYear}`} 
-            />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
             <StatCard 
               title="Stunden Woche" 
               value={`${stats.hoursWeek.toFixed(2)} h`} 
@@ -253,7 +237,17 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage }) => {
               icon={Calendar} 
               color="brand" 
               subText="Aktuelle Woche"
+              comparison={`${stats.avgHoursPerWeek.toFixed(1)} h`}
               isOutOfContext={!isCurrentView}
+            />
+            <StatCard 
+              title={`Stunden ${getMonthName(viewMonth)}`} 
+              value={`${stats.hoursMonth.toFixed(2)} h`} 
+              pensum={stats.pensumMonth}
+              icon={Clock} 
+              color="brand" 
+              subText="Monatstotal" 
+              comparison={`${stats.avgHoursPerMonth.toFixed(1)} h`}
             />
             <StatCard 
               title={`Total ${viewYear}`} 
@@ -262,13 +256,6 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage }) => {
               icon={BarChart3} 
               color="brand" 
               subText="Jahresfortschritt" 
-            />
-            <StatCard 
-              title="Ø pro Monat" 
-              value={`${stats.avgHoursPerMonth.toFixed(1)} h`} 
-              icon={Activity} 
-              color="brand" 
-              subText="Monatsschnitt" 
             />
           </div>
 
@@ -552,8 +539,8 @@ const PensumCard = ({ label, percent, hours, capacity, isOutOfContext }: { label
   );
 };
 
-const StatCard = ({ title, value, pensum, subText, icon: Icon, color, isOutOfContext }: { 
-  title: string, value: string, pensum?: number, subText: string, icon: any, color: string, isOutOfContext?: boolean
+const StatCard = ({ title, value, pensum, subText, icon: Icon, color, isOutOfContext, comparison }: { 
+  title: string, value: string, pensum?: number, subText: string, icon: any, color: string, isOutOfContext?: boolean, comparison?: string
 }) => {
   const colorMap: any = {
     brand: 'bg-brand-50 text-brand-600',
@@ -581,14 +568,21 @@ const StatCard = ({ title, value, pensum, subText, icon: Icon, color, isOutOfCon
             isOver ? 'bg-brand-50 text-brand-600 border-brand-100' : 
             'bg-slate-50 text-slate-500 border-slate-100'
           }`}>
-            <Percent className="w-3 h-3 mr-1" />
             {pensum.toFixed(0)}% {isTarget && <Zap className="w-2.5 h-2.5 ml-1" />}
           </div>
         )}
       </div>
       <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 truncate">{title}</h4>
       <div className="text-2xl font-black text-gray-900 mb-1">{value}</div>
-      <p className="text-[10px] font-bold text-gray-400 tracking-tight">{subText}</p>
+      <div className="flex items-center justify-between">
+        <p className="text-[10px] font-bold text-gray-400 tracking-tight">{subText}</p>
+        {comparison && (
+          <div className="flex items-center space-x-1.5">
+            <span className="text-[8px] font-black text-gray-300 uppercase tracking-tighter">Ø</span>
+            <span className="text-[10px] font-black text-brand-600">{comparison}</span>
+          </div>
+        )}
+      </div>
       
       {pensum !== undefined && (
         <div className="mt-2 h-0.5 w-full bg-gray-50 rounded-full overflow-hidden">

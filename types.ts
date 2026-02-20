@@ -41,4 +41,5 @@ export interface UserSettings {
   defaultStartN: string;
   defaultEnd: string;
   lastExportDate: string | null;
+  darkMode: boolean;
 }

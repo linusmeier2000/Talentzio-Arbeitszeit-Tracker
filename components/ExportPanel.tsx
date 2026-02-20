@@ -101,18 +101,18 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-20">
       {/* Steuerungs-Panel - no-print */}
-      <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-8 no-print">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border dark:border-slate-800 shadow-sm space-y-8 no-print">
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-brand-50 rounded-xl"><Calendar className="w-5 h-5 text-brand-500" /></div>
-            <h3 className="text-lg font-black text-gray-900 tracking-tight">Export-Center</h3>
+            <div className="p-2 bg-brand-50 dark:bg-brand-500/10 rounded-xl"><Calendar className="w-5 h-5 text-brand-500" /></div>
+            <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">Export-Center</h3>
           </div>
           
           {filteredEntries.length > 0 && (
             <button 
               onClick={() => onToggleLock(startDate, endDate, !allEntriesLocked)}
               className={`flex items-center px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                allEntriesLocked ? 'bg-orange-50 text-orange-600 border border-orange-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                allEntriesLocked ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-orange-500/20' : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-500/20'
               }`}
             >
               {allEntriesLocked ? <Unlock className="w-3 h-3 mr-2" /> : <Lock className="w-3 h-3 mr-2" />}
@@ -123,48 +123,48 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-4">
-            <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center">
+            <h4 className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest flex items-center">
               <span className="w-2 h-2 bg-brand-500 rounded-full mr-2"></span> Zeitraum wählen
             </h4>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-300 uppercase ml-1">Von</label>
-                <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="w-full p-3 bg-gray-50 rounded-xl font-bold border-none outline-none focus:ring-2 focus:ring-brand-500" />
+                <label className="text-[10px] font-bold text-gray-300 dark:text-slate-600 uppercase ml-1">Von</label>
+                <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="w-full p-3 bg-gray-50 dark:bg-slate-800 rounded-xl font-bold border-none outline-none focus:ring-2 focus:ring-brand-500 dark:text-white" />
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-300 uppercase ml-1">Bis</label>
-                <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-full p-3 bg-gray-50 rounded-xl font-bold border-none outline-none focus:ring-2 focus:ring-brand-500" />
+                <label className="text-[10px] font-bold text-gray-300 dark:text-slate-600 uppercase ml-1">Bis</label>
+                <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-full p-3 bg-gray-50 dark:bg-slate-800 rounded-xl font-bold border-none outline-none focus:ring-2 focus:ring-brand-500 dark:text-white" />
               </div>
             </div>
           </div>
 
           <div className="space-y-4">
-            <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center">
+            <h4 className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest flex items-center">
               <span className="w-2 h-2 bg-brand-500 rounded-full mr-2"></span> Titel-Konfiguration
             </h4>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-300 uppercase ml-1">Monat</label>
-                <select value={displayMonth} onChange={(e) => setOverrideMonth(parseInt(e.target.value))} className="w-full p-3 bg-gray-50 rounded-xl font-bold border-none outline-none focus:ring-2 focus:ring-brand-500 appearance-none">
-                  {months.map(m => <option key={m} value={m}>{getMonthName(m)}</option>)}
+                <label className="text-[10px] font-bold text-gray-300 dark:text-slate-600 uppercase ml-1">Monat</label>
+                <select value={displayMonth} onChange={(e) => setOverrideMonth(parseInt(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-800 rounded-xl font-bold border-none outline-none focus:ring-2 focus:ring-brand-500 appearance-none dark:text-white">
+                  {months.map(m => <option key={m} value={m} className="dark:bg-slate-900">{getMonthName(m)}</option>)}
                 </select>
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-300 uppercase ml-1">Jahr</label>
-                <select value={displayYear} onChange={(e) => setOverrideYear(parseInt(e.target.value))} className="w-full p-3 bg-gray-50 rounded-xl font-bold border-none outline-none focus:ring-2 focus:ring-brand-500 appearance-none">
-                  {years.map(y => <option key={y} value={y}>{y}</option>)}
+                <label className="text-[10px] font-bold text-gray-300 dark:text-slate-600 uppercase ml-1">Jahr</label>
+                <select value={displayYear} onChange={(e) => setOverrideYear(parseInt(e.target.value))} className="w-full p-3 bg-gray-50 dark:bg-slate-800 rounded-xl font-bold border-none outline-none focus:ring-2 focus:ring-brand-500 appearance-none dark:text-white">
+                  {years.map(y => <option key={y} value={y} className="dark:bg-slate-900">{y}</option>)}
                 </select>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="p-6 bg-slate-900 rounded-[2rem] flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl relative overflow-hidden">
+        <div className="p-6 bg-slate-900 dark:bg-slate-800 rounded-[2rem] flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-brand-500/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
           <div className="text-center md:text-left z-10">
             <p className="text-xl font-black text-white">{filteredEntries.length} Tage für PDF bereit</p>
             <p className="text-xs text-brand-400 font-medium tracking-tight mt-1 flex items-center justify-center md:justify-start">
-              <Printer className="w-3 h-3 mr-2" /> PDF via <kbd className="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-slate-200 mx-1">Ctrl + P</kbd> speichern
+              <Printer className="w-3 h-3 mr-2" /> PDF via <kbd className="bg-slate-800 dark:bg-slate-700 px-1.5 py-0.5 rounded border border-slate-700 dark:border-slate-600 text-slate-200 mx-1">Ctrl + P</kbd> speichern
             </p>
           </div>
           
@@ -179,8 +179,8 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
       </div>
 
       {/* Das Dokument (Print-optimiert) */}
-      <div id="print-area" className="bg-white rounded-[2rem] border shadow-sm overflow-hidden print:m-0 print:p-0 print:border-none print:shadow-none">
-        <div className="p-4 bg-gray-50 border-b no-print flex justify-between items-center text-[10px] font-black text-gray-400 uppercase tracking-widest">
+      <div id="print-area" className="bg-white dark:bg-slate-900 rounded-[2rem] border dark:border-slate-800 shadow-sm overflow-hidden print:m-0 print:p-0 print:border-none print:shadow-none">
+        <div className="p-4 bg-gray-50 dark:bg-slate-800/50 border-b dark:border-slate-800 no-print flex justify-between items-center text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest">
           Druckvorschau
         </div>
 
@@ -250,10 +250,10 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
           </div>
         ) : (
           <div className="p-24 text-center space-y-4">
-             <div className="bg-orange-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+             <div className="bg-orange-50 dark:bg-orange-500/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
                <FileWarning className="w-10 h-10 text-orange-400" />
              </div>
-             <p className="text-xl font-black text-gray-900">Keine Einträge verfügbar</p>
+             <p className="text-xl font-black text-gray-900 dark:text-white">Keine Einträge verfügbar</p>
           </div>
         )}
       </div>
