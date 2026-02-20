@@ -124,71 +124,7 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage }) => {
     const avgHoursPerDay = countFullWorkDays > 0 ? sumHoursFullDays / countFullWorkDays : 0;
     const avgDailyNet = avgHoursPerDay * wageInfo.netRate;
 
-    return {
-      hoursMonth, hoursYear, hoursWeek, avgHoursPerWeek, avgHoursPerMonth,
-      netMonth, netWeek, weekComparison, pensumWeek, pensumMonth, pensumYear, pensumAvgWeek,
-      avgDailyNet, avgHoursPerDay, workDays: countFullWorkDays,
-      capacityWeek: REFERENCE_WEEK_HOURS, capacityMonth, capacityYear: capacityYearYTD
-    };
-  }, [entries, viewMonth, viewYear, wageInfo, now]);
-
-  const dailyTrendData = useMemo(() => {
-    const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-    const data = Array.from({ length: daysInMonth }, (_, i) => ({ day: i + 1, cumulative: 0 }));
-    let runningTotal = 0;
-    
-    entries.filter(e => {
-      const d = new Date(e.date);
-      return d.getMonth() === viewMonth && d.getFullYear() === viewYear;
-    }).sort((a,b) => a.date.localeCompare(b.date)).forEach(e => {
-      const dayNum = new Date(e.date).getDate();
-      runningTotal += e.totalHours * wageInfo.netRate;
-      data[dayNum - 1].cumulative = runningTotal;
-    });
-
-    for(let i=1; i<data.length; i++) {
-      if(data[i].cumulative === 0) data[i].cumulative = data[i-1].cumulative;
-    }
-    return data;
-  }, [entries, viewMonth, viewYear, wageInfo]);
-
-  const chartData = useMemo(() => {
-    const data = Array.from({ length: 12 }, (_, i) => ({ name: getMonthName(i).substring(0, 3), hours: 0, hoursPrev: 0 }));
-    entries.forEach(e => {
-      const d = new Date(e.date);
-      const m = d.getMonth();
-      const y = d.getFullYear();
-      if (y === viewYear) data[m].hours += e.totalHours;
-      else if (y === viewYear - 1) data[m].hoursPrev += e.totalHours;
-    });
-    return data;
-  }, [entries, viewYear]);
-
-  const splitData = useMemo(() => {
-    let med = 0, bau = 0, cursum = 0, talentzio = 0;
-    entries.forEach(e => {
-      const d = new Date(e.date);
-      if (d.getMonth() === viewMonth && d.getFullYear() === viewYear) {
-        med += e.splits.med; bau += e.splits.bau; cursum += e.splits.cursum; talentzio += e.splits.talentzio;
-      }
-    });
-    return [
-      { name: 'Talentzio Med AG', value: med, color: '#10183c' },
-      { name: 'Talentzio Bau AG', value: bau, color: '#ff501a' },
-      { name: 'Cursum AG', value: cursum, color: '#4bf6bb' },
-      { name: 'Talentzio AG (Rest)', value: talentzio, color: '#0280c9' },
-    ].filter(v => v.value > 0);
-  }, [entries, viewMonth, viewYear]);
-
-  const cursumStats = useMemo(() => {
-    const hours = getMonthlyCompanyHours(entries, 'cursum', viewMonth, viewYear);
-    const limit = 6.0;
-    const remaining = Math.max(0, limit - hours);
-    const progress = Math.min(100, (hours / limit) * 100);
-    return { hours, limit, remaining, progress, isOver: hours > limit };
-  }, [entries, viewMonth, viewYear]);
-
-  return (
+return (
     <div className="space-y-6 md:space-y-6">
       {/* Zentrale Steuerung */}
       <div className="bg-white p-3 md:p-4 rounded-2xl md:rounded-[2rem] border shadow-sm flex flex-col lg:flex-row items-center justify-between gap-3 md:gap-4 no-print sticky top-14 md:top-20 z-30">
@@ -229,17 +165,7 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage }) => {
       {activeSubTab === 'times' ? (
         <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
           {/* Haupt-Metriken */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-            <StatCard 
-              title="Stunden Woche" 
-              value={`${stats.hoursWeek.toFixed(2)} h`} 
-              pensum={stats.pensumWeek}
-              icon={Calendar} 
-              color="brand" 
-              subText="Aktuelle Woche"
-              comparison={`${stats.avgHoursPerWeek.toFixed(1)} h`}
-              isOutOfContext={!isCurrentView}
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-4">
             <StatCard 
               title={`Stunden ${getMonthName(viewMonth)}`} 
               value={`${stats.hoursMonth.toFixed(2)} h`} 
@@ -247,7 +173,23 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage }) => {
               icon={Clock} 
               color="brand" 
               subText="Monatstotal" 
-              comparison={`${stats.avgHoursPerMonth.toFixed(1)} h`}
+            />
+            <StatCard 
+              title="Ø pro Woche" 
+              value={`${stats.avgHoursPerWeek.toFixed(1)} h`} 
+              pensum={stats.pensumAvgWeek}
+              icon={TrendingUp} 
+              color="brand" 
+              subText={`Schnitt ${viewYear}`} 
+            />
+            <StatCard 
+              title="Stunden Woche" 
+              value={`${stats.hoursWeek.toFixed(2)} h`} 
+              pensum={stats.pensumWeek}
+              icon={Calendar} 
+              color="brand" 
+              subText="Aktuelle Woche"
+              isOutOfContext={!isCurrentView}
             />
             <StatCard 
               title={`Total ${viewYear}`} 
@@ -256,6 +198,13 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage }) => {
               icon={BarChart3} 
               color="brand" 
               subText="Jahresfortschritt" 
+            />
+            <StatCard 
+              title="Ø pro Monat" 
+              value={`${stats.avgHoursPerMonth.toFixed(1)} h`} 
+              icon={Activity} 
+              color="brand" 
+              subText="Monatsschnitt" 
             />
           </div>
 
@@ -539,8 +488,8 @@ const PensumCard = ({ label, percent, hours, capacity, isOutOfContext }: { label
   );
 };
 
-const StatCard = ({ title, value, pensum, subText, icon: Icon, color, isOutOfContext, comparison }: { 
-  title: string, value: string, pensum?: number, subText: string, icon: any, color: string, isOutOfContext?: boolean, comparison?: string
+const StatCard = ({ title, value, pensum, subText, icon: Icon, color, isOutOfContext }: { 
+  title: string, value: string, pensum?: number, subText: string, icon: any, color: string, isOutOfContext?: boolean
 }) => {
   const colorMap: any = {
     brand: 'bg-brand-50 text-brand-600',
@@ -568,21 +517,14 @@ const StatCard = ({ title, value, pensum, subText, icon: Icon, color, isOutOfCon
             isOver ? 'bg-brand-50 text-brand-600 border-brand-100' : 
             'bg-slate-50 text-slate-500 border-slate-100'
           }`}>
+            <Percent className="w-3 h-3 mr-1" />
             {pensum.toFixed(0)}% {isTarget && <Zap className="w-2.5 h-2.5 ml-1" />}
           </div>
         )}
       </div>
       <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 truncate">{title}</h4>
       <div className="text-2xl font-black text-gray-900 mb-1">{value}</div>
-      <div className="flex items-center justify-between">
-        <p className="text-[10px] font-bold text-gray-400 tracking-tight">{subText}</p>
-        {comparison && (
-          <div className="flex items-center space-x-1.5">
-            <span className="text-[8px] font-black text-gray-300 uppercase tracking-tighter">Ø</span>
-            <span className="text-[10px] font-black text-brand-600">{comparison}</span>
-          </div>
-        )}
-      </div>
+      <p className="text-[10px] font-bold text-gray-400 tracking-tight">{subText}</p>
       
       {pensum !== undefined && (
         <div className="mt-2 h-0.5 w-full bg-gray-50 rounded-full overflow-hidden">
