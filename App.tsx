@@ -23,9 +23,7 @@ import {
   ArrowUp,
   ArrowDown,
   Timer,
-  Trash2,
-  Moon,
-  Sun
+  Trash2
 } from 'lucide-react';
 import { calculateWageBreakdown, formatCurrency, calculateTotalHours, roundTo } from './utils';
 import { generateWorkComment } from './services/geminiService';
