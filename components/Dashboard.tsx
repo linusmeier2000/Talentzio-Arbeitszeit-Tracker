@@ -189,47 +189,47 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage }) => {
   }, [entries, viewMonth, viewYear]);
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-6 md:space-y-6">
       {/* Zentrale Steuerung */}
-      <div className="bg-white p-1.5 md:p-4 rounded-lg md:rounded-[2rem] border shadow-sm flex flex-col lg:flex-row items-center justify-between gap-1.5 md:gap-4 no-print sticky top-10 md:top-20 z-30">
-        <div className="flex bg-gray-100 p-0.5 md:p-1 rounded-md md:rounded-2xl w-full lg:w-auto">
-          <button onClick={() => setActiveSubTab('times')} className={`flex-1 lg:flex-none flex items-center justify-center px-3 md:px-6 py-1.5 md:py-2.5 rounded-md md:rounded-xl font-black text-[10px] md:text-xs transition-all ${activeSubTab === 'times' ? 'bg-white text-brand-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
-            <Clock className="w-3 h-3 md:w-4 md:h-4 mr-1.5 md:mr-2" /> Zeiten
+      <div className="bg-white p-3 md:p-4 rounded-2xl md:rounded-[2rem] border shadow-sm flex flex-col lg:flex-row items-center justify-between gap-3 md:gap-4 no-print sticky top-14 md:top-20 z-30">
+        <div className="flex bg-gray-100 p-1 rounded-xl md:rounded-2xl w-full lg:w-auto">
+          <button onClick={() => setActiveSubTab('times')} className={`flex-1 lg:flex-none flex items-center justify-center px-4 md:px-6 py-2 md:py-2.5 rounded-xl font-black text-xs transition-all ${activeSubTab === 'times' ? 'bg-white text-brand-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+            <Clock className="w-4 h-4 mr-2" /> Zeiten
           </button>
-          <button onClick={() => setActiveSubTab('finances')} className={`flex-1 lg:flex-none flex items-center justify-center px-3 md:px-6 py-1.5 md:py-2.5 rounded-md md:rounded-xl font-black text-[10px] md:text-xs transition-all ${activeSubTab === 'finances' ? 'bg-white text-emerald-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
-            <Coins className="w-3 h-3 md:w-4 md:h-4 mr-1.5 md:mr-2" /> Finanzen
+          <button onClick={() => setActiveSubTab('finances')} className={`flex-1 lg:flex-none flex items-center justify-center px-4 md:px-6 py-2 md:py-2.5 rounded-xl font-black text-xs transition-all ${activeSubTab === 'finances' ? 'bg-white text-emerald-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+            <Coins className="w-4 h-4 mr-2" /> Finanzen
           </button>
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-2 w-full lg:w-auto">
-          <div className="flex items-center space-x-1.5 bg-gray-50 px-2.5 py-1.5 rounded-lg border border-gray-100">
-            <span className="text-[8px] md:text-[10px] font-black text-gray-400 uppercase tracking-widest">Zeit</span>
-            <select value={viewMonth} onChange={(e) => setViewMonth(parseInt(e.target.value))} className="bg-transparent font-bold text-[10px] md:text-sm outline-none cursor-pointer">
+        <div className="flex flex-wrap items-center justify-center gap-3 w-full lg:w-auto">
+          <div className="flex items-center space-x-2 bg-gray-50 px-3 py-2 rounded-xl border border-gray-100">
+            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Zeitraum</span>
+            <select value={viewMonth} onChange={(e) => setViewMonth(parseInt(e.target.value))} className="bg-transparent font-bold text-xs md:text-sm outline-none cursor-pointer">
               {Array.from({ length: 12 }, (_, i) => (
-                <option key={i} value={i}>{getMonthName(i).substring(0, 3)}</option>
+                <option key={i} value={i}>{getMonthName(i)}</option>
               ))}
             </select>
             <span className="text-gray-300">/</span>
-            <select value={viewYear} onChange={(e) => setViewYear(parseInt(e.target.value))} className="bg-transparent font-bold text-[10px] md:text-sm outline-none cursor-pointer">
+            <select value={viewYear} onChange={(e) => setViewYear(parseInt(e.target.value))} className="bg-transparent font-bold text-xs md:text-sm outline-none cursor-pointer">
               {availableYears.map(y => <option key={y} value={y}>{y}</option>)}
             </select>
           </div>
           
           <button 
             onClick={handleReset}
-            className={`p-1.5 md:p-2.5 rounded-lg md:rounded-xl transition-all flex items-center group ${isCurrentView ? 'bg-brand-50 text-brand-600' : 'bg-gray-100 text-gray-500 hover:bg-brand-50 hover:text-brand-600'}`}
+            className={`p-2 md:p-2.5 rounded-xl transition-all flex items-center group ${isCurrentView ? 'bg-brand-50 text-brand-600' : 'bg-gray-100 text-gray-500 hover:bg-brand-50 hover:text-brand-600'}`}
             title="Auf heute zurücksetzen"
           >
-            <RotateCcw className={`w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2 transition-transform duration-500 ${!isCurrentView ? 'group-hover:rotate-180' : ''}`} />
-            <span className="text-[8px] md:text-[10px] font-black uppercase">Heute</span>
+            <RotateCcw className={`w-4 h-4 mr-2 transition-transform duration-500 ${!isCurrentView ? 'group-hover:rotate-180' : ''}`} />
+            <span className="text-[10px] font-black uppercase">Aktuell</span>
           </button>
         </div>
       </div>
 
       {activeSubTab === 'times' ? (
-        <div className="space-y-4 md:space-y-8 animate-in fade-in duration-500">
+        <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
           {/* Haupt-Metriken */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2 md:gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-4">
             <StatCard 
               title={`Stunden ${getMonthName(viewMonth)}`} 
               value={`${stats.hoursMonth.toFixed(2)} h`} 
@@ -306,9 +306,9 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage }) => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 bg-white p-3 md:p-8 rounded-lg md:rounded-[3rem] border shadow-sm">
-              <h3 className="text-[8px] md:text-sm font-black text-gray-400 uppercase tracking-[0.2em] mb-2 md:mb-8">Stunden {viewYear}</h3>
-              <div className="h-[160px] md:h-[400px]">
+            <div className="lg:col-span-2 bg-white p-5 md:p-8 rounded-2xl md:rounded-[3rem] border shadow-sm">
+              <h3 className="text-[10px] md:text-sm font-black text-gray-400 uppercase tracking-[0.2em] mb-4 md:mb-8">Stunden-Entwicklung {viewYear}</h3>
+              <div className="h-[240px] md:h-[400px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -323,24 +323,24 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage }) => {
             </div>
 
             <div className="space-y-6">
-              <div className={`p-3 md:p-8 rounded-lg md:rounded-[3rem] border transition-all duration-700 ${cursumStats.isOver ? 'bg-red-50 border-red-200 shadow-xl shadow-red-100' : 'bg-white border-gray-100 shadow-sm'}`}>
-                <div className="flex justify-between items-start mb-2 md:mb-6">
-                   <div className={`p-1.5 md:p-3 rounded-lg md:rounded-2xl ${cursumStats.isOver ? 'bg-red-500 text-white shadow-lg' : 'bg-gray-50 text-gray-400'}`}>
-                     <Target className="w-3 h-3 md:w-5 md:h-5" />
+              <div className={`p-5 md:p-8 rounded-2xl md:rounded-[3rem] border transition-all duration-700 ${cursumStats.isOver ? 'bg-red-50 border-red-200 shadow-xl shadow-red-100' : 'bg-white border-gray-100 shadow-sm'}`}>
+                <div className="flex justify-between items-start mb-4 md:mb-6">
+                   <div className={`p-3 rounded-2xl ${cursumStats.isOver ? 'bg-red-500 text-white shadow-lg' : 'bg-gray-50 text-gray-400'}`}>
+                     <Target className="w-5 h-5" />
                    </div>
                    <div className="text-right">
-                     <p className={`text-[8px] md:text-[10px] font-black uppercase tracking-widest ${cursumStats.isOver ? 'text-red-400' : 'text-gray-400'}`}>Cursum AG</p>
-                     <p className={`text-[10px] md:text-sm font-black ${cursumStats.isOver ? 'text-red-900' : 'text-gray-900'}`}>{cursumStats.hours.toFixed(1)} / 6.0 h</p>
+                     <p className={`text-[10px] font-black uppercase tracking-widest ${cursumStats.isOver ? 'text-red-400' : 'text-gray-400'}`}>Cursum AG</p>
+                     <p className={`text-sm font-black ${cursumStats.isOver ? 'text-red-900' : 'text-gray-900'}`}>{cursumStats.hours.toFixed(1)} / 6.0 h</p>
                    </div>
                 </div>
                 
-                <div className="mb-2 md:mb-4">
-                  <p className={`text-[8px] md:text-xs font-bold mb-0.5 md:mb-1 ${cursumStats.isOver ? 'text-red-600' : 'text-gray-400'}`}>
-                    {cursumStats.isOver ? 'Limit!' : 'Rest'}
+                <div className="mb-4 md:mb-4">
+                  <p className={`text-[10px] md:text-xs font-bold mb-1 ${cursumStats.isOver ? 'text-red-600' : 'text-gray-400'}`}>
+                    {cursumStats.isOver ? 'Budget überschritten!' : 'Verbleibend'}
                   </p>
-                  <div className="flex items-baseline space-x-1 md:space-x-2">
-                    <span className={`text-2xl md:text-5xl font-black tracking-tighter ${cursumStats.isOver ? 'text-red-600' : 'text-brand-500'}`}>{cursumStats.remaining.toFixed(1)}</span>
-                    <span className="text-sm md:text-xl font-bold text-gray-300">h</span>
+                  <div className="flex items-baseline space-x-2">
+                    <span className={`text-4xl md:text-5xl font-black tracking-tighter ${cursumStats.isOver ? 'text-red-600' : 'text-brand-500'}`}>{cursumStats.remaining.toFixed(1)}</span>
+                    <span className="text-xl font-bold text-gray-300">h</span>
                   </div>
                 </div>
 
@@ -354,9 +354,9 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage }) => {
                 </div>
               </div>
 
-              <div className="bg-white p-3 md:p-8 rounded-lg md:rounded-[3rem] border shadow-sm">
-                <h3 className="text-[8px] md:text-sm font-black text-gray-400 uppercase tracking-[0.2em] mb-2 md:mb-6">Split {getMonthName(viewMonth).substring(0, 3)}</h3>
-                <div className="h-24 md:h-48">
+              <div className="bg-white p-5 md:p-8 rounded-2xl md:rounded-[3rem] border shadow-sm">
+                <h3 className="text-[10px] md:text-sm font-black text-gray-400 uppercase tracking-[0.2em] mb-4 md:mb-6">Split {getMonthName(viewMonth)}</h3>
+                <div className="h-40 md:h-48">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie data={splitData} cx="50%" cy="50%" innerRadius={50} outerRadius={70} paddingAngle={5} dataKey="value">
@@ -379,9 +379,9 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage }) => {
           </div>
         </div>
       ) : (
-        <div className="space-y-4 md:space-y-8 animate-in fade-in duration-500">
+        <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
           {/* Finance Hero Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-6">
             <div className="lg:col-span-2 bg-emerald-600 p-6 md:p-10 rounded-2xl md:rounded-[3rem] text-white shadow-2xl shadow-emerald-100 relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
               <div className="relative z-10">
@@ -419,9 +419,9 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage }) => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 bg-white p-3 md:p-8 rounded-lg md:rounded-[3rem] border shadow-sm">
-              <h3 className="text-[8px] md:text-sm font-black text-gray-400 uppercase tracking-[0.2em] mb-2 md:mb-8">Trend {getMonthName(viewMonth).substring(0, 3)}</h3>
-              <div className="h-[140px] md:h-[350px]">
+            <div className="lg:col-span-2 bg-white p-5 md:p-8 rounded-2xl md:rounded-[3rem] border shadow-sm">
+              <h3 className="text-[10px] md:text-sm font-black text-gray-400 uppercase tracking-[0.2em] mb-4 md:mb-8">Einnahmen-Verlauf {getMonthName(viewMonth)}</h3>
+              <div className="h-[200px] md:h-[350px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={dailyTrendData}>
                     <defs>
@@ -518,30 +518,30 @@ const PensumCard = ({ label, percent, hours, capacity, isOutOfContext }: { label
       : 'text-slate-600 border-slate-100 bg-slate-50/30';
 
   return (
-    <div className={`p-3 md:p-6 rounded-xl md:rounded-[2rem] border shadow-sm transition-all duration-700 relative overflow-hidden group hover:shadow-md ${colorClass} ${isOutOfContext ? 'blur-lg opacity-30 grayscale pointer-events-none scale-95' : ''}`}>
+    <div className={`p-5 md:p-6 rounded-2xl md:rounded-[2rem] border shadow-sm transition-all duration-700 relative overflow-hidden group hover:shadow-md ${colorClass} ${isOutOfContext ? 'blur-lg opacity-30 grayscale pointer-events-none scale-95' : ''}`}>
       {isOutOfContext && (
         <div className="absolute inset-0 z-10 bg-white/20 flex items-center justify-center">
-           <span className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-slate-400 bg-white/80 px-2 py-1 rounded shadow-sm">Live-Statistik</span>
+           <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 bg-white/80 px-2 py-1 rounded shadow-sm">Live-Statistik</span>
         </div>
       )}
-      <div className="flex justify-between items-start mb-2 md:mb-4">
-        <h4 className="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-60">{label}</h4>
+      <div className="flex justify-between items-start mb-4 md:mb-4">
+        <h4 className="text-[10px] font-black uppercase tracking-widest opacity-60">{label}</h4>
         {isTarget && (
-          <div className="bg-emerald-500 text-white p-0.5 md:p-1 rounded-md md:rounded-lg">
-            <Zap className="w-2.5 h-2.5 md:w-3 md:h-3" />
+          <div className="bg-emerald-500 text-white p-1 rounded-lg">
+            <Zap className="w-3 h-3" />
           </div>
         )}
       </div>
-      <div className="flex items-baseline space-x-1 md:space-x-2">
-        <span className="text-2xl md:text-3xl font-black tracking-tight">{percent.toFixed(1)}%</span>
-        <span className="text-[10px] md:text-xs font-bold opacity-40">Pensum</span>
+      <div className="flex items-baseline space-x-2">
+        <span className="text-3xl font-black tracking-tight">{percent.toFixed(1)}%</span>
+        <span className="text-xs font-bold opacity-40">Pensum</span>
       </div>
-      <div className="mt-3 md:mt-4 space-y-1.5 md:space-y-2">
-        <div className="flex justify-between text-[9px] md:text-[10px] font-bold opacity-50">
+      <div className="mt-4 space-y-2">
+        <div className="flex justify-between text-[10px] font-bold opacity-50">
           <span>{hours.toFixed(1)}h</span>
           <span>Soll: {capacity.toFixed(1)}h</span>
         </div>
-        <div className="h-1 w-full bg-white/50 rounded-full overflow-hidden">
+        <div className="h-1.5 w-full bg-white/50 rounded-full overflow-hidden">
           <div 
             className={`h-full rounded-full transition-all duration-1000 ${isTarget ? 'bg-emerald-500' : isOver ? 'bg-brand-500' : 'bg-slate-400'}`}
             style={{ width: `${Math.min(100, percent)}%` }}
@@ -565,33 +565,33 @@ const StatCard = ({ title, value, pensum, subText, icon: Icon, color, isOutOfCon
   const isOver = pensum !== undefined && pensum > 50;
 
   return (
-    <div className={`bg-white p-3 md:p-6 rounded-xl md:rounded-[2.5rem] border shadow-sm group hover:shadow-md transition-all duration-700 relative overflow-hidden ${isOutOfContext ? 'blur-lg opacity-30 grayscale pointer-events-none scale-95' : ''}`}>
+    <div className={`bg-white p-5 md:p-6 rounded-2xl md:rounded-[2.5rem] border shadow-sm group hover:shadow-md transition-all duration-700 relative overflow-hidden ${isOutOfContext ? 'blur-lg opacity-30 grayscale pointer-events-none scale-95' : ''}`}>
       {isOutOfContext && (
         <div className="absolute inset-0 z-10 bg-white/10 flex items-center justify-center">
-           <span className="text-[6px] md:text-[7px] font-black uppercase tracking-widest text-slate-400 bg-white/80 px-2 py-0.5 rounded shadow-sm">Inaktiv</span>
+           <span className="text-[7px] font-black uppercase tracking-widest text-slate-400 bg-white/80 px-2 py-0.5 rounded shadow-sm">Inaktiv</span>
         </div>
       )}
-      <div className="flex justify-between items-start mb-2 md:mb-4">
-        <div className={`p-2 md:p-3 rounded-lg md:rounded-2xl ${colorMap[color]} transition-transform group-hover:scale-110`}>
-          <Icon className="w-4 h-4 md:w-5 md:h-5" />
+      <div className="flex justify-between items-start mb-4 md:mb-4">
+        <div className={`p-3 rounded-2xl ${colorMap[color]} transition-transform group-hover:scale-110`}>
+          <Icon className="w-5 h-5" />
         </div>
         {pensum !== undefined && (
-          <div className={`flex items-center text-[8px] md:text-[10px] font-black px-1.5 md:px-2.5 py-0.5 md:py-1 rounded-full border transition-colors ${
+          <div className={`flex items-center text-[10px] font-black px-2.5 py-1 rounded-full border transition-colors ${
             isTarget ? 'bg-emerald-50 text-emerald-600 border-emerald-100 ring-2 ring-emerald-500/10' : 
             isOver ? 'bg-brand-50 text-brand-600 border-brand-100' : 
             'bg-slate-50 text-slate-500 border-slate-100'
           }`}>
-            <Percent className="w-2.5 h-2.5 md:w-3 md:h-3 mr-0.5 md:mr-1" />
-            {pensum.toFixed(0)}% {isTarget && <Zap className="w-2 h-2 md:w-2.5 md:h-2.5 ml-0.5 md:ml-1" />}
+            <Percent className="w-3 h-3 mr-1" />
+            {pensum.toFixed(0)}% {isTarget && <Zap className="w-2.5 h-2.5 ml-1" />}
           </div>
         )}
       </div>
-      <h4 className="text-[9px] md:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5 md:mb-1 truncate">{title}</h4>
-      <div className="text-xl md:text-2xl font-black text-gray-900 mb-0.5 md:mb-1">{value}</div>
-      <p className="text-[9px] md:text-[10px] font-bold text-gray-400 tracking-tight">{subText}</p>
+      <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 truncate">{title}</h4>
+      <div className="text-2xl font-black text-gray-900 mb-1">{value}</div>
+      <p className="text-[10px] font-bold text-gray-400 tracking-tight">{subText}</p>
       
       {pensum !== undefined && (
-        <div className="mt-1.5 md:mt-2 h-0.5 w-full bg-gray-50 rounded-full overflow-hidden">
+        <div className="mt-2 h-0.5 w-full bg-gray-50 rounded-full overflow-hidden">
           <div 
             className={`h-full rounded-full ${isTarget ? 'bg-emerald-500' : isOver ? 'bg-brand-500' : 'bg-gray-200'}`}
             style={{ width: `${Math.min(100, pensum)}%` }}

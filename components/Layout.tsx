@@ -66,28 +66,28 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, noti
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 print:block print:w-full print:static">
-        <header className="bg-white/80 backdrop-blur-md border-b h-10 md:h-16 flex items-center px-3 md:px-8 sticky top-0 z-40 justify-between no-print">
-           <h2 className="text-[10px] md:text-sm font-black text-gray-900 uppercase tracking-widest">
+        <header className="bg-white/80 backdrop-blur-md border-b h-14 md:h-16 flex items-center px-4 md:px-8 sticky top-0 z-40 justify-between no-print">
+           <h2 className="text-xs md:text-sm font-black text-gray-900 uppercase tracking-widest">
              {menuItems.find(m => m.id === activeTab)?.label}
            </h2>
         </header>
 
-        <div className="p-2 md:p-8 flex-1 print:p-0 print:block">
+        <div className="p-4 md:p-8 flex-1 print:p-0 print:block">
           {children}
         </div>
 
         {/* Navigation - Mobile */}
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t flex justify-around p-1 z-50 no-print">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t flex justify-around p-2 z-50 no-print">
           {menuItems.map((item) => (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`flex flex-col items-center p-1 rounded-lg transition-all ${
+              className={`flex flex-col items-center p-2 rounded-xl transition-all ${
                 activeTab === item.id ? 'text-brand-500 bg-brand-50' : 'text-gray-400'
               }`}
             >
-              <item.icon className="w-4 h-4" />
-              <span className="text-[6px] mt-0.5 font-black uppercase tracking-widest">{item.label}</span>
+              <item.icon className="w-5 h-5" />
+              <span className="text-[8px] mt-1 font-black uppercase tracking-widest">{item.label}</span>
             </button>
           ))}
         </nav>
