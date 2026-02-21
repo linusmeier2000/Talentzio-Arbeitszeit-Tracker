@@ -30,16 +30,16 @@ const HistoryList: React.FC<HistoryListProps> = ({ entries, onEdit }) => {
             placeholder="Suche in Notizen & Kommentaren..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border dark:border-slate-800 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 shadow-sm transition-all dark:text-white"
+            className="w-full pl-10 pr-4 py-2 bg-white border rounded-xl outline-none focus:ring-2 focus:ring-brand-500 shadow-sm transition-all"
           />
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 rounded-xl border dark:border-slate-800 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
         {/* Desktop Table View */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[800px]">
-            <thead className="bg-gray-50 dark:bg-slate-800/50 text-gray-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider border-b dark:border-slate-800">
+            <thead className="bg-gray-50 text-gray-500 text-xs font-bold uppercase tracking-wider border-b">
               <tr>
                 <th className="px-6 py-4">Datum / Wochentag</th>
                 <th className="px-6 py-4">Zeiten (M / P / N / E)</th>
@@ -48,20 +48,20 @@ const HistoryList: React.FC<HistoryListProps> = ({ entries, onEdit }) => {
                 <th className="px-6 py-4 text-right">Aktion</th>
               </tr>
             </thead>
-            <tbody className="divide-y dark:divide-slate-800">
+            <tbody className="divide-y">
               {filteredEntries.map((entry) => (
-                <tr key={entry.id} className="hover:bg-brand-50/30 dark:hover:bg-brand-500/5 transition-colors group/row">
+                <tr key={entry.id} className="hover:bg-brand-50/30 transition-colors group/row">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="font-semibold text-gray-900 dark:text-white">{formatDate(entry.date)}</div>
-                    <div className="text-xs text-gray-400 dark:text-slate-500">{getWeekday(entry.date)}</div>
+                    <div className="font-semibold text-gray-900">{formatDate(entry.date)}</div>
+                    <div className="text-xs text-gray-400">{getWeekday(entry.date)}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-slate-400">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                     <span className="font-medium">{entry.startM} - {entry.lunch}</span>
-                    <span className="mx-2 text-gray-300 dark:text-slate-700">|</span>
+                    <span className="mx-2 text-gray-300">|</span>
                     <span className="font-medium">{entry.startN || '-'} - {entry.end}</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <span className={`px-2.5 py-1 rounded-lg text-xs font-black ${entry.totalHours > 0 ? 'bg-brand-100 dark:bg-brand-500/20 text-brand-700 dark:text-brand-400' : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-500'}`}>
+                    <span className={`px-2.5 py-1 rounded-lg text-xs font-black ${entry.totalHours > 0 ? 'bg-brand-100 text-brand-700' : 'bg-gray-100 text-gray-500'}`}>
                       {entry.totalHours.toFixed(2)} h
                     </span>
                   </td>
@@ -95,14 +95,14 @@ const HistoryList: React.FC<HistoryListProps> = ({ entries, onEdit }) => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     {entry.isLocked ? (
-                      <div className="flex items-center justify-end text-gray-300 dark:text-slate-700">
+                      <div className="flex items-center justify-end text-gray-300">
                         <Lock className="w-4 h-4 mr-1" />
                         <span className="text-[10px] font-bold uppercase tracking-widest">Gesperrt</span>
                       </div>
                     ) : (
                       <button 
                         onClick={() => onEdit(entry)}
-                        className="p-2 text-brand-600 dark:text-brand-400 hover:bg-brand-100 dark:hover:bg-brand-500/10 rounded-lg transition-all transform hover:scale-110 active:scale-95"
+                        className="p-2 text-brand-600 hover:bg-brand-100 rounded-lg transition-all transform hover:scale-110 active:scale-95"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
@@ -115,33 +115,33 @@ const HistoryList: React.FC<HistoryListProps> = ({ entries, onEdit }) => {
         </div>
 
         {/* Mobile Card View */}
-        <div className="md:hidden divide-y dark:divide-slate-800">
+        <div className="md:hidden divide-y">
           {filteredEntries.map((entry) => (
-            <div key={entry.id} className="p-4 space-y-3 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
+            <div key={entry.id} className="p-4 space-y-3 hover:bg-gray-50 transition-colors">
               <div className="flex justify-between items-start">
                 <div>
-                  <div className="font-bold text-gray-900 dark:text-white">{formatDate(entry.date)}</div>
-                  <div className="text-[10px] text-gray-400 dark:text-slate-500 font-black uppercase tracking-widest">{getWeekday(entry.date)}</div>
+                  <div className="font-bold text-gray-900">{formatDate(entry.date)}</div>
+                  <div className="text-[10px] text-gray-400 font-black uppercase tracking-widest">{getWeekday(entry.date)}</div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black ${entry.totalHours > 0 ? 'bg-brand-100 dark:bg-brand-500/20 text-brand-700 dark:text-brand-400' : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-500'}`}>
+                  <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black ${entry.totalHours > 0 ? 'bg-brand-100 text-brand-700' : 'bg-gray-100 text-gray-500'}`}>
                     {entry.totalHours.toFixed(2)} h
                   </span>
                   {!entry.isLocked && (
                     <button 
                       onClick={() => onEdit(entry)}
-                      className="p-2 text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/10 rounded-lg"
+                      className="p-2 text-brand-600 bg-brand-50 rounded-lg"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
                     </button>
                   )}
-                  {entry.isLocked && <Lock className="w-3.5 h-3.5 text-gray-300 dark:text-slate-700" />}
+                  {entry.isLocked && <Lock className="w-3.5 h-3.5 text-gray-300" />}
                 </div>
               </div>
 
-              <div className="flex items-center text-xs text-gray-600 dark:text-slate-400 bg-gray-50 dark:bg-slate-800/50 p-2 rounded-xl border dark:border-slate-800 border-gray-100">
+              <div className="flex items-center text-xs text-gray-600 bg-gray-50 p-2 rounded-xl border border-gray-100">
                 <span className="font-bold">{entry.startM} - {entry.lunch}</span>
-                <span className="mx-2 text-gray-300 dark:text-slate-700">|</span>
+                <span className="mx-2 text-gray-300">|</span>
                 <span className="font-bold">{entry.startN || '-'} - {entry.end}</span>
               </div>
 
