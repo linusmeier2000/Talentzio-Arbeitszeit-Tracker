@@ -138,7 +138,6 @@ const App: React.FC = () => {
   };
 
   const handleDeleteEntry = async (id: string) => {
-    if (!confirm('Eintrag wirklich löschen?')) return;
     try {
       const res = await fetch(`/api/entries/${id}`, { method: 'DELETE' });
       if (res.ok) {
@@ -405,11 +404,12 @@ const App: React.FC = () => {
             <HistoryList 
               entries={sortedRecentEntries} 
               onEdit={(e) => { setEditingEntry(e); setShowForm(true); }} 
+              onDelete={handleDeleteEntry}
             />
           </div>
         </div>
       );
-      case 'history': return <HistoryList entries={entries} onEdit={(e) => { setEditingEntry(e); setShowForm(true); }} />;
+      case 'history': return <HistoryList entries={entries} onEdit={(e) => { setEditingEntry(e); setShowForm(true); }} onDelete={handleDeleteEntry} />;
       case 'export': return <ExportPanel entries={entries} settings={settings} onToggleLock={handleToggleLock} onUpdateExportDate={handleUpdateExportDate} />;
       case 'settings': return <SettingsPanel settings={settings} setSettings={handleUpdateSettings} entries={entries} />;
       default: return <div>In Entwicklung...</div>;

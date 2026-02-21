@@ -2,15 +2,17 @@
 import React, { useState } from 'react';
 import { TimeEntry } from '../types';
 import { formatDate, getWeekday } from '../utils';
-import { Edit2, Search, Lock, MessageSquare } from 'lucide-react';
+import { Edit2, Search, Lock, MessageSquare, Trash2, AlertTriangle, X } from 'lucide-react';
 
 interface HistoryListProps {
   entries: TimeEntry[];
   onEdit: (entry: TimeEntry) => void;
+  onDelete: (id: string) => void;
 }
 
-const HistoryList: React.FC<HistoryListProps> = ({ entries, onEdit }) => {
+const HistoryList: React.FC<HistoryListProps> = ({ entries, onEdit, onDelete }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const filteredEntries = entries.filter(e => {
     const matchesSearch = e.note.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -100,12 +102,22 @@ const HistoryList: React.FC<HistoryListProps> = ({ entries, onEdit }) => {
                         <span className="text-[10px] font-bold uppercase tracking-widest">Gesperrt</span>
                       </div>
                     ) : (
-                      <button 
-                        onClick={() => onEdit(entry)}
-                        className="p-2 text-brand-600 hover:bg-brand-100 rounded-lg transition-all transform hover:scale-110 active:scale-95"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center justify-end space-x-1">
+                        <button 
+                          onClick={() => onEdit(entry)}
+                          className="p-2 text-brand-600 hover:bg-brand-100 rounded-lg transition-all transform hover:scale-110 active:scale-95"
+                          title="Bearbeiten"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => setDeleteId(entry.id)}
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all transform hover:scale-110 active:scale-95"
+                          title="Löschen"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     )}
                   </td>
                 </tr>
@@ -128,12 +140,20 @@ const HistoryList: React.FC<HistoryListProps> = ({ entries, onEdit }) => {
                     {entry.totalHours.toFixed(2)} h
                   </span>
                   {!entry.isLocked && (
-                    <button 
-                      onClick={() => onEdit(entry)}
-                      className="p-2 text-brand-600 bg-brand-50 rounded-lg"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </button>
+                    <div className="flex items-center space-x-1">
+                      <button 
+                        onClick={() => onEdit(entry)}
+                        className="p-2 text-brand-600 bg-brand-50 rounded-lg"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button 
+                        onClick={() => setDeleteId(entry.id)}
+                        className="p-2 text-red-500 bg-red-50 rounded-lg"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   )}
                   {entry.isLocked && <Lock className="w-3.5 h-3.5 text-gray-300" />}
                 </div>
@@ -160,6 +180,40 @@ const HistoryList: React.FC<HistoryListProps> = ({ entries, onEdit }) => {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteId && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6 md:p-8 text-center">
+              <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500">
+                <AlertTriangle className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-black text-gray-900 mb-2">Eintrag löschen?</h3>
+              <p className="text-sm text-gray-500 font-medium leading-relaxed">
+                Bist du sicher, dass du diesen Eintrag unwiderruflich löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.
+              </p>
+            </div>
+            <div className="flex border-t">
+              <button 
+                onClick={() => setDeleteId(null)}
+                className="flex-1 px-6 py-4 text-sm font-bold text-gray-500 hover:bg-gray-50 transition-colors border-r"
+              >
+                Abbrechen
+              </button>
+              <button 
+                onClick={() => {
+                  onDelete(deleteId);
+                  setDeleteId(null);
+                }}
+                className="flex-1 px-6 py-4 text-sm font-black text-red-600 hover:bg-red-50 transition-colors"
+              >
+                Löschen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
