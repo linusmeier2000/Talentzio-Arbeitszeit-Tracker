@@ -1,5 +1,8 @@
 export async function onRequest(context) {
+  if (!context) return new Response("No context", { status: 500 });
   const { request, env } = context;
+  if (!request) return new Response("No request", { status: 500 });
+  
   const url = new URL(request.url);
   const path = url.pathname;
   const method = request.method;
@@ -7,10 +10,30 @@ export async function onRequest(context) {
   // Helper to return JSON
   const jsonResponse = (data, status = 200) => new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json' }
+    headers: { 
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    }
   });
 
+  // Handle CORS preflight
+  if (method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    }});
+  }
+
   try {
+    if (!env || !env.DB) {
+      return jsonResponse({ 
+        error: "D1 Datenbank 'DB' ist nicht gebunden oder 'env' ist nicht verfügbar. Bitte prüfe deine Cloudflare Pages Einstellungen (Bindings)." 
+      }, 500);
+    }
+
     // --- ENTRIES ENDPOINTS ---
     if (path === '/api/entries') {
       if (method === 'GET') {

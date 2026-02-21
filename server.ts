@@ -21,9 +21,16 @@ async function startServer() {
 
   app.use(express.json());
 
+  // Logging Middleware
+  app.use((req, res, next) => {
+    console.log(`[API] ${req.method} ${req.path}`);
+    next();
+  });
+
   // --- API ROUTES (Mimicking Cloudflare D1 Function) ---
 
   app.get("/api/entries", (req, res) => {
+    if (!db) return res.status(500).json({ error: "Datenbank nicht initialisiert" });
     try {
       const rows = db.prepare("SELECT * FROM entries ORDER BY date DESC").all() as any[];
       const entries = rows.map(row => ({
@@ -40,6 +47,7 @@ async function startServer() {
 
   app.post("/api/entries", (req, res) => {
     console.log("POST /api/entries", req.body);
+    if (!db) return res.status(500).json({ error: "Datenbank nicht initialisiert" });
     try {
       const entry = req.body;
       if (!entry || !entry.id || !entry.date) {
