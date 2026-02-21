@@ -41,8 +41,18 @@ export async function onRequest(context) {
         const entries = results.map(row => ({
           ...row,
           isLocked: Boolean(row.isLocked),
-          splits: JSON.parse(row.splits),
-          comments: JSON.parse(row.comments)
+          splits: row.splits ? JSON.parse(row.splits) : {
+            med: row.med_hours || 0,
+            bau: row.bau_hours || 0,
+            cursum: row.cursum_hours || 0,
+            talentzio: row.totalHours - ((row.med_hours || 0) + (row.bau_hours || 0) + (row.cursum_hours || 0))
+          },
+          comments: row.comments ? JSON.parse(row.comments) : {
+            med: row.med_notes || '',
+            bau: row.bau_notes || '',
+            cursum: row.cursum_notes || '',
+            talentzio: ''
+          }
         }));
         return jsonResponse(entries);
       }
@@ -50,16 +60,25 @@ export async function onRequest(context) {
       if (method === 'POST') {
         const entry = await request.json();
         await env.db.prepare(`
-          INSERT INTO entries (id, date, startM, lunch, startN, end, note, totalHours, isLocked, splits, comments)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          INSERT INTO entries (
+            id, date, startM, lunch, startN, end, note, totalHours, isLocked, splits, comments,
+            cursum_hours, cursum_notes, med_hours, med_notes, bau_hours, bau_notes
+          )
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           ON CONFLICT(id) DO UPDATE SET
             date=excluded.date, startM=excluded.startM, lunch=excluded.lunch, startN=excluded.startN,
             end=excluded.end, note=excluded.note, totalHours=excluded.totalHours,
-            isLocked=excluded.isLocked, splits=excluded.splits, comments=excluded.comments
+            isLocked=excluded.isLocked, splits=excluded.splits, comments=excluded.comments,
+            cursum_hours=excluded.cursum_hours, cursum_notes=excluded.cursum_notes,
+            med_hours=excluded.med_hours, med_notes=excluded.med_notes,
+            bau_hours=excluded.bau_hours, bau_notes=excluded.bau_notes
         `).bind(
           entry.id, entry.date, entry.startM, entry.lunch, entry.startN, entry.end,
           entry.note, entry.totalHours, entry.isLocked ? 1 : 0,
-          JSON.stringify(entry.splits), JSON.stringify(entry.comments)
+          JSON.stringify(entry.splits), JSON.stringify(entry.comments),
+          entry.splits.cursum || 0, entry.comments.cursum || '',
+          entry.splits.med || 0, entry.comments.med || '',
+          entry.splits.bau || 0, entry.comments.bau || ''
         ).run();
         return jsonResponse({ success: true }, 201);
       }

@@ -36,8 +36,18 @@ async function startServer() {
       const entries = rows.map(row => ({
         ...row,
         isLocked: Boolean(row.isLocked),
-        splits: JSON.parse(row.splits),
-        comments: JSON.parse(row.comments)
+        splits: row.splits ? JSON.parse(row.splits) : {
+          med: row.med_hours || 0,
+          bau: row.bau_hours || 0,
+          cursum: row.cursum_hours || 0,
+          talentzio: row.totalHours - ((row.med_hours || 0) + (row.bau_hours || 0) + (row.cursum_hours || 0))
+        },
+        comments: row.comments ? JSON.parse(row.comments) : {
+          med: row.med_notes || '',
+          bau: row.bau_notes || '',
+          cursum: row.cursum_notes || '',
+          talentzio: ''
+        }
       }));
       res.json(entries);
     } catch (err: any) {
@@ -54,18 +64,27 @@ async function startServer() {
         return res.status(400).json({ error: "Ungültige Daten: ID und Datum erforderlich" });
       }
       const stmt = db.prepare(`
-        INSERT INTO entries (id, date, startM, lunch, startN, end, note, totalHours, isLocked, splits, comments)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO entries (
+          id, date, startM, lunch, startN, end, note, totalHours, isLocked, splits, comments,
+          cursum_hours, cursum_notes, med_hours, med_notes, bau_hours, bau_notes
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(id) DO UPDATE SET
           date=excluded.date, startM=excluded.startM, lunch=excluded.lunch, startN=excluded.startN,
           end=excluded.end, note=excluded.note, totalHours=excluded.totalHours,
-          isLocked=excluded.isLocked, splits=excluded.splits, comments=excluded.comments
+          isLocked=excluded.isLocked, splits=excluded.splits, comments=excluded.comments,
+          cursum_hours=excluded.cursum_hours, cursum_notes=excluded.cursum_notes,
+          med_hours=excluded.med_hours, med_notes=excluded.med_notes,
+          bau_hours=excluded.bau_hours, bau_notes=excluded.bau_notes
       `);
       
       stmt.run(
         entry.id, entry.date, entry.startM, entry.lunch, entry.startN, entry.end,
         entry.note, entry.totalHours, entry.isLocked ? 1 : 0,
-        JSON.stringify(entry.splits), JSON.stringify(entry.comments)
+        JSON.stringify(entry.splits), JSON.stringify(entry.comments),
+        entry.splits.cursum || 0, entry.comments.cursum || '',
+        entry.splits.med || 0, entry.comments.med || '',
+        entry.splits.bau || 0, entry.comments.bau || ''
       );
       res.status(201).json({ success: true });
     } catch (err: any) {

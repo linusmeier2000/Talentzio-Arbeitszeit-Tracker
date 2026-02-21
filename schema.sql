@@ -10,8 +10,14 @@ CREATE TABLE IF NOT EXISTS entries (
   note TEXT,
   totalHours REAL,
   isLocked INTEGER DEFAULT 0,
-  splits TEXT, -- Stored as JSON string
-  comments TEXT -- Stored as JSON string
+  splits TEXT, -- Stored as JSON string (keeping for compatibility)
+  comments TEXT, -- Stored as JSON string (keeping for compatibility)
+  cursum_hours REAL,
+  cursum_notes TEXT,
+  med_hours REAL,
+  med_notes TEXT,
+  bau_hours REAL,
+  bau_notes TEXT
 );
 
 CREATE TABLE IF NOT EXISTS settings (
