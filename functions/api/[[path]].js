@@ -28,16 +28,16 @@ export async function onRequest(context) {
   }
 
   try {
-    if (!env || !env.DB) {
+    if (!env || !env.db) {
       return jsonResponse({ 
-        error: "D1 Datenbank 'DB' ist nicht gebunden oder 'env' ist nicht verfügbar. Bitte prüfe deine Cloudflare Pages Einstellungen (Bindings)." 
+        error: "D1 Datenbank 'db' ist nicht gebunden oder 'env' ist nicht verfügbar. Bitte prüfe deine Cloudflare Pages Einstellungen (Bindings)." 
       }, 500);
     }
 
     // --- ENTRIES ENDPOINTS ---
     if (path === '/api/entries') {
       if (method === 'GET') {
-        const { results } = await env.DB.prepare("SELECT * FROM entries ORDER BY date DESC").all();
+        const { results } = await env.db.prepare("SELECT * FROM entries ORDER BY date DESC").all();
         const entries = results.map(row => ({
           ...row,
           isLocked: Boolean(row.isLocked),
@@ -49,7 +49,7 @@ export async function onRequest(context) {
       
       if (method === 'POST') {
         const entry = await request.json();
-        await env.DB.prepare(`
+        await env.db.prepare(`
           INSERT INTO entries (id, date, startM, lunch, startN, end, note, totalHours, isLocked, splits, comments)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           ON CONFLICT(id) DO UPDATE SET
@@ -69,7 +69,7 @@ export async function onRequest(context) {
       const id = path.split('/').pop();
       
       if (method === 'DELETE') {
-        await env.DB.prepare("DELETE FROM entries WHERE id = ?").bind(id).run();
+        await env.db.prepare("DELETE FROM entries WHERE id = ?").bind(id).run();
         return new Response(null, { status: 204 });
       }
     }
@@ -77,12 +77,12 @@ export async function onRequest(context) {
     // --- SETTINGS ENDPOINTS ---
     if (path === '/api/settings') {
       if (method === 'GET') {
-        const result = await env.DB.prepare("SELECT value FROM settings WHERE key = 'user_settings'").first();
+        const result = await env.db.prepare("SELECT value FROM settings WHERE key = 'user_settings'").first();
         return jsonResponse(result ? JSON.parse(result.value) : null);
       }
       if (method === 'POST') {
         const settings = await request.json();
-        await env.DB.prepare("INSERT INTO settings (key, value) VALUES ('user_settings', ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value")
+        await env.db.prepare("INSERT INTO settings (key, value) VALUES ('user_settings', ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value")
           .bind(JSON.stringify(settings)).run();
         return jsonResponse({ success: true });
       }
@@ -91,7 +91,7 @@ export async function onRequest(context) {
     // --- BULK OPERATIONS ---
     if (path === '/api/entries/bulk-lock' && method === 'POST') {
       const { startDate, endDate, lock } = await request.json();
-      await env.DB.prepare("UPDATE entries SET isLocked = ? WHERE date >= ? AND date <= ?")
+      await env.db.prepare("UPDATE entries SET isLocked = ? WHERE date >= ? AND date <= ?")
         .bind(lock ? 1 : 0, startDate, endDate).run();
       return jsonResponse({ success: true });
     }
