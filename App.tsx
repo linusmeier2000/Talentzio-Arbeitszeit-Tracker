@@ -121,9 +121,19 @@ const App: React.FC = () => {
         });
         setShowForm(false);
         setEditingEntry(null);
+      } else {
+        let errorMessage = res.statusText;
+        try {
+          const errorData = await res.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          // Not JSON
+        }
+        alert(`Fehler beim Speichern: ${errorMessage}`);
       }
     } catch (err) {
-      alert("Fehler beim Speichern");
+      console.error(err);
+      alert("Netzwerkfehler beim Speichern");
     }
   };
 
@@ -156,7 +166,7 @@ const App: React.FC = () => {
     }
   };
 
-  const handleQuickSave = () => {
+  const handleQuickSave = async () => {
     if (!quickEditData) return;
     
     const rawTotal = calculateTotalHours(
@@ -179,7 +189,7 @@ const App: React.FC = () => {
       }
     };
     
-    handleSaveEntry(updated);
+    await handleSaveEntry(updated);
     alert('Eintrag für heute wurde aktualisiert.');
   };
 

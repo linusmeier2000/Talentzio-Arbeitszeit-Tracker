@@ -30,6 +30,7 @@ type Step = 'basis' | 'times' | 'splits' | 'final';
 
 const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onCancel, onDelete }) => {
   const [currentStep, setCurrentStep] = useState<Step>('basis');
+  const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<Partial<TimeEntry>>(
     initialData || {
       date: new Date().toISOString().split('T')[0],
@@ -149,12 +150,41 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave({
-      ...formData,
-      id: formData.id || Math.random().toString(36).substr(2, 9),
-    } as TimeEntry);
+  const handleSubmit = async (e?: React.BaseSyntheticEvent) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (isSaving) return;
+    
+    setIsSaving(true);
+    try {
+      const finalEntry: TimeEntry = {
+        ...formData,
+        id: formData.id || Math.random().toString(36).substr(2, 9),
+        date: formData.date || new Date().toISOString().split('T')[0],
+        startM: formData.startM || '',
+        lunch: formData.lunch || '',
+        startN: formData.startN || '',
+        end: formData.end || '',
+        note: formData.note || '',
+        totalHours: formData.totalHours || 0,
+        isLocked: formData.isLocked || false,
+        splits: {
+          med: formData.splits?.med || 0,
+          bau: formData.splits?.bau || 0,
+          cursum: formData.splits?.cursum || 0,
+          talentzio: formData.splits?.talentzio || 0,
+        },
+        comments: {
+          med: formData.comments?.med || '',
+          bau: formData.comments?.bau || '',
+          cursum: formData.comments?.cursum || '',
+          talentzio: formData.comments?.talentzio || '',
+        }
+      };
+
+      await onSave(finalEntry);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -189,7 +219,7 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
 
       {/* Content Area */}
       <div className="flex-1 p-4 md:p-8 overflow-y-auto">
-        <form onSubmit={handleSubmit} className="h-full flex flex-col">
+        <form id="entry-form" onSubmit={handleSubmit} className="h-full flex flex-col">
           {currentStep === 'basis' && (
             <div className="space-y-4 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                <div className="text-center space-y-1">
@@ -256,7 +286,7 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
                </div>
                <div className="space-y-2 md:space-y-4">
                   <SplitInputStep label={COMPANIES.MED} hours={formData.splits?.med!} comment={formData.comments?.med!} onHourChange={(v) => handleSplitChange('med', v)} onCommentChange={(v) => handleCommentChange('med', v)} onGenerate={() => triggerAiComment('med', COMPANIES.MED)} isLoading={aiLoading.med} showRequired={!formData.id?.startsWith('import-')} />
-                  <SplitInputStep label={COMPANIES.BAU} hours={formData.splits?.bau!} comment={formData.comments?.bau!} onHourChange={(v) => handleSplitChange('bau', v)} onCommentChange={(v) => handleSplitChange('bau', v)} onGenerate={() => triggerAiComment('bau', COMPANIES.BAU)} isLoading={aiLoading.bau} showRequired={!formData.id?.startsWith('import-')} />
+                  <SplitInputStep label={COMPANIES.BAU} hours={formData.splits?.bau!} comment={formData.comments?.bau!} onHourChange={(v) => handleSplitChange('bau', v)} onCommentChange={(v) => handleCommentChange('bau', v)} onGenerate={() => triggerAiComment('bau', COMPANIES.BAU)} isLoading={aiLoading.bau} showRequired={!formData.id?.startsWith('import-')} />
                   <SplitInputStep label={COMPANIES.CURSUM} hours={formData.splits?.cursum!} comment={formData.comments?.cursum!} onHourChange={(v) => handleSplitChange('cursum', v)} onCommentChange={(v) => handleCommentChange('cursum', v)} onGenerate={() => triggerAiComment('cursum', COMPANIES.CURSUM)} isLoading={aiLoading.cursum} showRequired={!formData.id?.startsWith('import-')} />
                   <div className="p-4 md:p-6 bg-slate-900 rounded-xl md:rounded-3xl flex justify-between items-center text-white shadow-lg">
                     <div>
@@ -300,6 +330,7 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
          <div className="flex gap-2">
            {currentStepIndex > 0 && (
              <button 
+               type="button"
                onClick={prevStep}
                className="flex-1 bg-white border border-gray-200 text-gray-600 font-black py-3 md:py-5 rounded-xl md:rounded-3xl flex items-center justify-center transition-all hover:bg-gray-50 active:scale-95 text-xs md:text-base"
              >
@@ -309,6 +340,7 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
            )}
            {currentStepIndex < steps.length - 1 ? (
              <button 
+               type="button"
                onClick={nextStep}
                disabled={!validateStep(currentStep)}
                className="flex-[2] bg-brand-500 hover:bg-brand-600 disabled:bg-gray-200 disabled:text-gray-400 text-white font-black py-3 md:py-5 rounded-xl md:rounded-3xl flex items-center justify-center transition-all shadow-lg shadow-brand-500/20 active:scale-95 text-xs md:text-base"
@@ -318,11 +350,17 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
              </button>
            ) : (
              <button 
-               onClick={handleSubmit}
-               className="flex-[2] bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 md:py-5 rounded-xl md:rounded-3xl flex items-center justify-center transition-all shadow-lg shadow-emerald-500/20 active:scale-95 text-xs md:text-base"
+               type="submit"
+               form="entry-form"
+               disabled={isSaving}
+               className="flex-[2] bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 text-white font-black py-3 md:py-5 rounded-xl md:rounded-3xl flex items-center justify-center transition-all shadow-lg shadow-emerald-500/20 active:scale-95 text-xs md:text-base"
              >
-               <Save className="w-3.5 h-3.5 md:w-5 md:h-5 mr-1 md:mr-2" />
-               Speichern
+               {isSaving ? (
+                 <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin mr-2" />
+               ) : (
+                 <Save className="w-3.5 h-3.5 md:w-5 md:h-5 mr-1 md:mr-2" />
+               )}
+               {isSaving ? 'Speichert...' : 'Speichern'}
              </button>
            )}
          </div>

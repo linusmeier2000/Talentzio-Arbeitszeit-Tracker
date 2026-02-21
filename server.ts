@@ -39,8 +39,12 @@ async function startServer() {
   });
 
   app.post("/api/entries", (req, res) => {
+    console.log("POST /api/entries", req.body);
     try {
       const entry = req.body;
+      if (!entry || !entry.id || !entry.date) {
+        return res.status(400).json({ error: "Ungültige Daten: ID und Datum erforderlich" });
+      }
       const stmt = db.prepare(`
         INSERT INTO entries (id, date, startM, lunch, startN, end, note, totalHours, isLocked, splits, comments)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -57,6 +61,7 @@ async function startServer() {
       );
       res.status(201).json({ success: true });
     } catch (err: any) {
+      console.error("Database error:", err);
       res.status(500).json({ error: err.message });
     }
   });
