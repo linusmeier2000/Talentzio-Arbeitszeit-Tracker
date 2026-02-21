@@ -15,10 +15,10 @@ const HistoryList: React.FC<HistoryListProps> = ({ entries, onEdit, onDelete }) 
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const filteredEntries = entries.filter(e => {
-    const matchesSearch = e.note.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          e.comments.med.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          e.comments.bau.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          e.comments.cursum.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = (e.note || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          (e.comments?.med || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (e.comments?.bau || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (e.comments?.cursum || '').toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   }).sort((a, b) => b.date.localeCompare(a.date));
 

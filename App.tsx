@@ -62,8 +62,8 @@ const App: React.FC = () => {
         
         if (entriesRes.ok) {
           const data = await entriesRes.json();
-          if (data && data.length > 0) {
-            setEntries(data);
+          if (Array.isArray(data)) {
+            setEntries(data.length > 0 ? data : INITIAL_IMPORT_DATA);
           } else {
             setEntries(INITIAL_IMPORT_DATA);
           }

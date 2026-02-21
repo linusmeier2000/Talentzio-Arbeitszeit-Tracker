@@ -31,8 +31,21 @@ type Step = 'basis' | 'times' | 'splits' | 'final';
 const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onCancel, onDelete }) => {
   const [currentStep, setCurrentStep] = useState<Step>('basis');
   const [isSaving, setIsSaving] = useState(false);
-  const [formData, setFormData] = useState<Partial<TimeEntry>>(
-    initialData || {
+  const [formData, setFormData] = useState<Partial<TimeEntry>>(() => {
+    if (initialData) {
+      return {
+        ...initialData,
+        splits: {
+          med: 0, bau: 0, cursum: 0, talentzio: 0,
+          ...(initialData.splits || {})
+        },
+        comments: {
+          med: '', bau: '', cursum: '', talentzio: '',
+          ...(initialData.comments || {})
+        }
+      };
+    }
+    return {
       date: new Date().toISOString().split('T')[0],
       startM: DEFAULT_SETTINGS.defaultStartM,
       lunch: DEFAULT_SETTINGS.defaultLunch,
@@ -43,8 +56,8 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
       comments: { med: '', bau: '', cursum: '', talentzio: '' },
       totalHours: 0,
       isLocked: false,
-    }
-  );
+    };
+  });
 
   const [aiLoading, setAiLoading] = useState<Record<string, boolean>>({});
 

@@ -38,22 +38,41 @@ export async function onRequest(context) {
     if (path === '/api/entries') {
       if (method === 'GET') {
         const { results } = await env.db.prepare("SELECT * FROM entries ORDER BY date DESC").all();
-        const entries = results.map(row => ({
-          ...row,
-          isLocked: Boolean(row.isLocked),
-          splits: row.splits ? JSON.parse(row.splits) : {
-            med: row.med_hours || 0,
-            bau: row.bau_hours || 0,
-            cursum: row.cursum_hours || 0,
-            talentzio: row.totalHours - ((row.med_hours || 0) + (row.bau_hours || 0) + (row.cursum_hours || 0))
-          },
-          comments: row.comments ? JSON.parse(row.comments) : {
-            med: row.med_notes || '',
-            bau: row.bau_notes || '',
-            cursum: row.cursum_notes || '',
-            talentzio: ''
-          }
-        }));
+        const entries = results.map(row => {
+          let splits = { med: 0, bau: 0, cursum: 0, talentzio: 0 };
+          let comments = { med: '', bau: '', cursum: '', talentzio: '' };
+          
+          try {
+            if (row.splits) splits = JSON.parse(row.splits);
+            else {
+              splits = {
+                med: row.med_hours || 0,
+                bau: row.bau_hours || 0,
+                cursum: row.cursum_hours || 0,
+                talentzio: (row.totalHours || 0) - ((row.med_hours || 0) + (row.bau_hours || 0) + (row.cursum_hours || 0))
+              };
+            }
+          } catch (e) { console.error("Error parsing splits", e); }
+
+          try {
+            if (row.comments) comments = JSON.parse(row.comments);
+            else {
+              comments = {
+                med: row.med_notes || '',
+                bau: row.bau_notes || '',
+                cursum: row.cursum_notes || '',
+                talentzio: ''
+              };
+            }
+          } catch (e) { console.error("Error parsing comments", e); }
+
+          return {
+            ...row,
+            isLocked: Boolean(row.isLocked),
+            splits,
+            comments
+          };
+        });
         return jsonResponse(entries);
       }
       
