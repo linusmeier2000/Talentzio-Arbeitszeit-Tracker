@@ -20,6 +20,8 @@ import {
   EyeOff
 } from 'lucide-react';
 
+import CalendarView from './CalendarView';
+
 interface DashboardProps {
   entries: TimeEntry[];
   hourlyWage: number;
@@ -30,6 +32,11 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage }) => {
   const [viewMonth, setViewMonth] = useState(now.getMonth());
   const [viewYear, setViewYear] = useState(now.getFullYear());
   const [activeSubTab, setActiveSubTab] = useState<'times' | 'finances'>('times');
+
+  const handleMonthChange = (month: number, year: number) => {
+    setViewMonth(month);
+    setViewYear(year);
+  };
 
   const isCurrentView = useMemo(() => {
     return viewMonth === now.getMonth() && viewYear === now.getFullYear();
@@ -228,6 +235,15 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage }) => {
 
       {activeSubTab === 'times' ? (
         <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
+          <CalendarView 
+            entries={entries} 
+            viewMonth={viewMonth} 
+            viewYear={viewYear} 
+            onMonthChange={(m, y) => {
+              setViewMonth(m);
+              setViewYear(y);
+            }} 
+          />
           {/* Haupt-Metriken */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
             <StatCard 
