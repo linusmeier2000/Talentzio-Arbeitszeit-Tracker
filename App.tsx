@@ -422,7 +422,7 @@ const App: React.FC = () => {
       {!showForm && activeTab !== 'track' && (
         <button 
           onClick={() => setShowForm(true)} 
-          className="fixed bottom-14 right-3 md:bottom-12 md:right-12 w-12 h-12 md:w-20 md:h-20 bg-slate-900 text-white rounded-full shadow-[0_15px_30px_rgba(0,0,0,0.3)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-30 no-print" 
+          className="fixed bottom-24 right-3 md:bottom-12 md:right-12 w-12 h-12 md:w-20 md:h-20 bg-slate-900 text-white rounded-full shadow-[0_15px_30px_rgba(0,0,0,0.3)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-30 no-print" 
           title="Schnellerfassung"
         >
           <PlusCircle className="w-6 h-6 md:w-10 md:h-10" />
@@ -504,7 +504,7 @@ const SettingsPanel = ({ settings, setSettings, entries }: { settings: UserSetti
   const wageBreakdown = useMemo(() => calculateWageBreakdown(settings.wages[0].rate), [settings.wages]);
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8 pb-20 no-print">
+    <div className="max-w-3xl mx-auto space-y-8 pb-24 md:pb-20 no-print">
       <div className="bg-white p-6 md:p-10 rounded-2xl md:rounded-[3rem] border border-gray-100 shadow-sm space-y-10">
         <div>
           <h3 className="text-xl md:text-2xl font-black text-gray-900 border-b border-gray-50 pb-6 mb-8 tracking-tight">Profil & Basis-Lohn</h3>

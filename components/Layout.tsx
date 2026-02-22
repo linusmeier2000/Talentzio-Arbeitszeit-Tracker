@@ -72,7 +72,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, noti
            </h2>
         </header>
 
-        <div className="p-4 md:p-8 flex-1 print:p-0 print:block">
+        <div className="p-4 md:p-8 pb-24 md:pb-8 flex-1 print:p-0 print:block">
           {children}
         </div>
 

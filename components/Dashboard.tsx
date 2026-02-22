@@ -196,7 +196,7 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage }) => {
   }, [entries, viewMonth, viewYear]);
 
   return (
-    <div className="space-y-6 md:space-y-6">
+    <div className="space-y-6 md:space-y-6 pb-24 md:pb-0">
       {/* Zentrale Steuerung */}
       <div className="bg-white p-3 md:p-4 rounded-2xl md:rounded-[2rem] border shadow-sm flex flex-col lg:flex-row items-center justify-between gap-3 md:gap-4 no-print sticky top-14 md:top-20 z-30">
         <div className="flex bg-gray-100 p-1 rounded-xl md:rounded-2xl w-full lg:w-auto">

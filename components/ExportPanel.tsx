@@ -99,7 +99,7 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
   const months = Array.from({ length: 12 }, (_, i) => i);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-20">
+    <div className="max-w-5xl mx-auto space-y-6 pb-24 md:pb-20">
       {/* Steuerungs-Panel - no-print */}
       <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-8 no-print">
         <div className="flex justify-between items-center">
@@ -189,7 +189,7 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
             {/* Header des Dokuments */}
             <div className="mb-10 border-b-2 border-slate-900 pb-8">
                <div className="relative">
-                 <h1 className="text-4xl font-black text-gray-900 tracking-tighter uppercase leading-none">
+                 <h1 className="text-2xl md:text-4xl font-black text-gray-900 tracking-tighter uppercase leading-none">
                     Arbeitszeit {getMonthName(displayMonth)} {displayYear}
                  </h1>
                  <p className="text-base text-gray-500 font-bold mt-2 uppercase tracking-[0.2em]">{settings.userName}</p>
