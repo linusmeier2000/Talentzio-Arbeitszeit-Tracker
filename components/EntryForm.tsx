@@ -255,26 +255,10 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
 
           {currentStep === 'times' && (
             <div className="space-y-4 md:space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-               <div className="text-center space-y-1">
-                 <div className="flex items-center justify-center space-x-3">
-                   <h3 className="text-lg md:text-2xl font-black text-gray-900">Zeiten erfassen</h3>
-                   <button 
-                     type="button"
-                     onClick={() => {
-                       handleChange('startM', '');
-                       handleChange('lunch', '');
-                       handleChange('startN', '');
-                       handleChange('end', '');
-                     }}
-                     className="flex items-center space-x-1 text-[8px] md:text-[10px] font-black text-gray-300 hover:text-red-400 transition-colors uppercase tracking-widest"
-                     title="Zeiten leeren"
-                   >
-                     <Trash2 className="w-2.5 h-2.5" />
-                     <span>Leeren</span>
-                   </button>
-                 </div>
-                 <p className="text-[10px] md:text-sm text-gray-400 font-medium">Trage deine Präsenzzeiten ein.</p>
-               </div>
+                <div className="text-center space-y-1">
+                  <h3 className="text-lg md:text-2xl font-black text-gray-900">Zeiten erfassen</h3>
+                  <p className="text-[10px] md:text-sm text-gray-400 font-medium">Trage deine Präsenzzeiten ein.</p>
+                </div>
                <div className="bg-brand-500 p-4 md:p-6 rounded-xl md:rounded-[2rem] text-white flex justify-between items-center shadow-lg shadow-brand-200 mb-1 md:mb-4">
                   <div>
                     <p className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-brand-200">Total</p>
@@ -384,9 +368,21 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
 
 const TimeInputLarge = ({ label, value, onChange, placeholder, icon }: { label: string, value: string, onChange: (v: string) => void, placeholder?: string, icon: string }) => (
   <div className="space-y-2">
-    <div className="flex items-center space-x-2 ml-1">
-      <span className="text-lg">{icon}</span>
-      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{label}</label>
+    <div className="flex items-center justify-between ml-1">
+      <div className="flex items-center space-x-2">
+        <span className="text-lg">{icon}</span>
+        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{label}</label>
+      </div>
+      {value && (
+        <button 
+          type="button" 
+          onClick={() => onChange('')}
+          className="text-gray-300 hover:text-red-500 transition-colors"
+          title={`${label} leeren`}
+        >
+          <Trash2 className="w-3 h-3" />
+        </button>
+      )}
     </div>
     <TimePicker 
       value={value} 

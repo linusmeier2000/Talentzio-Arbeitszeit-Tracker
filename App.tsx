@@ -435,8 +435,20 @@ const App: React.FC = () => {
 // --- Refined Quick Edit Components ---
 
 const QuickInputLarge = ({ label, value, onChange }: { label: string, value: string, onChange: (v: string) => void }) => (
-  <div className="space-y-3 group text-center">
-    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest group-focus-within:text-emerald-500 transition-colors">{label}</label>
+  <div className="space-y-3 group text-center relative">
+    <div className="flex items-center justify-center space-x-2">
+      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest group-focus-within:text-emerald-500 transition-colors">{label}</label>
+      {value && (
+        <button 
+          type="button" 
+          onClick={() => onChange('')}
+          className="text-gray-300 hover:text-red-500 transition-colors"
+          title={`${label} leeren`}
+        >
+          <Trash2 className="w-2.5 h-2.5" />
+        </button>
+      )}
+    </div>
     <TimePicker 
       value={value} 
       onChange={onChange}

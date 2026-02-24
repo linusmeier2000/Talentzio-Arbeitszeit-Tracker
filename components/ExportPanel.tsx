@@ -12,16 +12,18 @@ interface ExportPanelProps {
 }
 
 const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLock, onUpdateExportDate }) => {
-  const lastMonthDate = new Date();
-  lastMonthDate.setMonth(lastMonthDate.getMonth() - 1);
-  const firstDay = new Date(lastMonthDate.getFullYear(), lastMonthDate.getMonth(), 1).toISOString().split('T')[0];
-  const lastDay = new Date(lastMonthDate.getFullYear(), lastMonthDate.getMonth() + 1, 0).toISOString().split('T')[0];
-
-  const [startDate, setStartDate] = useState(firstDay);
-  const [endDate, setEndDate] = useState(lastDay);
+  const now = new Date();
+  const currentMonthDate = new Date(now.getFullYear(), now.getMonth(), 15);
+  const previousMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 15);
   
-  const [overrideMonth, setOverrideMonth] = useState<number | null>(null);
-  const [overrideYear, setOverrideYear] = useState<number | null>(null);
+  const defaultStartDate = previousMonthDate.toISOString().split('T')[0];
+  const defaultEndDate = currentMonthDate.toISOString().split('T')[0];
+
+  const [startDate, setStartDate] = useState(defaultStartDate);
+  const [endDate, setEndDate] = useState(defaultEndDate);
+  
+  const [overrideMonth, setOverrideMonth] = useState<number>(now.getMonth());
+  const [overrideYear, setOverrideYear] = useState<number>(now.getFullYear());
 
   const filteredEntries = useMemo(() => {
     return entries.filter(e => e.date >= startDate && e.date <= endDate)
@@ -30,7 +32,7 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
 
   // Berechnet den dominanten Monat und das Jahr für den Titel
   const dominantPeriod = useMemo(() => {
-    if (filteredEntries.length === 0) return { month: lastMonthDate.getMonth(), year: lastMonthDate.getFullYear() };
+    if (filteredEntries.length === 0) return { month: now.getMonth(), year: now.getFullYear() };
     
     const months: Record<number, number> = {};
     const years: Record<number, number> = {};
@@ -52,14 +54,8 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
     };
   }, [filteredEntries]);
 
-  // Wenn sich der Zeitraum ändert, passen wir die Standardauswahl an, sofern der User nichts manuell gewählt hat
-  useEffect(() => {
-    if (overrideMonth === null) setOverrideMonth(dominantPeriod.month);
-    if (overrideYear === null) setOverrideYear(dominantPeriod.year);
-  }, [dominantPeriod]);
-
-  const displayMonth = overrideMonth ?? dominantPeriod.month;
-  const displayYear = overrideYear ?? dominantPeriod.year;
+  const displayMonth = overrideMonth;
+  const displayYear = overrideYear;
 
   const totals = useMemo(() => {
     return filteredEntries.reduce((acc, curr) => ({
