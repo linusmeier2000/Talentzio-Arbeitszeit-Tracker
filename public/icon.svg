@@ -1,5 +1,32 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="128" fill="#0280c9"/>
-  <path d="M256 128c-70.7 0-128 57.3-128 128s57.3 128 128 128 128-57.3 128-128-57.3-128-128-128zm0 230c-56.3 0-102-45.7-102-102s45.7-102 102-102 102 45.7 102 102-45.7 102-102 102z" fill="white"/>
-  <path d="M256 192c-35.3 0-64 28.7-64 64s28.7 64 64 64 64-28.7 64-64-28.7-64-64-64zm0 102c-21 0-38-17-38-38s17-38 38-38 38 17 38 38-17 38-38 38z" fill="white"/>
+  <rect width="512" height="512" fill="#0280c9"/>
+  <text x="50%" y="160" text-anchor="middle" font-family="serif" font-weight="900" font-size="140" fill="white">TD</text>
+  <circle cx="256" cy="340" r="130" fill="white"/>
+  <circle cx="256" cy="340" r="115" fill="#0280c9"/>
+  
+  <!-- Clock ticks (Roman numerals simplified) -->
+  <g fill="white" font-family="serif" font-weight="900" font-size="24" text-anchor="middle">
+    <text x="256" y="255">XII</text>
+    <text x="256" y="445">VI</text>
+    <text x="345" y="350">III</text>
+    <text x="167" y="350">IX</text>
+    
+    <text x="305" y="275" transform="rotate(30, 305, 275)">I</text>
+    <text x="335" y="305" transform="rotate(60, 335, 305)">II</text>
+    <text x="335" y="385" transform="rotate(120, 335, 385)">IV</text>
+    <text x="305" y="415" transform="rotate(150, 305, 415)">V</text>
+    <text x="207" y="415" transform="rotate(210, 207, 415)">VII</text>
+    <text x="177" y="385" transform="rotate(240, 177, 385)">VIII</text>
+    <text x="177" y="305" transform="rotate(300, 177, 305)">X</text>
+    <text x="207" y="275" transform="rotate(330, 207, 275)">XI</text>
+  </g>
+
+  <!-- Clock hands -->
+  <line x1="256" y1="340" x2="256" y2="280" stroke="white" stroke-width="8" stroke-linecap="round"/>
+  <line x1="256" y1="340" x2="210" y2="370" stroke="white" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="256" cy="340" r="12" fill="white"/>
+  
+  <!-- Pocket watch top -->
+  <rect x="216" y="200" width="80" height="20" rx="5" fill="white"/>
+  <rect x="236" y="190" width="40" height="10" rx="2" fill="white"/>
 </svg>

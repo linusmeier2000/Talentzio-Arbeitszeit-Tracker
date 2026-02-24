@@ -22,7 +22,7 @@ export default defineConfig(({ mode }) => {
             short_name: 'TimeDash',
             description: 'Intelligenter Arbeitszeit-Tracker für Talentzio',
             theme_color: '#0280c9',
-            background_color: '#ffffff',
+            background_color: '#0280c9',
             display: 'standalone',
             icons: [
               {
