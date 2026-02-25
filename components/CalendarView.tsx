@@ -26,16 +26,20 @@ const CalendarView: React.FC<CalendarViewProps> = ({ entries, viewMonth, viewYea
   }, [entries, viewMonth, viewYear]);
 
   const hoursByDay = useMemo(() => {
-    const map: Record<number, number> = {};
+    const map: Record<number, { total: number, isDraft: boolean }> = {};
     monthEntries.forEach(e => {
       const day = new Date(e.date).getDate();
-      map[day] = (map[day] || 0) + e.totalHours;
+      const current = map[day] || { total: 0, isDraft: true };
+      map[day] = {
+        total: current.total + e.totalHours,
+        isDraft: current.isDraft && !!e.isDraft // Only draft if all entries for that day are drafts
+      };
     });
     return map;
   }, [monthEntries]);
 
   const maxHours = useMemo(() => {
-    const values = Object.values(hoursByDay) as number[];
+    const values = Object.values(hoursByDay).map(v => v.total);
     return values.length > 0 ? Math.max(...values) : 10;
   }, [hoursByDay]);
 

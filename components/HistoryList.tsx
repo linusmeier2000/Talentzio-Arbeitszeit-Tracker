@@ -82,7 +82,12 @@ const HistoryList: React.FC<HistoryListProps> = ({ entries, onEdit, onDelete }) 
                       className="hover:bg-brand-50/30 transition-colors group/row"
                     >
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="font-semibold text-gray-900">{formatDate(entry.date)}</div>
+                    <div className="flex items-center space-x-2">
+                      <div className="font-semibold text-gray-900">{formatDate(entry.date)}</div>
+                      {entry.isDraft && (
+                        <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[8px] font-black uppercase rounded tracking-tighter">Entwurf</span>
+                      )}
+                    </div>
                     <div className="text-xs text-gray-400">{getWeekday(entry.date)}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
@@ -177,7 +182,12 @@ const HistoryList: React.FC<HistoryListProps> = ({ entries, onEdit, onDelete }) 
               >
               <div className="flex justify-between items-start">
                 <div>
-                  <div className="font-bold text-gray-900">{formatDate(entry.date)}</div>
+                  <div className="flex items-center space-x-2">
+                    <div className="font-bold text-gray-900">{formatDate(entry.date)}</div>
+                    {entry.isDraft && (
+                      <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[8px] font-black uppercase rounded tracking-tighter">Entwurf</span>
+                    )}
+                  </div>
                   <div className="text-[10px] text-gray-400 font-black uppercase tracking-widest">{getWeekday(entry.date)}</div>
                 </div>
                 <div className="flex items-center space-x-2">

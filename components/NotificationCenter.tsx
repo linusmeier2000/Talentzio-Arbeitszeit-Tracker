@@ -17,7 +17,7 @@ import { Notification } from '../types';
 interface NotificationCenterProps {
   notifications: Notification[];
   onMarkAsDone: (id: string) => void;
-  onPlanNextWeek: (days: string[]) => void;
+  onPlanNextWeek: (days: string[], notificationId: string) => void;
 }
 
 const NotificationCenter: React.FC<NotificationCenterProps> = ({ 
@@ -25,6 +25,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
   onMarkAsDone,
   onPlanNextWeek
 }) => {
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
 
   const weekdays = [
@@ -102,32 +103,65 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
 
             {n.type === 'planning' && (
               <div className="space-y-3 mt-4 pt-4 border-t border-brand-100">
-                <div className="grid grid-cols-1 gap-2">
-                  {weekdays.map(day => (
-                    <button 
-                      key={day.id}
-                      onClick={() => toggleDay(day.id)}
-                      className="flex items-center space-x-3 p-2 hover:bg-white/50 rounded-xl transition-colors"
-                    >
-                      {selectedDays.includes(day.id) ? (
-                        <CheckSquare className="w-4 h-4 text-brand-500" />
-                      ) : (
-                        <Square className="w-4 h-4 text-gray-300" />
+                {(!n.data?.isPlanned || editingId === n.id) ? (
+                  <>
+                    <div className="grid grid-cols-1 gap-2">
+                      {weekdays.map(day => (
+                        <button 
+                          key={day.id}
+                          onClick={() => toggleDay(day.id)}
+                          className="flex items-center space-x-3 p-2 hover:bg-white/50 rounded-xl transition-colors"
+                        >
+                          {selectedDays.includes(day.id) ? (
+                            <CheckSquare className="w-4 h-4 text-brand-500" />
+                          ) : (
+                            <Square className="w-4 h-4 text-gray-300" />
+                          )}
+                          <span className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">{day.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      {editingId === n.id && (
+                        <button 
+                          onClick={() => setEditingId(null)}
+                          className="flex-1 bg-gray-100 text-gray-500 font-black py-2 rounded-xl text-[10px] uppercase tracking-widest transition-all"
+                        >
+                          Abbrechen
+                        </button>
                       )}
-                      <span className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">{day.label}</span>
+                      <button 
+                        disabled={selectedDays.length === 0}
+                        onClick={() => {
+                          onPlanNextWeek(selectedDays, n.id);
+                          setEditingId(null);
+                        }}
+                        className="flex-[2] bg-brand-500 hover:bg-brand-600 disabled:bg-gray-200 text-white font-black py-2 rounded-xl text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-brand-500/20"
+                      >
+                        Planung bestätigen
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex flex-wrap gap-1.5">
+                      {weekdays.filter(d => n.data?.plannedDays?.includes(d.id)).map(d => (
+                        <span key={d.id} className="px-2 py-1 bg-brand-100 text-brand-700 text-[9px] font-black uppercase rounded-lg">
+                          {d.label}
+                        </span>
+                      ))}
+                    </div>
+                    <button 
+                      onClick={() => {
+                        setEditingId(n.id);
+                        setSelectedDays(n.data?.plannedDays || []);
+                      }}
+                      className="w-full bg-white border border-brand-200 text-brand-500 hover:bg-brand-50 font-black py-2 rounded-xl text-[10px] uppercase tracking-widest transition-all"
+                    >
+                      Wochenplanung anpassen
                     </button>
-                  ))}
-                </div>
-                <button 
-                  disabled={selectedDays.length === 0}
-                  onClick={() => {
-                    onPlanNextWeek(selectedDays);
-                    onMarkAsDone(n.id);
-                  }}
-                  className="w-full bg-brand-500 hover:bg-brand-600 disabled:bg-gray-200 text-white font-black py-2 rounded-xl text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-brand-500/20"
-                >
-                  Planung bestätigen
-                </button>
+                  </div>
+                )}
               </div>
             )}
           </motion.div>

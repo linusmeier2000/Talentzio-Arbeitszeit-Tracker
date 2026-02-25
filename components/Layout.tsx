@@ -24,9 +24,12 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, noti
     { id: 'track', label: 'Erfassung', icon: Clock },
     { id: 'history', label: 'Verlauf', icon: Calendar },
     { id: 'export', label: 'Export', icon: FileDown },
-    { id: 'notifications', label: 'Meldungen', icon: Bell, badge: notifications.filter(n => !n.isRead).length },
+    { id: 'notifications', label: 'Meldungen', icon: Bell, badge: notifications.filter(n => !n.isRead).length, desktopOnly: false },
     { id: 'settings', label: 'Einstellungen', icon: SettingsIcon },
   ];
+
+  const mobileMenuItems = menuItems.filter(item => item.id !== 'notifications');
+  const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gray-50 text-gray-900 transition-colors duration-300 print:bg-white print:block">
@@ -89,6 +92,21 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, noti
            <h2 className="text-xs md:text-sm font-black text-gray-900 uppercase tracking-widest">
              {menuItems.find(m => m.id === activeTab)?.label}
            </h2>
+           
+           {/* Mobile Notification Bell */}
+           <div className="md:hidden flex items-center">
+             <button 
+               onClick={() => setActiveTab('notifications')}
+               className={`p-2 rounded-xl relative ${activeTab === 'notifications' ? 'text-brand-500 bg-brand-50' : 'text-gray-400'}`}
+             >
+               <Bell className="w-5 h-5" />
+               {unreadCount > 0 && (
+                 <span className="absolute top-1 right-1 bg-brand-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full ring-2 ring-white">
+                   {unreadCount}
+                 </span>
+               )}
+             </button>
+           </div>
         </header>
 
         <div className="p-4 md:p-8 pb-24 md:pb-8 flex-1 print:p-0 print:block">
@@ -97,7 +115,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, noti
 
         {/* Navigation - Mobile */}
         <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t flex justify-around p-2 z-50 no-print">
-          {menuItems.map((item) => (
+          {mobileMenuItems.map((item) => (
             <motion.button
               key={item.id}
               whileTap={{ scale: 0.9 }}
@@ -115,11 +133,6 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, noti
               )}
               <item.icon className="w-5 h-5" />
               <span className="text-[8px] mt-1 font-black uppercase tracking-widest">{item.label}</span>
-              {item.badge !== undefined && item.badge > 0 && (
-                <span className="absolute top-1 right-2 bg-brand-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full ring-2 ring-white">
-                  {item.badge}
-                </span>
-              )}
             </motion.button>
           ))}
         </nav>
