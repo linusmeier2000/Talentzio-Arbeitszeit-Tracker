@@ -15,7 +15,7 @@ import {
 import { generateWorkComment } from '../services/geminiService';
 import { 
   Sparkles, Save, X, Trash2, Loader2, Info, 
-  AlertTriangle, ChevronRight, ChevronLeft, Calendar, 
+  AlertTriangle, ChevronRight, ChevronLeft, ChevronUp, ChevronDown, Calendar, 
   Clock, Briefcase, FileText, CheckCircle2 
 } from 'lucide-react';
 
@@ -444,9 +444,32 @@ const SplitInputStep = ({ label, hours, comment, onHourChange, onCommentChange, 
   <div className="p-4 md:p-5 rounded-2xl md:rounded-3xl border-2 bg-white border-gray-100">
      <div className="flex justify-between items-center mb-3 md:mb-4">
        <span className="font-black text-gray-900 tracking-tight text-sm md:text-base">{label}</span>
-       <div className="relative w-20 md:w-24">
-         <input type="number" step="0.25" value={hours || ''} onChange={(e) => onHourChange(e.target.value)} placeholder="0.00" className="w-full bg-gray-50 border-none rounded-lg md:rounded-xl px-2 md:px-3 py-1.5 md:py-2 text-right font-black text-xs md:text-sm focus:ring-2 focus:ring-brand-500" />
-         <span className="absolute left-1.5 md:left-2 top-2 md:top-2.5 text-[8px] md:text-[10px] font-bold text-gray-400">h</span>
+       <div className="flex items-center space-x-2 md:space-x-3">
+          <div className="flex flex-col -space-y-1">
+            <button 
+              type="button"
+              onClick={() => onHourChange((parseFloat(hours.toString()) + 0.25).toString())}
+              className="p-1 text-gray-400 hover:text-brand-500 transition-colors"
+            >
+              <ChevronUp className="w-3 h-3 md:w-4 md:h-4" />
+            </button>
+            <button 
+              type="button"
+              onClick={() => onHourChange(Math.max(0, parseFloat(hours.toString()) - 0.25).toString())}
+              className="p-1 text-gray-400 hover:text-brand-500 transition-colors"
+            >
+              <ChevronDown className="w-3 h-3 md:w-4 md:h-4" />
+            </button>
+          </div>
+          <div className="relative w-20 md:w-24">
+            <input 
+              type="number" step="0.25" value={hours || ''} 
+              onChange={(e) => onHourChange(e.target.value)} 
+              placeholder="0.00" 
+              className="w-full bg-gray-50 border-none rounded-lg md:rounded-xl px-2 md:px-3 py-1.5 md:py-2 text-right font-black text-xs md:text-sm focus:ring-2 focus:ring-brand-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
+            />
+            <span className="absolute left-1.5 md:left-2 top-2 md:top-2.5 text-[8px] md:text-[10px] font-bold text-gray-400">h</span>
+          </div>
        </div>
      </div>
      <div className="relative">
