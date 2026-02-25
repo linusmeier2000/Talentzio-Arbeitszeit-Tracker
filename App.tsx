@@ -214,9 +214,17 @@ const App: React.FC = () => {
 
   const handleMarkAsDone = async (id: string) => {
     try {
-      const res = await fetch(`/api/notifications/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        setNotifications(prev => prev.filter(n => n.id !== id));
+      const notification = notifications.find(n => n.id === id);
+      if (notification) {
+        const updated = { ...notification, isRead: true };
+        const res = await fetch(`/api/notifications`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updated)
+        });
+        if (res.ok) {
+          setNotifications(prev => prev.map(n => n.id === id ? updated : n));
+        }
       }
     } catch (err) {
       console.error(err);
