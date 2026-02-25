@@ -25,6 +25,17 @@ export interface TimeEntry {
   comments: CompanyComments;
   totalHours: number;
   isLocked: boolean;
+  isDraft?: boolean;
+}
+
+export interface Notification {
+  id: string;
+  type: 'info' | 'planning' | 'alert' | 'fact' | 'draft-ready';
+  title: string;
+  message: string;
+  timestamp: string;
+  isRead: boolean;
+  data?: any;
 }
 
 export interface HourlyWage {

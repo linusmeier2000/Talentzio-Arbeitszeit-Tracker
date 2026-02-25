@@ -26,9 +26,11 @@ import CalendarView from './CalendarView';
 interface DashboardProps {
   entries: TimeEntry[];
   hourlyWage: number;
+  notifications: any[];
+  onMarkAsDone: (id: string) => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage }) => {
+const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage, notifications, onMarkAsDone }) => {
   const now = new Date();
   const [viewMonth, setViewMonth] = useState(now.getMonth());
   const [viewYear, setViewYear] = useState(now.getFullYear());

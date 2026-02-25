@@ -7,14 +7,15 @@ import {
   Settings as SettingsIcon, 
   FileDown, 
   Calendar, 
-  AlertCircle 
+  AlertCircle,
+  Bell
 } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  notifications: string[];
+  notifications: any[];
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, notifications }) => {
@@ -23,6 +24,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, noti
     { id: 'track', label: 'Erfassung', icon: Clock },
     { id: 'history', label: 'Verlauf', icon: Calendar },
     { id: 'export', label: 'Export', icon: FileDown },
+    { id: 'notifications', label: 'Meldungen', icon: Bell, badge: notifications.filter(n => !n.isRead).length },
     { id: 'settings', label: 'Einstellungen', icon: SettingsIcon },
   ];
 
@@ -57,17 +59,24 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, noti
               )}
               <item.icon className="w-5 h-5 mr-3" />
               <span className="font-bold text-sm tracking-tight">{item.label}</span>
+              {item.badge !== undefined && item.badge > 0 && (
+                <span className="ml-auto bg-brand-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full ring-2 ring-slate-900">
+                  {item.badge}
+                </span>
+              )}
             </motion.button>
           ))}
         </nav>
 
-        {notifications.length > 0 && (activeTab !== 'track') && (
-          <div className="p-4 bg-brand-900/20 m-4 rounded-2xl border border-brand-500/20 backdrop-blur-sm">
+        {notifications.filter(n => !n.isRead).length > 0 && (activeTab !== 'notifications') && (
+          <div className="p-4 bg-brand-900/20 m-4 rounded-2xl border border-brand-500/20 backdrop-blur-sm cursor-pointer hover:bg-brand-900/30 transition-all" onClick={() => setActiveTab('notifications')}>
             <div className="flex items-start">
               <AlertCircle className="w-5 h-5 text-brand-400 mr-2 shrink-0" />
               <div>
                 <p className="text-[10px] font-black text-brand-400 uppercase tracking-widest">Meldung</p>
-                <p className="text-xs text-brand-100/80 font-medium leading-relaxed mt-1">{notifications[0]}</p>
+                <p className="text-xs text-brand-100/80 font-medium leading-relaxed mt-1">
+                  {notifications.filter(n => !n.isRead)[0].title}
+                </p>
               </div>
             </div>
           </div>
@@ -106,6 +115,11 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, noti
               )}
               <item.icon className="w-5 h-5" />
               <span className="text-[8px] mt-1 font-black uppercase tracking-widest">{item.label}</span>
+              {item.badge !== undefined && item.badge > 0 && (
+                <span className="absolute top-1 right-2 bg-brand-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full ring-2 ring-white">
+                  {item.badge}
+                </span>
+              )}
             </motion.button>
           ))}
         </nav>

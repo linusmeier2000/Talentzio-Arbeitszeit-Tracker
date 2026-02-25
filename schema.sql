@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS entries (
   note TEXT,
   totalHours REAL,
   isLocked INTEGER DEFAULT 0,
+  isDraft INTEGER DEFAULT 0,
   splits TEXT, -- Stored as JSON string (keeping for compatibility)
   comments TEXT, -- Stored as JSON string (keeping for compatibility)
   cursum_hours REAL,
@@ -18,6 +19,16 @@ CREATE TABLE IF NOT EXISTS entries (
   med_notes TEXT,
   bau_hours REAL,
   bau_notes TEXT
+);
+
+CREATE TABLE IF NOT EXISTS notifications (
+  id TEXT PRIMARY KEY,
+  type TEXT,
+  title TEXT,
+  message TEXT,
+  timestamp TEXT,
+  isRead INTEGER DEFAULT 0,
+  data TEXT -- JSON string
 );
 
 CREATE TABLE IF NOT EXISTS settings (

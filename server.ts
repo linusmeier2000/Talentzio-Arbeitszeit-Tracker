@@ -36,6 +36,7 @@ async function startServer() {
       const entries = rows.map(row => ({
         ...row,
         isLocked: Boolean(row.isLocked),
+        isDraft: Boolean(row.isDraft),
         splits: row.splits ? JSON.parse(row.splits) : {
           med: row.med_hours || 0,
           bau: row.bau_hours || 0,
@@ -65,14 +66,14 @@ async function startServer() {
       }
       const stmt = db.prepare(`
         INSERT INTO entries (
-          id, date, startM, lunch, startN, end, note, totalHours, isLocked, splits, comments,
+          id, date, startM, lunch, startN, end, note, totalHours, isLocked, isDraft, splits, comments,
           cursum_hours, cursum_notes, med_hours, med_notes, bau_hours, bau_notes
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(id) DO UPDATE SET
           date=excluded.date, startM=excluded.startM, lunch=excluded.lunch, startN=excluded.startN,
           end=excluded.end, note=excluded.note, totalHours=excluded.totalHours,
-          isLocked=excluded.isLocked, splits=excluded.splits, comments=excluded.comments,
+          isLocked=excluded.isLocked, isDraft=excluded.isDraft, splits=excluded.splits, comments=excluded.comments,
           cursum_hours=excluded.cursum_hours, cursum_notes=excluded.cursum_notes,
           med_hours=excluded.med_hours, med_notes=excluded.med_notes,
           bau_hours=excluded.bau_hours, bau_notes=excluded.bau_notes
@@ -80,7 +81,7 @@ async function startServer() {
       
       stmt.run(
         entry.id, entry.date, entry.startM, entry.lunch, entry.startN, entry.end,
-        entry.note, entry.totalHours, entry.isLocked ? 1 : 0,
+        entry.note, entry.totalHours, entry.isLocked ? 1 : 0, entry.isDraft ? 1 : 0,
         JSON.stringify(entry.splits), JSON.stringify(entry.comments),
         entry.splits.cursum || 0, entry.comments.cursum || '',
         entry.splits.med || 0, entry.comments.med || '',
@@ -128,6 +129,50 @@ async function startServer() {
       db.prepare("UPDATE entries SET isLocked = ? WHERE date >= ? AND date <= ?")
         .run(lock ? 1 : 0, startDate, endDate);
       res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get("/api/notifications", (req, res) => {
+    try {
+      const rows = db.prepare("SELECT * FROM notifications ORDER BY timestamp DESC").all() as any[];
+      const notifications = rows.map(row => ({
+        ...row,
+        isRead: Boolean(row.isRead),
+        data: row.data ? JSON.parse(row.data) : null
+      }));
+      res.json(notifications);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/notifications", (req, res) => {
+    try {
+      const notification = req.body;
+      const stmt = db.prepare(`
+        INSERT INTO notifications (id, type, title, message, timestamp, isRead, data)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+          type=excluded.type, title=excluded.title, message=excluded.message,
+          timestamp=excluded.timestamp, isRead=excluded.isRead, data=excluded.data
+      `);
+      stmt.run(
+        notification.id, notification.type, notification.title, notification.message,
+        notification.timestamp, notification.isRead ? 1 : 0,
+        notification.data ? JSON.stringify(notification.data) : null
+      );
+      res.status(201).json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.delete("/api/notifications/:id", (req, res) => {
+    try {
+      db.prepare("DELETE FROM notifications WHERE id = ?").run(req.params.id);
+      res.status(204).send();
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }

@@ -7,7 +7,8 @@ import EntryForm from './components/EntryForm';
 import HistoryList from './components/HistoryList';
 import ExportPanel from './components/ExportPanel';
 import TimePicker from './components/TimePicker';
-import { TimeEntry, UserSettings, CompanySplit, CompanyComments } from './types';
+import NotificationCenter from './components/NotificationCenter';
+import { TimeEntry, UserSettings, CompanySplit, CompanyComments, Notification } from './types';
 import { DEFAULT_SETTINGS, INITIAL_IMPORT_DATA, COMPANIES } from './constants';
 import { 
   PlusCircle, 
@@ -24,7 +25,8 @@ import {
   ArrowUp,
   ArrowDown,
   Timer,
-  Trash2
+  Trash2,
+  Bell
 } from 'lucide-react';
 import { calculateWageBreakdown, formatCurrency, calculateTotalHours, roundTo } from './utils';
 import { generateWorkComment } from './services/geminiService';
@@ -35,6 +37,7 @@ const STORAGE_KEY_SETTINGS = 'at_settings_v1';
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [entries, setEntries] = useState<TimeEntry[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
   const [editingEntry, setEditingEntry] = useState<TimeEntry | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -56,9 +59,10 @@ const App: React.FC = () => {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const [entriesRes, settingsRes] = await Promise.all([
+        const [entriesRes, settingsRes, notificationsRes] = await Promise.all([
           fetch('/api/entries'),
-          fetch('/api/settings')
+          fetch('/api/settings'),
+          fetch('/api/notifications')
         ]);
         
         if (entriesRes.ok) {
@@ -74,6 +78,11 @@ const App: React.FC = () => {
           const data = await settingsRes.json();
           if (data) setSettings(data);
         }
+
+        if (notificationsRes.ok) {
+          const data = await notificationsRes.json();
+          setNotifications(data || []);
+        }
       } catch (err) {
         console.error("Failed to load data", err);
       } finally {
@@ -83,6 +92,150 @@ const App: React.FC = () => {
     loadData();
   }, []);
 
+  // Notification Generator Logic
+  useEffect(() => {
+    if (isLoading) return;
+
+    const checkNotifications = async () => {
+      const now = new Date();
+      const day = now.getDay(); // 0=Sun, 4=Thu
+      const hour = now.getHours();
+      const todayStr = now.toISOString().split('T')[0];
+      
+      const newNotifications: Partial<Notification>[] = [];
+
+      // 1. Thursday Morning: Cursum Check
+      if (day === 4 && hour >= 8 && hour < 12) {
+        const yesterday = new Date();
+        yesterday.setDate(now.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        const yesterdayEntry = entries.find(e => e.date === yesterdayStr);
+        const hasCursumYesterday = yesterdayEntry && yesterdayEntry.splits.cursum > 0;
+        
+        const id = `cursum-check-${todayStr}`;
+        if (!hasCursumYesterday && !notifications.some(n => n.id === id)) {
+          newNotifications.push({
+            id,
+            type: 'alert',
+            title: 'Cursum AG Check',
+            message: 'Du hast gestern keine Zeit für Cursum AG eingetragen. Hast du heute etwas für sie zu tun?',
+            timestamp: now.toISOString(),
+            isRead: false
+          });
+        }
+      }
+
+      // 2. Thursday Afternoon: Planning Next Week
+      if (day === 4 && hour >= 13) {
+        const id = `planning-${todayStr}`;
+        if (!notifications.some(n => n.id === id)) {
+          newNotifications.push({
+            id,
+            type: 'planning',
+            title: 'Wochenplanung',
+            message: 'Weisst du schon, an welchen Tagen du nächste Woche arbeiten wirst?',
+            timestamp: now.toISOString(),
+            isRead: false
+          });
+        }
+      }
+
+      // 3. Draft Ready Notification
+      const todayDraft = entries.find(e => e.date === todayStr && e.isDraft);
+      if (todayDraft) {
+        const id = `draft-ready-${todayStr}`;
+        if (!notifications.some(n => n.id === id)) {
+          newNotifications.push({
+            id,
+            type: 'draft-ready',
+            title: 'Entwurf bereit',
+            message: 'Ich habe bereits einen Entwurf für heute erstellt. Du musst nur noch die Zeiten kontrollieren und anpassen.',
+            timestamp: now.toISOString(),
+            isRead: false
+          });
+        }
+      }
+
+      // 4. Random Facts/Stats
+      if (Math.random() > 0.95 && notifications.filter(n => n.type === 'fact').length < 2) {
+        const facts = [
+          "Wusstest du? Deine produktivste Zeit ist statistisch gesehen am Mittwochmorgen.",
+          "Statistik: Du hast diesen Monat bereits 15% mehr für Cursum gearbeitet als im Vormonat.",
+          "Tipp: Kurze Pausen alle 90 Minuten steigern die Konzentration um bis zu 20%.",
+          "Fact: Talentzio Med AG macht aktuell 45% deiner Gesamtarbeitszeit aus."
+        ];
+        const fact = facts[Math.floor(Math.random() * facts.length)];
+        const id = `fact-${Date.now()}`;
+        newNotifications.push({
+          id,
+          type: 'fact',
+          title: 'Wusstest du schon?',
+          message: fact,
+          timestamp: now.toISOString(),
+          isRead: false
+        });
+      }
+
+      for (const n of newNotifications) {
+        await fetch('/api/notifications', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(n)
+        });
+      }
+
+      if (newNotifications.length > 0) {
+        const res = await fetch('/api/notifications');
+        if (res.ok) setNotifications(await res.json());
+      }
+    };
+
+    checkNotifications();
+    const interval = setInterval(checkNotifications, 1000 * 60 * 30); // Every 30 mins
+    return () => clearInterval(interval);
+  }, [isLoading, entries, notifications]);
+
+  const handleMarkAsDone = async (id: string) => {
+    try {
+      const res = await fetch(`/api/notifications/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setNotifications(prev => prev.filter(n => n.id !== id));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handlePlanNextWeek = async (dayIds: string[]) => {
+    const now = new Date();
+    const nextMonday = new Date();
+    nextMonday.setDate(now.getDate() + ((1 + 7 - now.getDay()) % 7 || 7));
+    
+    for (const dayId of dayIds) {
+      const targetDate = new Date(nextMonday);
+      targetDate.setDate(nextMonday.getDate() + (parseInt(dayId) - 1));
+      const dateStr = targetDate.toISOString().split('T')[0];
+      
+      const draftEntry: TimeEntry = {
+        id: `draft-${dateStr}`,
+        date: dateStr,
+        startM: settings.defaultStartM,
+        lunch: settings.defaultLunch,
+        startN: settings.defaultStartN,
+        end: settings.defaultEnd,
+        note: 'Geplante Arbeitszeit (Entwurf)',
+        isLocked: false,
+        isDraft: true,
+        totalHours: calculateTotalHours(settings.defaultStartM, settings.defaultLunch, settings.defaultStartN, settings.defaultEnd),
+        splits: { med: 0, bau: 0, cursum: 0, talentzio: 0 },
+        comments: { med: '', bau: '', cursum: '', talentzio: '' }
+      };
+      
+      await handleSaveEntry(draftEntry);
+    }
+    alert('Entwürfe für nächste Woche wurden erstellt.');
+  };
+
   // Initialisiere Quick-Edit wenn ein heutiger Eintrag gefunden wird
   useEffect(() => {
     if (todayEntry) {
@@ -91,16 +244,6 @@ const App: React.FC = () => {
       setQuickEditData(null);
     }
   }, [todayEntry]);
-
-  const notifications = useMemo(() => {
-    const msgs = [];
-    const today = new Date();
-    const twoDaysAgo = new Date();
-    twoDaysAgo.setDate(today.getDate() - 2);
-    const hasRecent = entries.some(e => new Date(e.date) >= twoDaysAgo);
-    if (!hasRecent && entries.length > 0) msgs.push("Du hast seit 2 Tagen keine Zeiten erfasst.");
-    return msgs;
-  }, [entries]);
 
   const handleSaveEntry = async (newEntry: TimeEntry) => {
     try {
@@ -272,7 +415,12 @@ const App: React.FC = () => {
           exit="exit"
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         >
-          <Dashboard entries={entries} hourlyWage={settings.wages[0].rate} />
+          <Dashboard 
+            entries={entries} 
+            hourlyWage={settings.wages[0].rate} 
+            notifications={notifications}
+            onMarkAsDone={handleMarkAsDone}
+          />
         </motion.div>
       );
       case 'track': return (
@@ -470,6 +618,27 @@ const App: React.FC = () => {
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         >
           <ExportPanel entries={entries} settings={settings} onToggleLock={handleToggleLock} onUpdateExportDate={handleUpdateExportDate} />
+        </motion.div>
+      );
+      case 'notifications': return (
+        <motion.div
+          key="notifications"
+          variants={pageVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="max-w-2xl mx-auto"
+        >
+          <div className="flex items-center space-x-4 mb-8">
+            <div className="p-3 bg-brand-50 rounded-2xl text-brand-500 shadow-sm"><Bell className="w-6 h-6" /></div>
+            <h3 className="text-xl font-black text-gray-900 tracking-tight">Meldungs-Zentrale</h3>
+          </div>
+          <NotificationCenter 
+            notifications={notifications} 
+            onMarkAsDone={handleMarkAsDone}
+            onPlanNextWeek={handlePlanNextWeek}
+          />
         </motion.div>
       );
       case 'settings': return (
