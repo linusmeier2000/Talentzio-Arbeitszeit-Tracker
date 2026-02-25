@@ -41,7 +41,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ entries, viewMonth, viewYea
   }, [monthEntries]);
 
   const maxHours = useMemo(() => {
-    const values = Object.values(hoursByDay).map(v => v.total);
+    const values = Object.values(hoursByDay).map((v: any) => v.total);
     return values.length > 0 ? Math.max(...values) : 10;
   }, [hoursByDay]);
 

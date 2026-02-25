@@ -127,12 +127,19 @@ const App: React.FC = () => {
         }
       }
 
-      // 2. Wednesday Morning: Planning Next Week
-      if (day === 3 && hour >= 8) {
-        const id = `planning-wed-${todayStr}`;
-        if (!notifications.some(n => n.id === id)) {
+      // 2. Weekly Planning Notification (Wed 08:00 - Sun 23:59)
+      const nextMonday = new Date();
+      nextMonday.setDate(now.getDate() + ((1 + 7 - now.getDay()) % 7 || 7));
+      const nextMondayStr = nextMonday.toISOString().split('T')[0];
+      
+      const isInPlanningWindow = (day === 3 && hour >= 8) || day === 4 || day === 5 || day === 6 || day === 0;
+      const hasPlanned = entries.some(e => e.isDraft && e.date >= nextMondayStr);
+      const planningId = `planning-${nextMondayStr}`;
+
+      if (isInPlanningWindow && !hasPlanned) {
+        if (!notifications.some(n => n.id === planningId)) {
           newNotifications.push({
-            id,
+            id: planningId,
             type: 'planning',
             title: 'Wochenplanung',
             message: 'Weisst du schon, an welchen Tagen du nächste Woche arbeiten wirst?',
@@ -140,27 +147,13 @@ const App: React.FC = () => {
             isRead: false
           });
         }
-      }
-
-      // 2b. Thursday Afternoon: Planning Reminder
-      if (day === 4 && hour >= 13) {
-        const nextMonday = new Date();
-        nextMonday.setDate(now.getDate() + ((1 + 7 - now.getDay()) % 7 || 7));
-        const nextMondayStr = nextMonday.toISOString().split('T')[0];
-        
-        // Check if any drafts exist for next week
-        const hasDraftsNextWeek = entries.some(e => e.isDraft && e.date >= nextMondayStr);
-        const id = `planning-reminder-${todayStr}`;
-        
-        if (!hasDraftsNextWeek && !notifications.some(n => n.id === id)) {
-          newNotifications.push({
-            id,
-            type: 'planning',
-            title: 'Erinnerung: Wochenplanung',
-            message: 'Du hast deine Arbeitstage für nächste Woche noch nicht definiert. Bitte gib sie jetzt an.',
-            timestamp: now.toISOString(),
-            isRead: false
-          });
+      } else if (hasPlanned || !isInPlanningWindow) {
+        // If already planned or outside window, remove the planning notification if it exists
+        const existingPlanning = notifications.find(n => n.id === planningId);
+        if (existingPlanning) {
+          await fetch(`/api/notifications/${planningId}`, { method: 'DELETE' });
+          const res = await fetch('/api/notifications');
+          if (res.ok) setNotifications(await res.json());
         }
       }
 
