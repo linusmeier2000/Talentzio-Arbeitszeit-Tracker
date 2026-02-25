@@ -22,14 +22,19 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
 
   const [startDate, setStartDate] = useState(defaultStartDate);
   const [endDate, setEndDate] = useState(defaultEndDate);
+  const [companyFilter, setCompanyFilter] = useState<'all' | 'med' | 'bau' | 'cursum' | 'talentzio'>('all');
   
   const [overrideMonth, setOverrideMonth] = useState<number>(now.getMonth());
   const [overrideYear, setOverrideYear] = useState<number>(now.getFullYear());
 
   const filteredEntries = useMemo(() => {
-    return entries.filter(e => e.date >= startDate && e.date <= endDate)
-                  .sort((a, b) => a.date.localeCompare(b.date));
-  }, [entries, startDate, endDate]);
+    return entries.filter(e => {
+      const dateMatch = e.date >= startDate && e.date <= endDate;
+      if (!dateMatch) return false;
+      if (companyFilter === 'all') return true;
+      return e.splits[companyFilter] > 0;
+    }).sort((a, b) => a.date.localeCompare(b.date));
+  }, [entries, startDate, endDate, companyFilter]);
 
   // Berechnet den dominanten Monat und das Jahr für den Titel
   const dominantPeriod = useMemo(() => {
@@ -59,13 +64,17 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
   const displayYear = overrideYear;
 
   const totals = useMemo(() => {
-    return filteredEntries.reduce((acc, curr) => ({
-      total: acc.total + curr.totalHours,
-      med: acc.med + curr.splits.med,
-      bau: acc.bau + curr.splits.bau,
-      cursum: acc.cursum + curr.splits.cursum,
-    }), { total: 0, med: 0, bau: 0, cursum: 0 });
-  }, [filteredEntries]);
+    return filteredEntries.reduce((acc, curr) => {
+      const hoursToSum = companyFilter === 'all' ? curr.totalHours : curr.splits[companyFilter];
+      return {
+        total: acc.total + hoursToSum,
+        med: acc.med + curr.splits.med,
+        bau: acc.bau + curr.splits.bau,
+        cursum: acc.cursum + curr.splits.cursum,
+        talentzio: acc.talentzio + curr.splits.talentzio,
+      };
+    }, { total: 0, med: 0, bau: 0, cursum: 0, talentzio: 0 });
+  }, [filteredEntries, companyFilter]);
 
   const allEntriesLocked = useMemo(() => {
     if (filteredEntries.length === 0) return false;
@@ -74,18 +83,56 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
 
   const handleExportCSV = () => {
     if (filteredEntries.length === 0) return;
-    const headers = ['Datum', 'Tag', 'B. M', 'Pause', 'B. N', 'Ende', 'Total', 'Med AG', 'Bau AG', 'Cursum'];
-    const rows = filteredEntries.map(e => [
-      formatDate(e.date), getWeekday(e.date).substring(0, 2), e.startM, e.lunch, e.startN || '-', e.end,
-      e.totalHours.toFixed(2).replace('.', ','), e.splits.med.toFixed(2).replace('.', ','),
-      e.splits.bau.toFixed(2).replace('.', ','), e.splits.cursum.toFixed(2).replace('.', ',')
-    ]);
-    rows.push(['TOTAL', '', '', '', '', '', totals.total.toFixed(2).replace('.', ','), totals.med.toFixed(2).replace('.', ','), totals.bau.toFixed(2).replace('.', ','), totals.cursum.toFixed(2).replace('.', ',')]);
+    
+    let headers = ['Datum', 'Tag', 'B. M', 'Pause', 'B. N', 'Ende', 'Total'];
+    if (companyFilter === 'all') {
+      headers = [...headers, 'Med AG', 'Bau AG', 'Cursum', 'Talentzio'];
+    } else {
+      headers = [...headers, companyFilter.toUpperCase()];
+    }
+
+    const rows = filteredEntries.map(e => {
+      let row = [
+        formatDate(e.date), 
+        getWeekday(e.date).substring(0, 2), 
+        e.startM, 
+        e.lunch, 
+        e.startN || '-', 
+        e.end,
+        (companyFilter === 'all' ? e.totalHours : e.splits[companyFilter]).toFixed(2).replace('.', ',')
+      ];
+      
+      if (companyFilter === 'all') {
+        row = [...row, 
+          e.splits.med.toFixed(2).replace('.', ','),
+          e.splits.bau.toFixed(2).replace('.', ','),
+          e.splits.cursum.toFixed(2).replace('.', ','),
+          e.splits.talentzio.toFixed(2).replace('.', ',')
+        ];
+      } else {
+        row = [...row, e.splits[companyFilter].toFixed(2).replace('.', ',')];
+      }
+      return row;
+    });
+
+    let totalRow = ['TOTAL', '', '', '', '', '', totals.total.toFixed(2).replace('.', ',')];
+    if (companyFilter === 'all') {
+      totalRow = [...totalRow, 
+        totals.med.toFixed(2).replace('.', ','), 
+        totals.bau.toFixed(2).replace('.', ','), 
+        totals.cursum.toFixed(2).replace('.', ','),
+        totals.talentzio.toFixed(2).replace('.', ',')
+      ];
+    } else {
+      totalRow = [...totalRow, totals.total.toFixed(2).replace('.', ',')];
+    }
+    
+    rows.push(totalRow);
     const csvContent = "\ufeff" + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.setAttribute('download', `Arbeitszeit_${getMonthName(displayMonth)}_${displayYear}_${settings.userName}.csv`);
+    link.setAttribute('download', `Arbeitszeit_${companyFilter}_${getMonthName(displayMonth)}_${displayYear}_${settings.userName}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -141,7 +188,7 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
           )}
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="space-y-4">
             <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center">
               <span className="w-2 h-2 bg-brand-500 rounded-full mr-2"></span> Zeitraum wählen
@@ -155,6 +202,26 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
                 <label className="text-[10px] font-bold text-gray-300 uppercase ml-1">Bis</label>
                 <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-full p-3 bg-gray-50 rounded-xl font-bold border-none outline-none focus:ring-2 focus:ring-brand-500" />
               </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center">
+              <span className="w-2 h-2 bg-brand-500 rounded-full mr-2"></span> Unternehmen Filter
+            </h4>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-gray-300 uppercase ml-1">Fokus auf</label>
+              <select 
+                value={companyFilter} 
+                onChange={(e) => setCompanyFilter(e.target.value as any)} 
+                className="w-full p-3 bg-gray-50 rounded-xl font-bold border-none outline-none focus:ring-2 focus:ring-brand-500 appearance-none"
+              >
+                <option value="all">Alle Unternehmen (Gesamt)</option>
+                <option value="med">Talentzio Med AG</option>
+                <option value="bau">Talentzio Bau AG</option>
+                <option value="cursum">Cursum AG</option>
+                <option value="talentzio">Talentzio (Rest)</option>
+              </select>
             </div>
           </div>
 
@@ -215,6 +282,11 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
                <div className="relative">
                  <h1 className="text-2xl md:text-4xl font-black text-gray-900 tracking-tighter uppercase leading-none">
                     Arbeitszeit {getMonthName(displayMonth)} {displayYear}
+                    {companyFilter !== 'all' && (
+                      <span className="block text-sm md:text-lg text-brand-500 mt-2">
+                        Fokus: {companyFilter === 'med' ? 'Talentzio Med AG' : companyFilter === 'bau' ? 'Talentzio Bau AG' : companyFilter === 'cursum' ? 'Cursum AG' : 'Talentzio'}
+                      </span>
+                    )}
                  </h1>
                  <p className="text-base text-gray-500 font-bold mt-2 uppercase tracking-[0.2em]">{settings.userName}</p>
                  <div className="absolute top-0 right-0 h-full flex flex-col justify-center items-end text-right">
@@ -235,9 +307,16 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
                     <th className="px-1 py-4 text-center">B. N.</th>
                     <th className="px-1 py-4 text-center">Ende</th>
                     <th className="px-2 py-4 text-right bg-brand-50/50 border-l border-brand-100">Total</th>
-                    <th className="px-2 py-4 text-center border-l border-slate-200">Med</th>
-                    <th className="px-2 py-4 text-center">Bau</th>
-                    <th className="px-2 py-4 text-center">Cur.</th>
+                    {companyFilter === 'all' ? (
+                      <>
+                        <th className="px-2 py-4 text-center border-l border-slate-200">Med</th>
+                        <th className="px-2 py-4 text-center">Bau</th>
+                        <th className="px-2 py-4 text-center">Cur.</th>
+                        <th className="px-2 py-4 text-center">Tal.</th>
+                      </>
+                    ) : (
+                      <th className="px-2 py-4 text-center border-l border-slate-200 uppercase">{companyFilter.substring(0, 3)}.</th>
+                    )}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -249,10 +328,21 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
                       <td className="px-1 py-2.5 text-center text-gray-400">{e.lunch}</td>
                       <td className="px-1 py-2.5 text-center text-gray-400">{e.startN || '—'}</td>
                       <td className="px-1 py-2.5 text-center text-gray-400">{e.end}</td>
-                      <td className="px-2 py-2.5 text-right font-black bg-brand-50/20 text-brand-700 border-l border-brand-100">{e.totalHours.toFixed(2)}</td>
-                      <td className="px-2 py-2.5 text-center font-bold text-gray-700 border-l border-slate-100">{e.splits.med > 0 ? e.splits.med.toFixed(2) : ''}</td>
-                      <td className="px-2 py-2.5 text-center font-bold text-gray-700">{e.splits.bau > 0 ? e.splits.bau.toFixed(2) : ''}</td>
-                      <td className="px-2 py-2.5 text-center font-bold text-gray-700">{e.splits.cursum > 0 ? e.splits.cursum.toFixed(2) : ''}</td>
+                      <td className="px-2 py-2.5 text-right font-black bg-brand-50/20 text-brand-700 border-l border-brand-100">
+                        {(companyFilter === 'all' ? e.totalHours : e.splits[companyFilter]).toFixed(2)}
+                      </td>
+                      {companyFilter === 'all' ? (
+                        <>
+                          <td className="px-2 py-2.5 text-center font-bold text-gray-700 border-l border-slate-100">{e.splits.med > 0 ? e.splits.med.toFixed(2) : ''}</td>
+                          <td className="px-2 py-2.5 text-center font-bold text-gray-700">{e.splits.bau > 0 ? e.splits.bau.toFixed(2) : ''}</td>
+                          <td className="px-2 py-2.5 text-center font-bold text-gray-700">{e.splits.cursum > 0 ? e.splits.cursum.toFixed(2) : ''}</td>
+                          <td className="px-2 py-2.5 text-center font-bold text-gray-700">{e.splits.talentzio > 0 ? e.splits.talentzio.toFixed(2) : ''}</td>
+                        </>
+                      ) : (
+                        <td className="px-2 py-2.5 text-center font-black text-brand-600 border-l border-slate-100">
+                          {e.splits[companyFilter].toFixed(2)}
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -260,9 +350,16 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
                   <tr className="bg-slate-900 text-white font-black border-t-2 border-white">
                     <td colSpan={6} className="px-2 py-6 text-right text-[10px] uppercase tracking-widest text-slate-400">Summe Stunden</td>
                     <td className="px-2 py-6 text-right text-xl text-brand-400 border-l border-slate-700">{totals.total.toFixed(2)}</td>
-                    <td className="px-2 py-6 text-center border-l border-slate-700 bg-slate-800/50">{totals.med.toFixed(2)}</td>
-                    <td className="px-2 py-6 text-center bg-slate-800/50">{totals.bau.toFixed(2)}</td>
-                    <td className="px-2 py-6 text-center bg-slate-800/50">{totals.cursum.toFixed(2)}</td>
+                    {companyFilter === 'all' ? (
+                      <>
+                        <td className="px-2 py-6 text-center border-l border-slate-700 bg-slate-800/50">{totals.med.toFixed(2)}</td>
+                        <td className="px-2 py-6 text-center bg-slate-800/50">{totals.bau.toFixed(2)}</td>
+                        <td className="px-2 py-6 text-center bg-slate-800/50">{totals.cursum.toFixed(2)}</td>
+                        <td className="px-2 py-6 text-center bg-slate-800/50">{totals.talentzio.toFixed(2)}</td>
+                      </>
+                    ) : (
+                      <td className="px-2 py-6 text-center border-l border-slate-700 bg-slate-800/50">{totals.total.toFixed(2)}</td>
+                    )}
                   </tr>
                 </tfoot>
               </table>
