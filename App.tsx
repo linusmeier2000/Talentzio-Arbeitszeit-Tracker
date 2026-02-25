@@ -765,11 +765,25 @@ const QuickSplitCard = ({ label, color, hours, comment, onHourChange, onCommentC
           <span className="text-[10px] md:text-sm font-black uppercase tracking-widest text-gray-900">{label}</span>
         </div>
         <div className="flex items-center space-x-2 md:space-x-3">
+          <div className="flex flex-col -space-y-1">
+            <button 
+              onClick={() => onHourChange((parseFloat(hours) + 0.25).toString())}
+              className="p-1 text-gray-400 hover:text-brand-500 transition-colors"
+            >
+              <ChevronUp className="w-3 h-3 md:w-4 md:h-4" />
+            </button>
+            <button 
+              onClick={() => onHourChange(Math.max(0, parseFloat(hours) - 0.25).toString())}
+              className="p-1 text-gray-400 hover:text-brand-500 transition-colors"
+            >
+              <ChevronDown className="w-3 h-3 md:w-4 md:h-4" />
+            </button>
+          </div>
           <div className="relative">
             <input 
               type="number" step="0.25" placeholder="0.00" value={hours || ''} 
               onChange={e => onHourChange(e.target.value)}
-              className="w-16 md:w-20 bg-gray-50 border-none rounded-lg md:rounded-xl px-2 md:px-3 py-1.5 md:py-2 text-right font-black text-xs md:text-sm focus:ring-2 focus:ring-brand-500 outline-none"
+              className="w-16 md:w-20 bg-gray-50 border-none rounded-lg md:rounded-xl px-2 md:px-3 py-1.5 md:py-2 text-right font-black text-xs md:text-sm focus:ring-2 focus:ring-brand-500 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
             <span className="absolute -right-4 md:-right-5 top-2 md:top-2.5 text-[8px] md:text-[10px] font-black text-gray-300 uppercase">h</span>
           </div>
