@@ -20,19 +20,21 @@ const CalendarView: React.FC<CalendarViewProps> = ({ entries, viewMonth, viewYea
 
   const monthEntries = useMemo(() => {
     return entries.filter(e => {
-      const d = new Date(e.date);
-      return d.getMonth() === viewMonth && d.getFullYear() === viewYear;
+      // Parse YYYY-MM-DD manually to avoid timezone shifts
+      const [year, month] = e.date.split('-').map(Number);
+      return (month - 1) === viewMonth && year === viewYear;
     });
   }, [entries, viewMonth, viewYear]);
 
   const hoursByDay = useMemo(() => {
     const map: Record<number, { total: number, isDraft: boolean }> = {};
     monthEntries.forEach(e => {
-      const day = new Date(e.date).getDate();
+      // Parse YYYY-MM-DD manually
+      const day = parseInt(e.date.split('-')[2]);
       const current = map[day] || { total: 0, isDraft: true };
       map[day] = {
         total: current.total + e.totalHours,
-        isDraft: current.isDraft && !!e.isDraft // Only draft if all entries for that day are drafts
+        isDraft: current.isDraft && !!e.isDraft
       };
     });
     return map;
@@ -107,7 +109,10 @@ const CalendarView: React.FC<CalendarViewProps> = ({ entries, viewMonth, viewYea
           {blanks.map(b => <div key={`blank-${b}`} />)}
           
           {days.map(day => {
-            const hours = hoursByDay[day] || 0;
+            const dayData = hoursByDay[day] || { total: 0, isDraft: false };
+            const hours = dayData.total;
+            const isDraft = dayData.isDraft;
+            
             // Scale circle size based on hours. Max size can exceed 100% to allow overlapping like in the inspiration image.
             // Using a square root scale for area representation
             const sizePercent = hours > 0 ? Math.max(40, Math.sqrt(hours / maxHours) * 160) : 0;
@@ -116,21 +121,26 @@ const CalendarView: React.FC<CalendarViewProps> = ({ entries, viewMonth, viewYea
               <div key={day} className="relative flex items-center justify-center h-10 md:h-14 group/day">
                 {hours > 0 && (
                   <div 
-                    className="absolute rounded-full bg-brand-500/40 border border-brand-400/30 transition-all duration-500 group-hover/day:bg-brand-500/60 group-hover/day:scale-110 aspect-square"
+                    className={`absolute rounded-full border transition-all duration-500 group-hover/day:scale-110 aspect-square ${
+                      isDraft 
+                        ? 'bg-amber-500/20 border-amber-400/30 border-dashed' 
+                        : 'bg-brand-500/40 border-brand-400/30 group-hover/day:bg-brand-500/60'
+                    }`}
                     style={{ 
                       width: `${sizePercent}%`,
                     }}
                   />
                 )}
-                <span className={`relative z-10 text-xs md:text-sm font-black transition-colors ${hours > 0 ? 'text-white' : 'text-slate-600'}`}>
+                <span className={`relative z-10 text-xs md:text-sm font-black transition-colors ${hours > 0 ? (isDraft ? 'text-amber-200' : 'text-white') : 'text-slate-600'}`}>
                   {day}
                 </span>
                 
                 {/* Tooltip */}
                 {hours > 0 && (
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/day:block z-50 animate-in fade-in zoom-in-95 duration-200">
-                    <div className="bg-white text-slate-900 px-3 py-1.5 rounded-xl shadow-xl text-[10px] font-black whitespace-nowrap border border-slate-100">
-                      {hours.toFixed(2)} h
+                    <div className="bg-white text-slate-900 px-3 py-1.5 rounded-xl shadow-xl text-[10px] font-black whitespace-nowrap border border-slate-100 flex items-center space-x-1">
+                      <span>{hours.toFixed(2)} h</span>
+                      {isDraft && <span className="text-[8px] bg-amber-100 text-amber-700 px-1 rounded">ENTWURF</span>}
                     </div>
                     <div className="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[4px] border-t-white mx-auto" />
                   </div>
