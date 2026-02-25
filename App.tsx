@@ -17,6 +17,8 @@ import {
   AlertCircle, 
   ChevronRight, 
   ChevronLeft, 
+  ChevronUp,
+  ChevronDown,
   Sparkles, 
   Loader2, 
   FileText,
