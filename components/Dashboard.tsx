@@ -1,5 +1,6 @@
 
 import React, { useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   PieChart, Pie, Cell, AreaChart, Area
@@ -32,6 +33,21 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage }) => {
   const [viewMonth, setViewMonth] = useState(now.getMonth());
   const [viewYear, setViewYear] = useState(now.getFullYear());
   const [activeSubTab, setActiveSubTab] = useState<'times' | 'finances'>('times');
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
 
   const handleMonthChange = (month: number, year: number) => {
     setViewMonth(month);
@@ -198,7 +214,11 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage }) => {
   return (
     <div className="space-y-6 md:space-y-6 pb-24 md:pb-0">
       {/* Zentrale Steuerung */}
-      <div className="bg-white p-3 md:p-4 rounded-2xl md:rounded-[2rem] border shadow-sm flex flex-col lg:flex-row items-center justify-between gap-3 md:gap-4 no-print sticky top-14 md:top-20 z-30">
+      <motion.div 
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="bg-white p-3 md:p-4 rounded-2xl md:rounded-[2rem] border shadow-sm flex flex-col lg:flex-row items-center justify-between gap-3 md:gap-4 no-print sticky top-14 md:top-20 z-30"
+      >
         <div className="flex bg-gray-100 p-1 rounded-xl md:rounded-2xl w-full lg:w-auto">
           <button onClick={() => setActiveSubTab('times')} className={`flex-1 lg:flex-none flex items-center justify-center px-4 md:px-6 py-2 md:py-2.5 rounded-xl font-black text-xs transition-all ${activeSubTab === 'times' ? 'bg-white text-brand-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
             <Clock className="w-4 h-4 mr-2" /> Zeiten
@@ -231,198 +251,263 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage }) => {
             <span className="text-[10px] font-black uppercase">Aktuell</span>
           </button>
         </div>
-      </div>
+      </motion.div>
 
-      {activeSubTab === 'times' ? (
-        <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
-          <CalendarView 
-            entries={entries} 
-            viewMonth={viewMonth} 
-            viewYear={viewYear} 
-            onMonthChange={(m, y) => {
-              setViewMonth(m);
-              setViewYear(y);
-            }} 
-          />
-          {/* Haupt-Metriken */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-            <StatCard 
-              title="Stunden Woche" 
-              value={`${stats.hoursWeek.toFixed(2)} h`} 
-              pensum={stats.pensumWeek}
-              icon={Calendar} 
-              color="brand" 
-              subText="Aktuelle Woche"
-              comparison={`${stats.avgHoursPerWeek.toFixed(1)} h`}
-              isOutOfContext={!isCurrentView}
+      <AnimatePresence mode="wait">
+        {activeSubTab === 'times' ? (
+          <motion.div
+            key="times"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 10 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-6 md:space-y-8"
+          >
+            <CalendarView 
+              entries={entries} 
+              viewMonth={viewMonth} 
+              viewYear={viewYear} 
+              onMonthChange={(m, y) => {
+                setViewMonth(m);
+                setViewYear(y);
+              }} 
             />
-            <StatCard 
-              title={`Stunden ${getMonthName(viewMonth)}`} 
-              value={`${stats.hoursMonth.toFixed(2)} h`} 
-              pensum={stats.pensumMonth}
-              icon={Clock} 
-              color="brand" 
-              subText="Monatstotal" 
-              comparison={`${stats.avgHoursPerMonth.toFixed(1)} h`}
-            />
-            <StatCard 
-              title={`Total ${viewYear}`} 
-              value={`${stats.hoursYear.toFixed(1)} h`} 
-              pensum={stats.pensumYear}
-              icon={BarChart3} 
-              color="brand" 
-              subText="Jahresfortschritt" 
-            />
-          </div>
+            {/* Haupt-Metriken */}
+            <motion.div 
+              variants={containerVariants}
+              initial="hidden"
+              animate="show"
+              className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6"
+            >
+              <motion.div variants={itemVariants}>
+                <StatCard 
+                  title="Stunden Woche" 
+                  value={`${stats.hoursWeek.toFixed(2)} h`} 
+                  pensum={stats.pensumWeek}
+                  icon={Calendar} 
+                  color="brand" 
+                  subText="Aktuelle Woche"
+                  comparison={`${stats.avgHoursPerWeek.toFixed(1)} h`}
+                  isOutOfContext={!isCurrentView}
+                />
+              </motion.div>
+              <motion.div variants={itemVariants}>
+                <StatCard 
+                  title={`Stunden ${getMonthName(viewMonth)}`} 
+                  value={`${stats.hoursMonth.toFixed(2)} h`} 
+                  pensum={stats.pensumMonth}
+                  icon={Clock} 
+                  color="brand" 
+                  subText="Monatstotal" 
+                  comparison={`${stats.avgHoursPerMonth.toFixed(1)} h`}
+                />
+              </motion.div>
+              <motion.div variants={itemVariants}>
+                <StatCard 
+                  title={`Total ${viewYear}`} 
+                  value={`${stats.hoursYear.toFixed(1)} h`} 
+                  pensum={stats.pensumYear}
+                  icon={BarChart3} 
+                  color="brand" 
+                  subText="Jahresfortschritt" 
+                />
+              </motion.div>
+            </motion.div>
 
-          {/* Pensum Sektion */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3 px-1">
-              <Percent className="w-5 h-5 text-gray-400" />
-              <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest">Detail-Analyse Arbeitspensum</h3>
-              <div className="flex-1 h-px bg-gray-200"></div>
-              {!isCurrentView && <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-3 py-1 rounded-full border border-gray-100 flex items-center"><EyeOff className="w-3 h-3 mr-1.5" /> Fokus auf {getMonthName(viewMonth)} {viewYear}</span>}
-              {isCurrentView && <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">Ziel: 40-50% (Ref. 42.5h)</span>}
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6">
-              <PensumCard 
-                label="Wochen-Pensum" 
-                percent={stats.pensumWeek} 
-                hours={stats.hoursWeek} 
-                capacity={stats.capacityWeek} 
-                isOutOfContext={!isCurrentView}
-              />
-              <PensumCard 
-                label={`Monats-Pensum (${getMonthName(viewMonth)})`} 
-                percent={stats.pensumMonth} 
-                hours={stats.hoursMonth} 
-                capacity={stats.capacityMonth} 
-              />
-              <PensumCard 
-                label={`Jahres-Pensum (${viewYear})`} 
-                percent={stats.pensumYear} 
-                hours={stats.hoursYear} 
-                capacity={stats.capacityYear} 
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 bg-white p-5 md:p-8 rounded-2xl md:rounded-[3rem] border shadow-sm">
-              <h3 className="text-[10px] md:text-sm font-black text-gray-400 uppercase tracking-[0.2em] mb-4 md:mb-8">Stunden-Entwicklung {viewYear}</h3>
-              <div className="h-[240px] md:h-[400px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} />
-                    <YAxis fontSize={10} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}h`} />
-                    <Tooltip cursor={{fill: '#f8fafc'}} contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}} />
-                    <Bar dataKey="hoursPrev" name="Vorjahr" fill="#e2e8f0" radius={[6, 6, 0, 0]} />
-                    <Bar dataKey="hours" name="Aktuell" fill="#0280c9" radius={[6, 6, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+            {/* Pensum Sektion */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, margin: "-100px" }}
+              className="space-y-4"
+            >
+              <div className="flex items-center space-x-3 px-1">
+                <Percent className="w-5 h-5 text-gray-400" />
+                <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest">Detail-Analyse Arbeitspensum</h3>
+                <div className="flex-1 h-px bg-gray-200"></div>
+                {!isCurrentView && <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-3 py-1 rounded-full border border-gray-100 flex items-center"><EyeOff className="w-3 h-3 mr-1.5" /> Fokus auf {getMonthName(viewMonth)} {viewYear}</span>}
+                {isCurrentView && <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">Ziel: 40-50% (Ref. 42.5h)</span>}
               </div>
-            </div>
+              
+              <motion.div 
+                variants={containerVariants}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true }}
+                className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6"
+              >
+                <motion.div variants={itemVariants}>
+                  <PensumCard 
+                    label="Wochen-Pensum" 
+                    percent={stats.pensumWeek} 
+                    hours={stats.hoursWeek} 
+                    capacity={stats.capacityWeek} 
+                    isOutOfContext={!isCurrentView}
+                  />
+                </motion.div>
+                <motion.div variants={itemVariants}>
+                  <PensumCard 
+                    label={`Monats-Pensum (${getMonthName(viewMonth)})`} 
+                    percent={stats.pensumMonth} 
+                    hours={stats.hoursMonth} 
+                    capacity={stats.capacityMonth} 
+                  />
+                </motion.div>
+                <motion.div variants={itemVariants}>
+                  <PensumCard 
+                    label={`Jahres-Pensum (${viewYear})`} 
+                    percent={stats.pensumYear} 
+                    hours={stats.hoursYear} 
+                    capacity={stats.capacityYear} 
+                  />
+                </motion.div>
+              </motion.div>
+            </motion.div>
 
-            <div className="space-y-6">
-              <div className={`p-5 md:p-8 rounded-2xl md:rounded-[3rem] border transition-all duration-700 ${cursumStats.isOver ? 'bg-red-50 border-red-200 shadow-xl shadow-red-100' : 'bg-white border-gray-100 shadow-sm'}`}>
-                <div className="flex justify-between items-start mb-4 md:mb-6">
-                   <div className={`p-3 rounded-2xl ${cursumStats.isOver ? 'bg-red-500 text-white shadow-lg' : 'bg-gray-50 text-gray-400'}`}>
-                     <Target className="w-5 h-5" />
-                   </div>
-                   <div className="text-right">
-                     <p className={`text-[10px] font-black uppercase tracking-widest ${cursumStats.isOver ? 'text-red-400' : 'text-gray-400'}`}>Cursum AG</p>
-                     <p className={`text-sm font-black ${cursumStats.isOver ? 'text-red-900' : 'text-gray-900'}`}>{cursumStats.hours.toFixed(1)} / 6.0 h</p>
-                   </div>
-                </div>
-                
-                <div className="mb-4 md:mb-4">
-                  <p className={`text-[10px] md:text-xs font-bold mb-1 ${cursumStats.isOver ? 'text-red-600' : 'text-gray-400'}`}>
-                    {cursumStats.isOver ? 'Budget überschritten!' : 'Verbleibend'}
-                  </p>
-                  <div className="flex items-baseline space-x-2">
-                    <span className={`text-4xl md:text-5xl font-black tracking-tighter ${cursumStats.isOver ? 'text-red-600' : 'text-brand-500'}`}>{cursumStats.remaining.toFixed(1)}</span>
-                    <span className="text-xl font-bold text-gray-300">h</span>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full rounded-full transition-all duration-1000 ${cursumStats.isOver ? 'bg-red-500' : 'bg-brand-500'}`} 
-                      style={{ width: `${cursumStats.progress}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white p-5 md:p-8 rounded-2xl md:rounded-[3rem] border shadow-sm">
-                <h3 className="text-[10px] md:text-sm font-black text-gray-400 uppercase tracking-[0.2em] mb-4 md:mb-6">Split {getMonthName(viewMonth)}</h3>
-                <div className="h-40 md:h-48">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="lg:col-span-2 bg-white p-5 md:p-8 rounded-2xl md:rounded-[3rem] border shadow-sm"
+              >
+                <h3 className="text-[10px] md:text-sm font-black text-gray-400 uppercase tracking-[0.2em] mb-4 md:mb-8">Stunden-Entwicklung {viewYear}</h3>
+                <div className="h-[240px] md:h-[400px]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie data={splitData} cx="50%" cy="50%" innerRadius={50} outerRadius={70} paddingAngle={5} dataKey="value">
-                        {splitData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
+                    <BarChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                      <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} />
+                      <YAxis fontSize={10} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}h`} />
+                      <Tooltip cursor={{fill: '#f8fafc'}} contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}} />
+                      <Bar dataKey="hoursPrev" name="Vorjahr" fill="#e2e8f0" radius={[6, 6, 0, 0]} />
+                      <Bar dataKey="hours" name="Aktuell" fill="#0280c9" radius={[6, 6, 0, 0]} />
+                    </BarChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="grid grid-cols-2 gap-2 mt-4">
-                  {splitData.map(s => (
-                    <div key={s.name} className="flex items-center space-x-2 bg-gray-50 p-2 rounded-xl">
-                      <div className="w-2 h-2 rounded-full" style={{backgroundColor: s.color}}></div>
-                      <span className="text-[10px] font-bold text-gray-600 truncate">{s.name}</span>
+              </motion.div>
+
+              <div className="space-y-6">
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  className={`p-5 md:p-8 rounded-2xl md:rounded-[3rem] border transition-all duration-700 ${cursumStats.isOver ? 'bg-red-50 border-red-200 shadow-xl shadow-red-100' : 'bg-white border-gray-100 shadow-sm'}`}
+                >
+                  <div className="flex justify-between items-start mb-4 md:mb-6">
+                    <div className={`p-3 rounded-2xl ${cursumStats.isOver ? 'bg-red-500 text-white shadow-lg' : 'bg-gray-50 text-gray-400'}`}>
+                      <Target className="w-5 h-5" />
                     </div>
-                  ))}
+                    <div className="text-right">
+                      <p className={`text-[10px] font-black uppercase tracking-widest ${cursumStats.isOver ? 'text-red-400' : 'text-gray-400'}`}>Cursum AG</p>
+                      <p className={`text-sm font-black ${cursumStats.isOver ? 'text-red-900' : 'text-gray-900'}`}>{cursumStats.hours.toFixed(1)} / 6.0 h</p>
+                    </div>
+                  </div>
+                  
+                  <div className="mb-4 md:mb-4">
+                    <p className={`text-[10px] md:text-xs font-bold mb-1 ${cursumStats.isOver ? 'text-red-600' : 'text-gray-400'}`}>
+                      {cursumStats.isOver ? 'Budget überschritten!' : 'Verbleibend'}
+                    </p>
+                    <div className="flex items-baseline space-x-2">
+                      <span className={`text-4xl md:text-5xl font-black tracking-tighter ${cursumStats.isOver ? 'text-red-600' : 'text-brand-500'}`}>{cursumStats.remaining.toFixed(1)}</span>
+                      <span className="text-xl font-bold text-gray-300">h</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full rounded-full transition-all duration-1000 ${cursumStats.isOver ? 'bg-red-500' : 'bg-brand-500'}`} 
+                        style={{ width: `${cursumStats.progress}%` }}
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+
+                <div className="bg-white p-5 md:p-8 rounded-2xl md:rounded-[3rem] border shadow-sm">
+                  <h3 className="text-[10px] md:text-sm font-black text-gray-400 uppercase tracking-[0.2em] mb-4 md:mb-6">Split {getMonthName(viewMonth)}</h3>
+                  <div className="h-40 md:h-48">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={splitData} cx="50%" cy="50%" innerRadius={50} outerRadius={70} paddingAngle={5} dataKey="value">
+                          {splitData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 mt-4">
+                    {splitData.map(s => (
+                      <div key={s.name} className="flex items-center space-x-2 bg-gray-50 p-2 rounded-xl">
+                        <div className="w-2 h-2 rounded-full" style={{backgroundColor: s.color}}></div>
+                        <span className="text-[10px] font-bold text-gray-600 truncate">{s.name}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
-          {/* Finance Hero Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-6">
-            <div className="lg:col-span-2 bg-emerald-600 p-6 md:p-10 rounded-2xl md:rounded-[3rem] text-white shadow-2xl shadow-emerald-100 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
-              <div className="relative z-10">
-                  <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] opacity-70 mb-1 md:mb-2">Netto Einnahmen {getMonthName(viewMonth)} {viewYear}</p>
-                  <h2 className="text-3xl sm:text-6xl font-black tracking-tighter mb-2 md:mb-4">{formatCurrency(stats.netMonth)}</h2>
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center text-xs font-black px-3 py-1.5 rounded-xl bg-white/20 backdrop-blur-md">
-                      Basierend auf {stats.hoursMonth.toFixed(1)}h total
+          </motion.div>
+        ) : (
+          <motion.div
+            key="finances"
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+            exit={{ opacity: 0, x: -10 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-6 md:space-y-8"
+          >
+            {/* Finance Hero Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-6">
+              <motion.div 
+                variants={itemVariants}
+                whileHover={{ scale: 1.01 }}
+                className="lg:col-span-2 bg-emerald-600 p-6 md:p-10 rounded-2xl md:rounded-[3rem] text-white shadow-2xl shadow-emerald-100 relative overflow-hidden group"
+              >
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+                <div className="relative z-10">
+                    <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] opacity-70 mb-1 md:mb-2">Netto Einnahmen {getMonthName(viewMonth)} {viewYear}</p>
+                    <h2 className="text-3xl sm:text-6xl font-black tracking-tighter mb-2 md:mb-4">{formatCurrency(stats.netMonth)}</h2>
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center text-xs font-black px-3 py-1.5 rounded-xl bg-white/20 backdrop-blur-md">
+                        Basierend auf {stats.hoursMonth.toFixed(1)}h total
+                      </div>
                     </div>
+                </div>
+              </motion.div>
+
+              {/* Wochen-Einnahmen Block */}
+              <motion.div 
+                variants={itemVariants}
+                whileHover={{ y: -5 }}
+                className={`bg-white p-6 md:p-10 rounded-2xl md:rounded-[3rem] border shadow-xl flex flex-col justify-center relative overflow-hidden group transition-all duration-700 ${!isCurrentView ? 'blur-md opacity-50 grayscale pointer-events-none scale-95' : ''}`}
+              >
+                {!isCurrentView && (
+                  <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/10 backdrop-blur-xs">
+                    <span className="bg-gray-900 text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-xl">Live-Modus inaktiv</span>
                   </div>
-              </div>
+                )}
+                <p className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Diese Woche (Live)</p>
+                <h3 className="text-4xl font-black text-gray-900 tracking-tight mb-2">{formatCurrency(stats.netWeek)}</h3>
+                <div className="flex items-center justify-between">
+                    <p className="text-xs font-bold text-emerald-600 flex items-center">
+                      <ArrowRight className="w-3 h-3 mr-1" /> {stats.hoursWeek.toFixed(1)}h erfasst
+                    </p>
+                    {stats.weekComparison !== 0 && (
+                      <div className={`text-[10px] font-black flex items-center ${stats.weekComparison > 0 ? 'text-emerald-500' : 'text-red-400'}`}>
+                        {stats.weekComparison > 0 ? <ArrowUpRight className="w-3 h-3 mr-0.5" /> : <ArrowDownRight className="w-3 h-3 mr-0.5" />}
+                        {Math.abs(stats.weekComparison).toFixed(1)}% vs. Vorwoche
+                      </div>
+                    )}
+                </div>
+              </motion.div>
             </div>
 
-            {/* Wochen-Einnahmen Block */}
-            <div className={`bg-white p-6 md:p-10 rounded-2xl md:rounded-[3rem] border shadow-xl flex flex-col justify-center relative overflow-hidden group transition-all duration-700 ${!isCurrentView ? 'blur-md opacity-50 grayscale pointer-events-none scale-95' : ''}`}>
-               {!isCurrentView && (
-                 <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/10 backdrop-blur-xs">
-                   <span className="bg-gray-900 text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-xl">Live-Modus inaktiv</span>
-                 </div>
-               )}
-               <p className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Diese Woche (Live)</p>
-               <h3 className="text-4xl font-black text-gray-900 tracking-tight mb-2">{formatCurrency(stats.netWeek)}</h3>
-               <div className="flex items-center justify-between">
-                  <p className="text-xs font-bold text-emerald-600 flex items-center">
-                    <ArrowRight className="w-3 h-3 mr-1" /> {stats.hoursWeek.toFixed(1)}h erfasst
-                  </p>
-                  {stats.weekComparison !== 0 && (
-                    <div className={`text-[10px] font-black flex items-center ${stats.weekComparison > 0 ? 'text-emerald-500' : 'text-red-400'}`}>
-                      {stats.weekComparison > 0 ? <ArrowUpRight className="w-3 h-3 mr-0.5" /> : <ArrowDownRight className="w-3 h-3 mr-0.5" />}
-                      {Math.abs(stats.weekComparison).toFixed(1)}% vs. Vorwoche
-                    </div>
-                  )}
-               </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 bg-white p-5 md:p-8 rounded-2xl md:rounded-[3rem] border shadow-sm">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <motion.div 
+                variants={itemVariants}
+                className="lg:col-span-2 bg-white p-5 md:p-8 rounded-2xl md:rounded-[3rem] border shadow-sm"
+              >
               <h3 className="text-[10px] md:text-sm font-black text-gray-400 uppercase tracking-[0.2em] mb-4 md:mb-8">Einnahmen-Verlauf {getMonthName(viewMonth)}</h3>
               <div className="h-[200px] md:h-[350px]">
                 <ResponsiveContainer width="100%" height="100%">
@@ -441,9 +526,12 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage }) => {
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
-            </div>
+              </motion.div>
 
-            <div className="bg-gray-50 p-4 md:p-8 rounded-xl md:rounded-[3rem] border border-gray-100 space-y-4 md:space-y-8 h-fit">
+              <motion.div 
+                variants={itemVariants}
+                className="bg-gray-50 p-4 md:p-8 rounded-xl md:rounded-[3rem] border border-gray-100 space-y-4 md:space-y-8 h-fit"
+              >
                <div className="space-y-6">
                   <div className="flex justify-between items-center mb-2">
                     <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] flex items-center">
@@ -501,10 +589,11 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage }) => {
                     <span className="text-sm font-black text-white">{formatCurrency(wageInfo.netRate)}</span>
                   </div>
                </div>
+              </motion.div>
             </div>
-          </div>
-        </div>
+          </motion.div>
       )}
+    </AnimatePresence>
     </div>
   );
 };
@@ -521,7 +610,11 @@ const PensumCard = ({ label, percent, hours, capacity, isOutOfContext }: { label
       : 'text-slate-600 border-slate-100 bg-slate-50/30';
 
   return (
-    <div className={`p-5 md:p-6 rounded-2xl md:rounded-[2rem] border shadow-sm transition-all duration-700 relative overflow-hidden group hover:shadow-md ${colorClass} ${isOutOfContext ? 'blur-md opacity-50 grayscale pointer-events-none scale-95' : ''}`}>
+    <motion.div 
+      whileHover={{ scale: 1.02, y: -5 }}
+      whileTap={{ scale: 0.98 }}
+      className={`p-5 md:p-6 rounded-2xl md:rounded-[2rem] border shadow-sm transition-all duration-700 relative overflow-hidden group hover:shadow-md ${colorClass} ${isOutOfContext ? 'blur-md opacity-50 grayscale pointer-events-none scale-95' : ''}`}
+    >
       {isOutOfContext && (
         <div className="absolute inset-0 z-10 bg-white/20 flex items-center justify-center">
            <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 bg-white/80 px-2 py-1 rounded shadow-sm">Live-Statistik</span>
@@ -551,7 +644,7 @@ const PensumCard = ({ label, percent, hours, capacity, isOutOfContext }: { label
           />
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -568,16 +661,23 @@ const StatCard = ({ title, value, pensum, subText, icon: Icon, color, isOutOfCon
   const isOver = pensum !== undefined && pensum > 50;
 
   return (
-    <div className={`bg-white p-5 md:p-6 rounded-2xl md:rounded-[2.5rem] border shadow-sm group hover:shadow-md transition-all duration-700 relative overflow-hidden ${isOutOfContext ? 'blur-md opacity-50 grayscale pointer-events-none scale-95' : ''}`}>
+    <motion.div 
+      whileHover={{ scale: 1.02, y: -5 }}
+      whileTap={{ scale: 0.98 }}
+      className={`bg-white p-5 md:p-6 rounded-2xl md:rounded-[2.5rem] border shadow-sm group hover:shadow-md transition-all duration-700 relative overflow-hidden ${isOutOfContext ? 'blur-md opacity-50 grayscale pointer-events-none scale-95' : ''}`}
+    >
       {isOutOfContext && (
         <div className="absolute inset-0 z-10 bg-white/10 flex items-center justify-center">
            <span className="text-[7px] font-black uppercase tracking-widest text-slate-400 bg-white/80 px-2 py-0.5 rounded shadow-sm">Inaktiv</span>
         </div>
       )}
       <div className="flex justify-between items-start mb-4 md:mb-4">
-        <div className={`p-3 rounded-2xl ${colorMap[color]} transition-transform group-hover:scale-110`}>
+        <motion.div 
+          whileHover={{ rotate: 15, scale: 1.2 }}
+          className={`p-3 rounded-2xl ${colorMap[color]} transition-transform group-hover:scale-110`}
+        >
           <Icon className="w-5 h-5" />
-        </div>
+        </motion.div>
         {pensum !== undefined && (
           <div className={`flex items-center text-[10px] font-black px-2.5 py-1 rounded-full border transition-colors ${
             isTarget ? 'bg-emerald-50 text-emerald-600 border-emerald-100 ring-2 ring-emerald-500/10' : 
@@ -608,7 +708,7 @@ const StatCard = ({ title, value, pensum, subText, icon: Icon, color, isOutOfCon
           />
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 

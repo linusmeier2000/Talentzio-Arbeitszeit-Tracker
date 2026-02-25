@@ -1,5 +1,6 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { TimeEntry, UserSettings } from '../types';
 import { formatDate, getWeekday, getMonthName } from '../utils';
 import { Calendar, Lock, Unlock, FileSpreadsheet, FileWarning, Printer, Download } from 'lucide-react';
@@ -94,10 +95,33 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
   const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
   const months = Array.from({ length: 12 }, (_, i) => i);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0 }
+  };
+
   return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-24 md:pb-20">
+    <motion.div 
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="max-w-5xl mx-auto space-y-6 pb-24 md:pb-20"
+    >
       {/* Steuerungs-Panel - no-print */}
-      <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-8 no-print">
+      <motion.div 
+        variants={itemVariants}
+        className="bg-white p-6 rounded-3xl border shadow-sm space-y-8 no-print"
+      >
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-brand-50 rounded-xl"><Calendar className="w-5 h-5 text-brand-500" /></div>
@@ -172,10 +196,14 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
             <Download className="w-3 h-3 mr-2" /> CSV Datenexport
           </button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Das Dokument (Print-optimiert) */}
-      <div id="print-area" className="bg-white rounded-[2rem] border shadow-sm overflow-hidden print:m-0 print:p-0 print:border-none print:shadow-none">
+      <motion.div 
+        variants={itemVariants}
+        id="print-area" 
+        className="bg-white rounded-[2rem] border shadow-sm overflow-hidden print:m-0 print:p-0 print:border-none print:shadow-none"
+      >
         <div className="p-4 bg-gray-50 border-b no-print flex justify-between items-center text-[10px] font-black text-gray-400 uppercase tracking-widest">
           Druckvorschau
         </div>
@@ -252,7 +280,7 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
              <p className="text-xl font-black text-gray-900">Keine Einträge verfügbar</p>
           </div>
         )}
-      </div>
+      </motion.div>
 
       <style>{`
         @media print {
@@ -274,7 +302,7 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
           .text-brand-700 { color: #025283 !important; }
         }
       `}</style>
-    </div>
+    </motion.div>
   );
 };
 

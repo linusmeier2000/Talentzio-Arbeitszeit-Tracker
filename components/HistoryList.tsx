@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { TimeEntry } from '../types';
 import { formatDate, getWeekday } from '../utils';
 import { Edit2, Search, Lock, MessageSquare, Trash2, AlertTriangle, X } from 'lucide-react';
@@ -13,6 +14,21 @@ interface HistoryListProps {
 const HistoryList: React.FC<HistoryListProps> = ({ entries, onEdit, onDelete }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.05
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0 }
+  };
 
   const filteredEntries = entries.filter(e => {
     const matchesSearch = (e.note || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -50,9 +66,21 @@ const HistoryList: React.FC<HistoryListProps> = ({ entries, onEdit, onDelete }) 
                 <th className="px-6 py-4 text-right">Aktion</th>
               </tr>
             </thead>
-            <tbody className="divide-y">
-              {filteredEntries.map((entry) => (
-                <tr key={entry.id} className="hover:bg-brand-50/30 transition-colors group/row">
+              <motion.tbody 
+                variants={containerVariants}
+                initial="hidden"
+                animate="show"
+                className="divide-y"
+              >
+                <AnimatePresence mode="popLayout">
+                  {filteredEntries.map((entry) => (
+                    <motion.tr 
+                      key={entry.id}
+                      layout
+                      variants={itemVariants}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="hover:bg-brand-50/30 transition-colors group/row"
+                    >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="font-semibold text-gray-900">{formatDate(entry.date)}</div>
                     <div className="text-xs text-gray-400">{getWeekday(entry.date)}</div>
@@ -103,33 +131,50 @@ const HistoryList: React.FC<HistoryListProps> = ({ entries, onEdit, onDelete }) 
                       </div>
                     ) : (
                       <div className="flex items-center justify-end space-x-1">
-                        <button 
+                        <motion.button 
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
                           onClick={() => onEdit(entry)}
-                          className="p-2 text-brand-600 hover:bg-brand-100 rounded-lg transition-all transform hover:scale-110 active:scale-95"
+                          className="p-2 text-brand-600 hover:bg-brand-100 rounded-lg transition-all"
                           title="Bearbeiten"
                         >
                           <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button 
+                        </motion.button>
+                        <motion.button 
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
                           onClick={() => setDeleteId(entry.id)}
-                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all transform hover:scale-110 active:scale-95"
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all"
                           title="Löschen"
                         >
                           <Trash2 className="w-4 h-4" />
-                        </button>
+                        </motion.button>
                       </div>
                     )}
                   </td>
-                </tr>
+                </motion.tr>
               ))}
-            </tbody>
+              </AnimatePresence>
+            </motion.tbody>
           </table>
         </div>
 
         {/* Mobile Card View */}
-        <div className="md:hidden divide-y">
-          {filteredEntries.map((entry) => (
-            <div key={entry.id} className="p-4 space-y-3 hover:bg-gray-50 transition-colors">
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+          className="md:hidden divide-y"
+        >
+          <AnimatePresence mode="popLayout">
+            {filteredEntries.map((entry) => (
+              <motion.div 
+                key={entry.id}
+                layout
+                variants={itemVariants}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="p-4 space-y-3 hover:bg-gray-50 transition-colors"
+              >
               <div className="flex justify-between items-start">
                 <div>
                   <div className="font-bold text-gray-900">{formatDate(entry.date)}</div>
@@ -170,9 +215,10 @@ const HistoryList: React.FC<HistoryListProps> = ({ entries, onEdit, onDelete }) 
                 <SplitTag label="Bau" hours={entry.splits.bau} bgColor="#ff501a" textColor="text-white" fullName="Bau AG" comment={entry.comments.bau} />
                 <SplitTag label="Cursum" hours={entry.splits.cursum} bgColor="#4bf6bb" textColor="text-[#10183c]" fullName="Cursum AG" comment={entry.comments.cursum} />
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </AnimatePresence>
+      </motion.div>
 
         {filteredEntries.length === 0 && (
           <div className="px-6 py-12 text-center text-gray-400 italic text-sm">

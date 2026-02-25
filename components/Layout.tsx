@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   LayoutDashboard, 
   Clock, 
@@ -36,18 +37,27 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, noti
         
         <nav className="flex-1 mt-4">
           {menuItems.map((item) => (
-            <button
+            <motion.button
               key={item.id}
+              whileHover={{ x: 4 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center px-6 py-4 transition-all ${
+              className={`w-full flex items-center px-6 py-4 transition-all relative ${
                 activeTab === item.id 
-                  ? 'bg-brand-500 text-white shadow-lg z-10' 
+                  ? 'text-white z-10' 
                   : 'text-slate-400 hover:bg-slate-800 hover:text-white'
               }`}
             >
+              {activeTab === item.id && (
+                <motion.div 
+                  layoutId="activeTabDesktop"
+                  className="absolute inset-0 bg-brand-500 shadow-lg -z-10"
+                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                />
+              )}
               <item.icon className="w-5 h-5 mr-3" />
               <span className="font-bold text-sm tracking-tight">{item.label}</span>
-            </button>
+            </motion.button>
           ))}
         </nav>
 
@@ -79,16 +89,24 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, noti
         {/* Navigation - Mobile */}
         <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t flex justify-around p-2 z-50 no-print">
           {menuItems.map((item) => (
-            <button
+            <motion.button
               key={item.id}
+              whileTap={{ scale: 0.9 }}
               onClick={() => setActiveTab(item.id)}
-              className={`flex flex-col items-center p-2 rounded-xl transition-all ${
-                activeTab === item.id ? 'text-brand-500 bg-brand-50' : 'text-gray-400'
+              className={`flex flex-col items-center p-2 rounded-xl transition-all relative ${
+                activeTab === item.id ? 'text-brand-500' : 'text-gray-400'
               }`}
             >
+              {activeTab === item.id && (
+                <motion.div 
+                  layoutId="activeTabMobile"
+                  className="absolute inset-0 bg-brand-50 rounded-xl -z-10"
+                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                />
+              )}
               <item.icon className="w-5 h-5" />
               <span className="text-[8px] mt-1 font-black uppercase tracking-widest">{item.label}</span>
-            </button>
+            </motion.button>
           ))}
         </nav>
       </main>

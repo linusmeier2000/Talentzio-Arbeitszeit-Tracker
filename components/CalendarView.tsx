@@ -112,10 +112,9 @@ const CalendarView: React.FC<CalendarViewProps> = ({ entries, viewMonth, viewYea
               <div key={day} className="relative flex items-center justify-center h-10 md:h-14 group/day">
                 {hours > 0 && (
                   <div 
-                    className="absolute rounded-full bg-brand-500/40 border border-brand-400/30 transition-all duration-500 group-hover/day:bg-brand-500/60 group-hover/day:scale-110"
+                    className="absolute rounded-full bg-brand-500/40 border border-brand-400/30 transition-all duration-500 group-hover/day:bg-brand-500/60 group-hover/day:scale-110 aspect-square"
                     style={{ 
-                      width: `${sizePercent}%`, 
-                      height: `${sizePercent}%`,
+                      width: `${sizePercent}%`,
                     }}
                   />
                 )}

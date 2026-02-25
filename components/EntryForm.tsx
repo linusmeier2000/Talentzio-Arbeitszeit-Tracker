@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { TimeEntry, CompanySplit, CompanyComments } from '../types';
 import TimePicker from './TimePicker';
 import { 
@@ -132,9 +133,14 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
     if (step === 'basis') return !!formData.date;
     if (step === 'times') {
       // Valid if: (StartM & Lunch) OR (StartN & End) OR (StartM & End)
+      // NEW: Also valid if only Morning is filled (StartM & Lunch) and Afternoon is empty
       const hasMorning = !!formData.startM && !!formData.lunch;
       const hasAfternoon = !!formData.startN && !!formData.end;
       const hasDirect = !!formData.startM && !!formData.end;
+      
+      // If Nachmittag is empty, we don't strictly need Ende if Morning is complete
+      if (hasMorning && !formData.startN) return true;
+      
       return hasMorning || hasAfternoon || hasDirect;
     }
     if (step === 'splits') {
@@ -200,6 +206,12 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
     }
   };
 
+  const stepVariants = {
+    initial: { opacity: 0, x: 20, scale: 0.95 },
+    animate: { opacity: 1, x: 0, scale: 1 },
+    exit: { opacity: 0, x: -20, scale: 0.95 }
+  };
+
   return (
     <div className="bg-white rounded-xl md:rounded-[2.5rem] shadow-2xl border border-gray-100 overflow-hidden max-w-2xl mx-auto flex flex-col min-h-[400px] md:min-h-[600px]">
       {/* Header with Progress */}
@@ -233,92 +245,126 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
       {/* Content Area */}
       <div className="flex-1 p-4 md:p-8 overflow-y-auto">
         <form id="entry-form" onSubmit={handleSubmit} className="h-full flex flex-col">
-          {currentStep === 'basis' && (
-            <div className="space-y-4 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-               <div className="text-center space-y-1">
-                 <h3 className="text-lg md:text-2xl font-black text-gray-900">Datum wählen</h3>
-                 <p className="text-[10px] md:text-sm text-gray-400 font-medium">Wann war dein Einsatz?</p>
-               </div>
-               <div className="space-y-3 md:space-y-6 pt-1 md:pt-4">
-                 <div className="space-y-1.5 md:space-y-3">
-                    <label className="text-[9px] md:text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Arbeitsdatum</label>
-                    <input 
-                      type="date" 
-                      value={formData.date} 
-                      onChange={(e) => handleChange('date', e.target.value)}
-                      className="w-full px-4 md:px-6 py-3 md:py-5 bg-gray-50 border-none rounded-xl md:rounded-3xl focus:ring-4 focus:ring-brand-100 outline-none font-bold text-sm md:text-lg"
-                    />
+          <AnimatePresence mode="wait">
+            {currentStep === 'basis' && (
+              <motion.div 
+                key="basis"
+                variants={stepVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                className="space-y-4 md:space-y-8"
+              >
+                 <div className="text-center space-y-1">
+                   <h3 className="text-lg md:text-2xl font-black text-gray-900">Datum wählen</h3>
+                   <p className="text-[10px] md:text-sm text-gray-400 font-medium">Wann war dein Einsatz?</p>
                  </div>
-               </div>
-            </div>
-          )}
+                 <div className="space-y-3 md:space-y-6 pt-1 md:pt-4">
+                   <div className="space-y-1.5 md:space-y-3">
+                      <label className="text-[9px] md:text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Arbeitsdatum</label>
+                      <input 
+                        type="date" 
+                        value={formData.date} 
+                        onChange={(e) => handleChange('date', e.target.value)}
+                        className="w-full px-4 md:px-6 py-3 md:py-5 bg-gray-50 border-none rounded-xl md:rounded-3xl focus:ring-4 focus:ring-brand-100 outline-none font-bold text-sm md:text-lg"
+                      />
+                   </div>
+                 </div>
+              </motion.div>
+            )}
 
-          {currentStep === 'times' && (
-            <div className="space-y-4 md:space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-                <div className="text-center space-y-1">
-                  <h3 className="text-lg md:text-2xl font-black text-gray-900">Zeiten erfassen</h3>
-                  <p className="text-[10px] md:text-sm text-gray-400 font-medium">Trage deine Präsenzzeiten ein.</p>
-                </div>
-               <div className="bg-brand-500 p-4 md:p-6 rounded-xl md:rounded-[2rem] text-white flex justify-between items-center shadow-lg shadow-brand-200 mb-1 md:mb-4">
-                  <div>
-                    <p className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-brand-200">Total</p>
-                    <p className="text-xl md:text-3xl font-black">{formData.totalHours?.toFixed(2)} h</p>
+            {currentStep === 'times' && (
+              <motion.div 
+                key="times"
+                variants={stepVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                className="space-y-4 md:space-y-8"
+              >
+                  <div className="text-center space-y-1">
+                    <h3 className="text-lg md:text-2xl font-black text-gray-900">Zeiten erfassen</h3>
+                    <p className="text-[10px] md:text-sm text-gray-400 font-medium">Trage deine Präsenzzeiten ein.</p>
                   </div>
-                  <Clock className="w-5 h-5 md:w-8 md:h-8 opacity-40" />
-               </div>
-               <div className="grid grid-cols-2 gap-2 md:gap-4">
-                 <TimeInputLarge label="Morgens" value={formData.startM!} onChange={(v) => handleChange('startM', v)} icon="☀️" />
-                 <TimeInputLarge label="Mittag" value={formData.lunch!} onChange={(v) => handleChange('lunch', v)} icon="🥗" />
-                 <TimeInputLarge label="Nachmittag" value={formData.startN!} onChange={(v) => handleChange('startN', v)} placeholder="Opt." icon="☕" />
-                 <TimeInputLarge label="Ende" value={formData.end!} onChange={(v) => handleChange('end', v)} icon="🌙" />
-               </div>
-            </div>
-          )}
-
-          {currentStep === 'splits' && (
-            <div className="space-y-4 md:space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-               <div className="text-center space-y-1">
-                 <h3 className="text-lg md:text-2xl font-black text-gray-900">Verteilung</h3>
-                 <p className="text-[10px] md:text-sm text-gray-400 font-medium">Verteile {formData.totalHours?.toFixed(2)}h.</p>
-               </div>
-               <div className="space-y-2 md:space-y-4">
-                  <SplitInputStep label={COMPANIES.MED} hours={formData.splits?.med!} comment={formData.comments?.med!} onHourChange={(v) => handleSplitChange('med', v)} onCommentChange={(v) => handleCommentChange('med', v)} onGenerate={() => triggerAiComment('med', COMPANIES.MED)} isLoading={aiLoading.med} showRequired={!formData.id?.startsWith('import-')} />
-                  <SplitInputStep label={COMPANIES.BAU} hours={formData.splits?.bau!} comment={formData.comments?.bau!} onHourChange={(v) => handleSplitChange('bau', v)} onCommentChange={(v) => handleCommentChange('bau', v)} onGenerate={() => triggerAiComment('bau', COMPANIES.BAU)} isLoading={aiLoading.bau} showRequired={!formData.id?.startsWith('import-')} />
-                  <SplitInputStep label={COMPANIES.CURSUM} hours={formData.splits?.cursum!} comment={formData.comments?.cursum!} onHourChange={(v) => handleSplitChange('cursum', v)} onCommentChange={(v) => handleCommentChange('cursum', v)} onGenerate={() => triggerAiComment('cursum', COMPANIES.CURSUM)} isLoading={aiLoading.cursum} showRequired={!formData.id?.startsWith('import-')} />
-                  <div className="p-4 md:p-6 bg-slate-900 rounded-xl md:rounded-3xl flex justify-between items-center text-white shadow-lg">
+                 <div className="bg-brand-500 p-4 md:p-6 rounded-xl md:rounded-[2rem] text-white flex justify-between items-center shadow-lg shadow-brand-200 mb-1 md:mb-4">
                     <div>
-                      <p className="font-black text-xs md:text-base">Rest: {COMPANIES.MAIN}</p>
-                      <p className="text-[8px] md:text-[10px] text-slate-400 font-bold uppercase tracking-widest">Auto-verbucht</p>
+                      <p className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-brand-200">Total</p>
+                      <p className="text-xl md:text-3xl font-black">{formData.totalHours?.toFixed(2)} h</p>
                     </div>
-                    <div className="text-lg md:text-2xl font-black text-brand-400">{formData.splits?.talentzio.toFixed(2)} h</div>
-                  </div>
-               </div>
-            </div>
-          )}
+                    <Clock className="w-5 h-5 md:w-8 md:h-8 opacity-40" />
+                 </div>
+                 <div className="grid grid-cols-2 gap-2 md:gap-4">
+                   <TimeInputLarge label="Morgens" value={formData.startM!} onChange={(v) => handleChange('startM', v)} icon="☀️" />
+                   <TimeInputLarge label="Mittag" value={formData.lunch!} onChange={(v) => handleChange('lunch', v)} icon="🥗" />
+                   <TimeInputLarge label="Nachmittag" value={formData.startN!} onChange={(v) => handleChange('startN', v)} placeholder="Opt." icon="☕" />
+                   <TimeInputLarge label="Ende" value={formData.end!} onChange={(v) => handleChange('end', v)} icon="🌙" placeholder={!formData.startN ? "Opt." : undefined} />
+                 </div>
+              </motion.div>
+            )}
 
-          {currentStep === 'final' && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-               <div className="text-center space-y-2">
-                 <h3 className="text-2xl font-black text-gray-900">Fast fertig!</h3>
-                 <p className="text-sm text-gray-400 font-medium">Gibt es noch etwas Wichtiges zu diesem Tag?</p>
-               </div>
-               <div className="space-y-4">
-                  <textarea 
-                    value={formData.note}
-                    onChange={(e) => handleChange('note', e.target.value)}
-                    className="w-full px-6 py-6 bg-gray-50 border-none rounded-3xl focus:ring-4 focus:ring-brand-100 outline-none h-40 resize-none font-medium text-lg"
-                    placeholder="Allgemeine Notiz zum Tag (optional)..."
-                  />
-                  <div className="p-6 bg-emerald-50 rounded-3xl border border-emerald-100 flex items-center">
-                    <div className="p-3 bg-white rounded-2xl shadow-sm mr-4 text-emerald-600"><CheckCircle2 className="w-6 h-6" /></div>
-                    <div>
-                      <p className="font-black text-emerald-900">Eintrag bereit</p>
-                      <p className="text-xs text-emerald-700 font-medium">Alle Pflichtfelder für {formData.totalHours?.toFixed(2)}h sind ausgefüllt.</p>
+            {currentStep === 'splits' && (
+              <motion.div 
+                key="splits"
+                variants={stepVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                className="space-y-4 md:space-y-8"
+              >
+                 <div className="text-center space-y-1">
+                   <h3 className="text-lg md:text-2xl font-black text-gray-900">Verteilung</h3>
+                   <p className="text-[10px] md:text-sm text-gray-400 font-medium">Verteile {formData.totalHours?.toFixed(2)}h.</p>
+                 </div>
+                 <div className="space-y-2 md:space-y-4">
+                    <SplitInputStep label={COMPANIES.MED} hours={formData.splits?.med!} comment={formData.comments?.med!} onHourChange={(v) => handleSplitChange('med', v)} onCommentChange={(v) => handleCommentChange('med', v)} onGenerate={() => triggerAiComment('med', COMPANIES.MED)} isLoading={aiLoading.med} showRequired={!formData.id?.startsWith('import-')} />
+                    <SplitInputStep label={COMPANIES.BAU} hours={formData.splits?.bau!} comment={formData.comments?.bau!} onHourChange={(v) => handleSplitChange('bau', v)} onCommentChange={(v) => handleCommentChange('bau', v)} onGenerate={() => triggerAiComment('bau', COMPANIES.BAU)} isLoading={aiLoading.bau} showRequired={!formData.id?.startsWith('import-')} />
+                    <SplitInputStep label={COMPANIES.CURSUM} hours={formData.splits?.cursum!} comment={formData.comments?.cursum!} onHourChange={(v) => handleSplitChange('cursum', v)} onCommentChange={(v) => handleCommentChange('cursum', v)} onGenerate={() => triggerAiComment('cursum', COMPANIES.CURSUM)} isLoading={aiLoading.cursum} showRequired={!formData.id?.startsWith('import-')} />
+                    <div className="p-4 md:p-6 bg-slate-900 rounded-xl md:rounded-3xl flex justify-between items-center text-white shadow-lg">
+                      <div>
+                        <p className="font-black text-xs md:text-base">Rest: {COMPANIES.MAIN}</p>
+                        <p className="text-[8px] md:text-[10px] text-slate-400 font-bold uppercase tracking-widest">Auto-verbucht</p>
+                      </div>
+                      <div className="text-lg md:text-2xl font-black text-brand-400">{formData.splits?.talentzio.toFixed(2)} h</div>
                     </div>
-                  </div>
-               </div>
-            </div>
-          )}
+                 </div>
+              </motion.div>
+            )}
+
+            {currentStep === 'final' && (
+              <motion.div 
+                key="final"
+                variants={stepVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                className="space-y-8"
+              >
+                 <div className="text-center space-y-2">
+                   <h3 className="text-2xl font-black text-gray-900">Fast fertig!</h3>
+                   <p className="text-sm text-gray-400 font-medium">Gibt es noch etwas Wichtiges zu diesem Tag?</p>
+                 </div>
+                 <div className="space-y-4">
+                    <textarea 
+                      value={formData.note}
+                      onChange={(e) => handleChange('note', e.target.value)}
+                      className="w-full px-6 py-6 bg-gray-50 border-none rounded-3xl focus:ring-4 focus:ring-brand-100 outline-none h-40 resize-none font-medium text-lg"
+                      placeholder="Allgemeine Notiz zum Tag (optional)..."
+                    />
+                    <div className="p-6 bg-emerald-50 rounded-3xl border border-emerald-100 flex items-center">
+                      <div className="p-3 bg-white rounded-2xl shadow-sm mr-4 text-emerald-600"><CheckCircle2 className="w-6 h-6" /></div>
+                      <div>
+                        <p className="font-black text-emerald-900">Eintrag bereit</p>
+                        <p className="text-xs text-emerald-700 font-medium">Alle Pflichtfelder für {formData.totalHours?.toFixed(2)}h sind ausgefüllt.</p>
+                      </div>
+                    </div>
+                 </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </form>
       </div>
 

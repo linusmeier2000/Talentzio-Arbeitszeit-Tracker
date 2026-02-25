@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import Layout from './components/Layout';
 import Dashboard from './components/Dashboard';
 import EntryForm from './components/EntryForm';
@@ -231,6 +232,12 @@ const App: React.FC = () => {
     setAiLoading(prev => ({ ...prev, [company]: false }));
   };
 
+  const pageVariants = {
+    initial: { opacity: 0, scale: 0.98, y: 10 },
+    animate: { opacity: 1, scale: 1, y: 0 },
+    exit: { opacity: 0, scale: 1.02, y: -10 }
+  };
+
   const renderContent = () => {
     if (isLoading) return (
       <div className="flex flex-col items-center justify-center h-[60vh] space-y-4">
@@ -239,15 +246,52 @@ const App: React.FC = () => {
       </div>
     );
 
-    if (showForm) return <EntryForm initialData={editingEntry || undefined} entries={entries} onSave={handleSaveEntry} onCancel={() => { setShowForm(false); setEditingEntry(null); }} onDelete={handleDeleteEntry} />;
+    if (showForm) return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 1.1 }}
+      >
+        <EntryForm 
+          initialData={editingEntry || undefined} 
+          entries={entries} 
+          onSave={handleSaveEntry} 
+          onCancel={() => { setShowForm(false); setEditingEntry(null); }} 
+          onDelete={handleDeleteEntry} 
+        />
+      </motion.div>
+    );
 
     switch (activeTab) {
-      case 'dashboard': return <Dashboard entries={entries} hourlyWage={settings.wages[0].rate} />;
+      case 'dashboard': return (
+        <motion.div
+          key="dashboard"
+          variants={pageVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <Dashboard entries={entries} hourlyWage={settings.wages[0].rate} />
+        </motion.div>
+      );
       case 'track': return (
-        <div className="flex flex-col space-y-4 md:space-y-12 py-4 md:py-12 no-print max-w-6xl mx-auto px-0.5 md:px-4">
+        <motion.div
+          key="track"
+          variants={pageVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="flex flex-col space-y-4 md:space-y-12 py-4 md:py-12 no-print max-w-6xl mx-auto px-0.5 md:px-4"
+        >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-10 items-stretch">
             {/* Box 1: Neuer Eintrag */}
-            <div className="bg-white p-6 md:p-12 rounded-xl md:rounded-[3rem] border border-gray-100 shadow-xl shadow-brand-100/10 text-center flex flex-col justify-center transition-all hover:scale-[1.01]">
+            <motion.div 
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+              className="bg-white p-6 md:p-12 rounded-xl md:rounded-[3rem] border border-gray-100 shadow-xl shadow-brand-100/10 text-center flex flex-col justify-center transition-all"
+            >
               <div className="w-12 h-12 md:w-24 md:h-24 bg-brand-50 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-8 text-brand-600 shadow-inner">
                 <PlusCircle className="w-6 h-6 md:w-12 md:h-12" />
               </div>
@@ -260,10 +304,15 @@ const App: React.FC = () => {
                 <PlusCircle className="w-4 h-4 md:w-6 md:h-6" />
                 <span>Jetzt starten</span>
               </button>
-            </div>
+            </motion.div>
 
             {/* Box 2: Heute im Blick - Luxury Mini-Editor */}
-            <div className="bg-white rounded-xl md:rounded-[3rem] border border-gray-100 shadow-xl shadow-emerald-100/10 relative overflow-hidden flex flex-col min-h-[400px] md:min-h-[600px] transition-all hover:scale-[1.01]">
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white rounded-xl md:rounded-[3rem] border border-gray-100 shadow-xl shadow-emerald-100/10 relative overflow-hidden flex flex-col min-h-[400px] md:min-h-[600px] transition-all"
+            >
               {/* Header Accent Bar */}
               <div className={`h-1 md:h-2 w-full transition-colors duration-500 ${quickEditStep === 'times' ? 'bg-emerald-500' : quickEditStep === 'splits' ? 'bg-brand-500' : 'bg-slate-800'}`} />
               
@@ -281,16 +330,6 @@ const App: React.FC = () => {
                         <p className="text-[8px] md:text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
                           {quickEditStep === 'times' ? 'Zeiten' : quickEditStep === 'splits' ? 'Split' : 'Notiz'}
                         </p>
-                        {quickEditStep === 'times' && (
-                          <button 
-                            onClick={() => setQuickEditData({...quickEditData, startM: '', lunch: '', startN: '', end: ''} as TimeEntry)}
-                            className="flex items-center space-x-1 text-[8px] md:text-[10px] font-black text-gray-300 hover:text-red-400 transition-colors uppercase tracking-widest"
-                            title="Zeiten leeren"
-                          >
-                            <Trash2 className="w-2.5 h-2.5" />
-                            <span>Leeren</span>
-                          </button>
-                        )}
                       </div>
                     </div>
                   </div>
@@ -311,7 +350,7 @@ const App: React.FC = () => {
                           <QuickInputLarge label="Beginn M" value={quickEditData.startM} onChange={v => setQuickEditData({...quickEditData, startM: v})} />
                           <QuickInputLarge label="Mittag" value={quickEditData.lunch} onChange={v => setQuickEditData({...quickEditData, lunch: v})} />
                           <QuickInputLarge label="Beginn N" value={quickEditData.startN} onChange={v => setQuickEditData({...quickEditData, startN: v})} />
-                          <QuickInputLarge label="Ende" value={quickEditData.end} onChange={v => setQuickEditData({...quickEditData, end: v})} />
+                          <QuickInputLarge label="Ende" value={quickEditData.end} onChange={v => setQuickEditData({...quickEditData, end: v})} placeholder={!quickEditData.startN ? "Opt." : undefined} />
                           <div className="col-span-2 mt-3 md:mt-8 p-4 md:p-6 bg-emerald-50/50 rounded-xl md:rounded-[2rem] flex justify-between items-center border border-emerald-100/50 group">
                             <div>
                               <span className="text-[8px] md:text-[10px] font-black text-emerald-800/60 uppercase tracking-widest block mb-0.5">Total</span>
@@ -392,7 +431,7 @@ const App: React.FC = () => {
                   </div>
                 )}
               </div>
-            </div>
+            </motion.div>
           </div>
 
           <div className="w-full">
@@ -407,26 +446,65 @@ const App: React.FC = () => {
               onDelete={handleDeleteEntry}
             />
           </div>
-        </div>
+        </motion.div>
       );
-      case 'history': return <HistoryList entries={entries} onEdit={(e) => { setEditingEntry(e); setShowForm(true); }} onDelete={handleDeleteEntry} />;
-      case 'export': return <ExportPanel entries={entries} settings={settings} onToggleLock={handleToggleLock} onUpdateExportDate={handleUpdateExportDate} />;
-      case 'settings': return <SettingsPanel settings={settings} setSettings={handleUpdateSettings} entries={entries} />;
+      case 'history': return (
+        <motion.div
+          key="history"
+          variants={pageVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <HistoryList entries={entries} onEdit={(e) => { setEditingEntry(e); setShowForm(true); }} onDelete={handleDeleteEntry} />
+        </motion.div>
+      );
+      case 'export': return (
+        <motion.div
+          key="export"
+          variants={pageVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <ExportPanel entries={entries} settings={settings} onToggleLock={handleToggleLock} onUpdateExportDate={handleUpdateExportDate} />
+        </motion.div>
+      );
+      case 'settings': return (
+        <motion.div
+          key="settings"
+          variants={pageVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <SettingsPanel settings={settings} setSettings={handleUpdateSettings} entries={entries} />
+        </motion.div>
+      );
       default: return <div>In Entwicklung...</div>;
     }
   };
 
   return (
     <Layout activeTab={activeTab} setActiveTab={setActiveTab} notifications={notifications}>
-      {renderContent()}
+      <AnimatePresence mode="wait">
+        {renderContent()}
+      </AnimatePresence>
       {!showForm && activeTab !== 'track' && (
-        <button 
+        <motion.button 
+          initial={{ scale: 0, rotate: -180 }}
+          animate={{ scale: 1, rotate: 0 }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
           onClick={() => setShowForm(true)} 
-          className="fixed bottom-24 right-3 md:bottom-12 md:right-12 w-12 h-12 md:w-20 md:h-20 bg-slate-900 text-white rounded-full shadow-[0_15px_30px_rgba(0,0,0,0.3)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-30 no-print" 
+          className="fixed bottom-24 right-3 md:bottom-12 md:right-12 w-12 h-12 md:w-20 md:h-20 bg-slate-900 text-white rounded-full shadow-[0_15px_30px_rgba(0,0,0,0.3)] flex items-center justify-center transition-all z-30 no-print" 
           title="Schnellerfassung"
         >
           <PlusCircle className="w-6 h-6 md:w-10 md:h-10" />
-        </button>
+        </motion.button>
       )}
     </Layout>
   );
@@ -434,7 +512,7 @@ const App: React.FC = () => {
 
 // --- Refined Quick Edit Components ---
 
-const QuickInputLarge = ({ label, value, onChange }: { label: string, value: string, onChange: (v: string) => void }) => (
+const QuickInputLarge = ({ label, value, onChange, placeholder }: { label: string, value: string, onChange: (v: string) => void, placeholder?: string }) => (
   <div className="space-y-3 group text-center relative">
     <div className="flex items-center justify-center space-x-2">
       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest group-focus-within:text-emerald-500 transition-colors">{label}</label>
@@ -452,6 +530,7 @@ const QuickInputLarge = ({ label, value, onChange }: { label: string, value: str
     <TimePicker 
       value={value} 
       onChange={onChange}
+      placeholder={placeholder}
     />
   </div>
 );
