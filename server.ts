@@ -19,6 +19,14 @@ async function startServer() {
   const schema = fs.readFileSync(path.join(__dirname, "schema.sql"), "utf8");
   db.exec(schema);
 
+  // Migration: Ensure isDraft column exists (for existing databases)
+  try {
+    db.prepare("ALTER TABLE entries ADD COLUMN isDraft INTEGER DEFAULT 0").run();
+    console.log("[DB] Added isDraft column to entries table");
+  } catch (e) {
+    // Column already exists or other error
+  }
+
   app.use(express.json());
 
   // Logging Middleware

@@ -28,7 +28,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, noti
     { id: 'settings', label: 'Einstellungen', icon: SettingsIcon },
   ];
 
-  const mobileMenuItems = menuItems;
+  const mobileMenuItems = menuItems.filter(item => item.id !== 'notifications');
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return (
