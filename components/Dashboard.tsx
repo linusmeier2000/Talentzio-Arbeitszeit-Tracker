@@ -28,9 +28,10 @@ interface DashboardProps {
   hourlyWage: number;
   notifications: any[];
   onMarkAsDone: (id: string) => void;
+  onPlanNextWeek: (dayIds: string[]) => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage, notifications, onMarkAsDone }) => {
+const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage, notifications, onMarkAsDone, onPlanNextWeek }) => {
   const now = new Date();
   const [viewMonth, setViewMonth] = useState(now.getMonth());
   const [viewYear, setViewYear] = useState(now.getFullYear());
@@ -157,6 +158,25 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage, notification
     };
   }, [entries, viewMonth, viewYear, wageInfo, now]);
 
+  const planningInfo = useMemo(() => {
+    const day = now.getDay();
+    const hour = now.getHours();
+    
+    // Window: Wednesday 08:00 to Sunday 22:00
+    const isInPlanningWindow = (day === 3 && hour >= 8) || day === 4 || day === 5 || day === 6 || (day === 0 && hour < 22);
+    
+    const nextMonday = new Date();
+    nextMonday.setDate(now.getDate() + ((1 + 7 - now.getDay()) % 7 || 7));
+    const nextMondayStr = nextMonday.toISOString().split('T')[0];
+    
+    const hasPlanned = entries.some(e => e.date >= nextMondayStr);
+    
+    return {
+      show: isInPlanningWindow && !hasPlanned,
+      nextMondayStr
+    };
+  }, [entries, now]);
+
   const dailyTrendData = useMemo(() => {
     const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
     const data = Array.from({ length: daysInMonth }, (_, i) => ({ day: i + 1, cumulative: 0 }));
@@ -265,6 +285,10 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage, notification
             transition={{ duration: 0.3 }}
             className="space-y-6 md:space-y-8"
           >
+            {planningInfo.show && (
+              <PlanningWidget onPlan={onPlanNextWeek} />
+            )}
+
             <CalendarView 
               entries={entries} 
               viewMonth={viewMonth} 
@@ -710,6 +734,71 @@ const StatCard = ({ title, value, pensum, subText, icon: Icon, color, isOutOfCon
           />
         </div>
       )}
+    </motion.div>
+  );
+};
+
+const PlanningWidget = ({ onPlan }: { onPlan: (days: string[]) => void }) => {
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
+  
+  const weekdays = [
+    { id: '1', label: 'Montag' },
+    { id: '2', label: 'Dienstag' },
+    { id: '3', label: 'Mittwoch' },
+    { id: '4', label: 'Donnerstag' },
+    { id: '5', label: 'Freitag' },
+  ];
+
+  const toggleDay = (day: string) => {
+    setSelectedDays(prev => 
+      prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]
+    );
+  };
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-brand-500 p-6 md:p-8 rounded-2xl md:rounded-[3rem] text-white shadow-xl shadow-brand-100"
+    >
+      <div className="flex items-center space-x-4 mb-6">
+        <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-md">
+          <Calendar className="w-6 h-6" />
+        </div>
+        <div>
+          <h3 className="text-xl font-black tracking-tight">Wochenplanung</h3>
+          <p className="text-xs font-bold opacity-70 uppercase tracking-widest">Nächste Woche vorbereiten</p>
+        </div>
+      </div>
+      
+      <p className="text-sm font-medium mb-6 leading-relaxed">
+        Weisst du schon, an welchen Tagen du nächste Woche arbeiten wirst? Wähle die Tage aus, um Entwürfe zu erstellen.
+      </p>
+
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-6">
+        {weekdays.map(day => (
+          <button 
+            key={day.id}
+            onClick={() => toggleDay(day.id)}
+            className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all border-2 ${
+              selectedDays.includes(day.id) 
+                ? 'bg-white text-brand-600 border-white shadow-lg' 
+                : 'bg-brand-600/30 border-brand-400/30 text-white hover:bg-brand-600/50'
+            }`}
+          >
+            <span className="text-[10px] font-black uppercase tracking-widest">{day.label.substring(0, 2)}</span>
+            <span className="text-[8px] font-bold opacity-60 mt-1">{day.label}</span>
+          </button>
+        ))}
+      </div>
+
+      <button 
+        disabled={selectedDays.length === 0}
+        onClick={() => onPlan(selectedDays)}
+        className="w-full bg-white text-brand-600 font-black py-4 rounded-2xl text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-black/10 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]"
+      >
+        Planung bestätigen & Entwürfe erstellen
+      </button>
     </motion.div>
   );
 };

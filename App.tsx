@@ -127,40 +127,8 @@ const App: React.FC = () => {
         }
       }
 
-      // 2. Weekly Planning Notification (Wed 08:00 - Sun 22:00)
-      const nextMonday = new Date();
-      nextMonday.setDate(now.getDate() + ((1 + 7 - now.getDay()) % 7 || 7));
-      const nextMondayStr = getLocalDateString(nextMonday);
+      // 2. Weekly Planning Notification (DEPRECATED - Moved to Dashboard Widget)
       
-      // Window: Wednesday 08:00 to Sunday 22:00
-      const isInPlanningWindow = (day === 3 && hour >= 8) || day === 4 || day === 5 || day === 6 || (day === 0 && hour < 22);
-      // Check if any entries (draft or real) exist for next week
-      const hasPlanned = entries.some(e => e.date >= nextMondayStr);
-      const planningId = `planning-${nextMondayStr}`;
-
-      if (isInPlanningWindow && !hasPlanned) {
-        const existing = notifications.find(n => n.id === planningId);
-        if (!existing) {
-          console.log("🔔 Erstelle neue Planungs-Benachrichtigung für:", nextMondayStr);
-          newNotifications.push({
-            id: planningId,
-            type: 'planning',
-            title: 'Wochenplanung',
-            message: 'Weisst du schon, an welchen Tagen du nächste Woche arbeiten wirst?',
-            timestamp: now.toISOString(),
-            isRead: false
-          });
-        }
-      } else if (hasPlanned || !isInPlanningWindow) {
-        const existingPlanning = notifications.find(n => n.id === planningId);
-        if (existingPlanning) {
-          console.log("🔕 Entferne Planungs-Benachrichtigung (geplant oder außerhalb Zeitfenster)");
-          await fetch(`/api/notifications/${planningId}`, { method: 'DELETE' });
-          const res = await fetch('/api/notifications');
-          if (res.ok) setNotifications(await res.json());
-        }
-      }
-
       // 3. Draft Ready Notification
       const todayDraft = entries.find(e => e.date === todayStr && e.isDraft);
       if (todayDraft) {
@@ -235,7 +203,7 @@ const App: React.FC = () => {
     }
   };
 
-  const handlePlanNextWeek = async (dayIds: string[], notificationId: string) => {
+  const handlePlanNextWeek = async (dayIds: string[], notificationId?: string) => {
     const now = new Date();
     const nextMonday = new Date();
     nextMonday.setDate(now.getDate() + ((1 + 7 - now.getDay()) % 7 || 7));
@@ -244,7 +212,7 @@ const App: React.FC = () => {
     for (const dayId of dayIds) {
       const targetDate = new Date(nextMonday);
       targetDate.setDate(nextMonday.getDate() + (parseInt(dayId) - 1));
-      const dateStr = targetDate.toISOString().split('T')[0];
+      const dateStr = getLocalDateString(targetDate);
       
       const draftEntry: TimeEntry = {
         id: `draft-${dateStr}`,
@@ -265,25 +233,27 @@ const App: React.FC = () => {
     }
 
     // 2. Update the notification with planned data
-    const notification = notifications.find(n => n.id === notificationId);
-    if (notification) {
-      const updatedNotification = {
-        ...notification,
-        data: {
-          ...notification.data,
-          isPlanned: true,
-          plannedDays: dayIds
-        }
-      };
+    if (notificationId) {
+      const notification = notifications.find(n => n.id === notificationId);
+      if (notification) {
+        const updatedNotification = {
+          ...notification,
+          data: {
+            ...notification.data,
+            isPlanned: true,
+            plannedDays: dayIds
+          }
+        };
 
-      await fetch('/api/notifications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedNotification)
-      });
-
-      const res = await fetch('/api/notifications');
-      if (res.ok) setNotifications(await res.json());
+        await fetch('/api/notifications', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedNotification)
+        });
+        
+        const res = await fetch('/api/notifications');
+        if (res.ok) setNotifications(await res.json());
+      }
     }
 
     alert('Entwürfe für nächste Woche wurden erstellt.');
@@ -473,6 +443,7 @@ const App: React.FC = () => {
             hourlyWage={settings.wages[0].rate} 
             notifications={notifications}
             onMarkAsDone={handleMarkAsDone}
+            onPlanNextWeek={handlePlanNextWeek}
           />
         </motion.div>
       );
