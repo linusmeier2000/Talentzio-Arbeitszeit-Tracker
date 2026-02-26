@@ -45,8 +45,8 @@ async function startServer() {
         const { isLocked, isDraft, ...rest } = row;
         return {
           ...rest,
-          isLocked: isLocked === 1,
-          isDraft: isDraft === 1,
+          isLocked: row.isLocked == 1 || row.isLocked === true || row.isLocked === '1',
+          isDraft: row.isDraft == 1 || row.isDraft === true || row.isDraft === '1',
           splits: row.splits ? JSON.parse(row.splits) : {
             med: row.med_hours || 0,
             bau: row.bau_hours || 0,
