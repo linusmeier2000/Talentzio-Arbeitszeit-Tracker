@@ -21,7 +21,7 @@ async function startServer() {
 
   // Migration: Ensure isDraft column exists (for existing databases)
   try {
-    db.prepare("ALTER TABLE entries ADD COLUMN isDraft INTEGER DEFAULT 0").run();
+    db.prepare("ALTER TABLE entries ADD COLUMN isDraft TEXT DEFAULT 'REAL'").run();
     console.log("[DB] Added isDraft column to entries table");
   } catch (e) {
     // Column already exists or other error
@@ -45,8 +45,8 @@ async function startServer() {
         const { isLocked, isDraft, ...rest } = row;
         return {
           ...rest,
-          isLocked: row.isLocked == 1 || row.isLocked === true || row.isLocked === '1',
-          isDraft: row.isDraft == 1 || row.isDraft === true || row.isDraft === '1',
+          isLocked: row.isLocked === 1 || row.isLocked === true || row.isLocked === '1' || row.isLocked === 'true',
+          isDraft: row.isDraft === 'DRAFT' || row.isDraft === 1 || row.isDraft === true || row.isDraft === '1' || row.isDraft === 'true',
           splits: row.splits ? JSON.parse(row.splits) : {
             med: row.med_hours || 0,
             bau: row.bau_hours || 0,
@@ -90,9 +90,12 @@ async function startServer() {
           bau_hours=excluded.bau_hours, bau_notes=excluded.bau_notes
       `);
       
+      const isDraftVal = (entry.isDraft === true || entry.isDraft === 'true' || entry.isDraft === 'DRAFT' || entry.isDraft === 1) ? 'DRAFT' : 'REAL';
+      const isLockedVal = (entry.isLocked === true || entry.isLocked === 'true' || entry.isLocked === 1) ? 1 : 0;
+
       stmt.run(
         entry.id, entry.date, entry.startM, entry.lunch, entry.startN, entry.end,
-        entry.note, entry.totalHours, entry.isLocked ? 1 : 0, entry.isDraft ? 1 : 0,
+        entry.note, entry.totalHours, isLockedVal, isDraftVal,
         JSON.stringify(entry.splits), JSON.stringify(entry.comments),
         entry.splits.cursum || 0, entry.comments.cursum || '',
         entry.splits.med || 0, entry.comments.med || '',
