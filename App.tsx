@@ -141,6 +141,7 @@ const App: React.FC = () => {
       if (isInPlanningWindow && !hasPlanned) {
         const existing = notifications.find(n => n.id === planningId);
         if (!existing) {
+          console.log("🔔 Erstelle neue Planungs-Benachrichtigung für:", nextMondayStr);
           newNotifications.push({
             id: planningId,
             type: 'planning',
@@ -151,9 +152,9 @@ const App: React.FC = () => {
           });
         }
       } else if (hasPlanned || !isInPlanningWindow) {
-        // If already planned or outside window, remove the planning notification if it exists
         const existingPlanning = notifications.find(n => n.id === planningId);
         if (existingPlanning) {
+          console.log("🔕 Entferne Planungs-Benachrichtigung (geplant oder außerhalb Zeitfenster)");
           await fetch(`/api/notifications/${planningId}`, { method: 'DELETE' });
           const res = await fetch('/api/notifications');
           if (res.ok) setNotifications(await res.json());
