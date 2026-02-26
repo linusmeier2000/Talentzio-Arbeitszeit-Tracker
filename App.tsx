@@ -368,7 +368,7 @@ const App: React.FC = () => {
       // If this is a real entry (not a draft), check if there's a draft for this date and delete it
       let entriesToRemove: string[] = [];
       if (!newEntry.isDraft) {
-        const draftOnSameDate = entries.find(e => e.date === newEntry.date && e.isDraft && e.id !== newEntry.id);
+        const draftOnSameDate = entries.find(e => e.date === newEntry.date && e.isDraft === true && e.id !== newEntry.id);
         if (draftOnSameDate) {
           await fetch(`/api/entries/${draftOnSameDate.id}`, { method: 'DELETE' });
           entriesToRemove.push(draftOnSameDate.id);
