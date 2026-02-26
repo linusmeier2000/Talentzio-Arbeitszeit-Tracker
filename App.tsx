@@ -127,17 +127,20 @@ const App: React.FC = () => {
         }
       }
 
-      // 2. Weekly Planning Notification (Wed 08:00 - Sun 23:59)
+      // 2. Weekly Planning Notification (Wed 08:00 - Sun 22:00)
       const nextMonday = new Date();
       nextMonday.setDate(now.getDate() + ((1 + 7 - now.getDay()) % 7 || 7));
       const nextMondayStr = nextMonday.toISOString().split('T')[0];
       
-      const isInPlanningWindow = (day === 3 && hour >= 8) || day === 4 || day === 5 || day === 6 || day === 0;
-      const hasPlanned = entries.some(e => e.isDraft && e.date >= nextMondayStr);
+      // Window: Wednesday 08:00 to Sunday 22:00
+      const isInPlanningWindow = (day === 3 && hour >= 8) || day === 4 || day === 5 || day === 6 || (day === 0 && hour < 22);
+      // Check if any entries (draft or real) exist for next week
+      const hasPlanned = entries.some(e => e.date >= nextMondayStr);
       const planningId = `planning-${nextMondayStr}`;
 
       if (isInPlanningWindow && !hasPlanned) {
-        if (!notifications.some(n => n.id === planningId)) {
+        const existing = notifications.find(n => n.id === planningId);
+        if (!existing) {
           newNotifications.push({
             id: planningId,
             type: 'planning',
