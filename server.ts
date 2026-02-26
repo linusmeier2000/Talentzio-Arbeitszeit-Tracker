@@ -12,8 +12,8 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  // Initialize local database
-  const db = new Database("local.db");
+  // Initialize in-memory database (nothing is stored locally on disk)
+  const db = new Database(":memory:");
   
   // Create tables if they don't exist (using the schema)
   const schema = fs.readFileSync(path.join(__dirname, "schema.sql"), "utf8");
@@ -21,7 +21,7 @@ async function startServer() {
 
   // Migration: Ensure isDraft column exists (for existing databases)
   try {
-    db.prepare("ALTER TABLE entries ADD COLUMN isDraft TEXT DEFAULT 'REAL'").run();
+    db.prepare("ALTER TABLE entries ADD COLUMN isDraft TEXT").run();
     console.log("[DB] Added isDraft column to entries table");
   } catch (e) {
     // Column already exists or other error

@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS entries (
   note TEXT,
   totalHours REAL,
   isLocked INTEGER DEFAULT 0,
-  isDraft TEXT DEFAULT 'REAL',
+  isDraft TEXT,
   splits TEXT, -- Stored as JSON string (keeping for compatibility)
   comments TEXT, -- Stored as JSON string (keeping for compatibility)
   cursum_hours REAL,
