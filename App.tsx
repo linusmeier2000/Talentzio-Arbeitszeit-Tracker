@@ -30,7 +30,7 @@ import {
   Trash2,
   Bell
 } from 'lucide-react';
-import { calculateWageBreakdown, formatCurrency, calculateTotalHours, roundTo } from './utils';
+import { calculateWageBreakdown, formatCurrency, calculateTotalHours, roundTo, getLocalDateString } from './utils';
 import { generateWorkComment } from './services/geminiService';
 
 const STORAGE_KEY_ENTRIES = 'at_entries_v1';
@@ -46,7 +46,7 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   // Status für das heutige Quick-Edit
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getLocalDateString(new Date());
   const todayEntry = useMemo(() => entries.find(e => e.date === todayStr), [entries, todayStr]);
   const [quickEditData, setQuickEditData] = useState<TimeEntry | null>(null);
   const [quickEditStep, setQuickEditStep] = useState<'times' | 'splits' | 'notes'>('times');
@@ -102,7 +102,7 @@ const App: React.FC = () => {
       const now = new Date();
       const day = now.getDay(); // 0=Sun, 4=Thu
       const hour = now.getHours();
-      const todayStr = now.toISOString().split('T')[0];
+      const todayStr = getLocalDateString(now);
       
       const newNotifications: Partial<Notification>[] = [];
 
@@ -110,7 +110,7 @@ const App: React.FC = () => {
       if (day === 4 && hour >= 8 && hour < 12) {
         const yesterday = new Date();
         yesterday.setDate(now.getDate() - 1);
-        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        const yesterdayStr = getLocalDateString(yesterday);
         const yesterdayEntry = entries.find(e => e.date === yesterdayStr);
         const hasCursumYesterday = yesterdayEntry && yesterdayEntry.splits.cursum > 0;
         
@@ -130,7 +130,7 @@ const App: React.FC = () => {
       // 2. Weekly Planning Notification (Wed 08:00 - Sun 22:00)
       const nextMonday = new Date();
       nextMonday.setDate(now.getDate() + ((1 + 7 - now.getDay()) % 7 || 7));
-      const nextMondayStr = nextMonday.toISOString().split('T')[0];
+      const nextMondayStr = getLocalDateString(nextMonday);
       
       // Window: Wednesday 08:00 to Sunday 22:00
       const isInPlanningWindow = (day === 3 && hour >= 8) || day === 4 || day === 5 || day === 6 || (day === 0 && hour < 22);

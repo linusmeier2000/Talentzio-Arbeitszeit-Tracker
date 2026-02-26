@@ -54,6 +54,12 @@ export const calculateTotalHours = (
   return total;
 };
 
+export const getLocalDateString = (date: Date): string => {
+  const offset = date.getTimezoneOffset();
+  const localDate = new Date(date.getTime() - (offset * 60 * 1000));
+  return localDate.toISOString().split('T')[0];
+};
+
 export const formatDate = (dateStr: string): string => {
   const date = new Date(dateStr);
   return date.toLocaleDateString('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric' });
