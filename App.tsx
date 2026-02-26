@@ -132,7 +132,7 @@ const App: React.FC = () => {
       nextMonday.setDate(now.getDate() + ((1 + 7 - now.getDay()) % 7 || 7));
       const nextMondayStr = getLocalDateString(nextMonday);
       
-      const isInPlanningWindow = (day === 3 && hour >= 8) || day === 4 || day === 5 || day === 6 || (day === 0 && hour < 22);
+      const isInPlanningWindow = (day === 3 && hour >= 7) || day === 4 || day === 5 || day === 6 || (day === 0 && hour < 22);
       
       if (isInPlanningWindow) {
         const id = `weekly-planning-${nextMondayStr}`;
@@ -365,6 +365,16 @@ const App: React.FC = () => {
 
   const handleSaveEntry = async (newEntry: TimeEntry) => {
     try {
+      // If this is a real entry (not a draft), check if there's a draft for this date and delete it
+      let entriesToRemove: string[] = [];
+      if (!newEntry.isDraft) {
+        const draftOnSameDate = entries.find(e => e.date === newEntry.date && e.isDraft && e.id !== newEntry.id);
+        if (draftOnSameDate) {
+          await fetch(`/api/entries/${draftOnSameDate.id}`, { method: 'DELETE' });
+          entriesToRemove.push(draftOnSameDate.id);
+        }
+      }
+
       const res = await fetch('/api/entries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -373,13 +383,17 @@ const App: React.FC = () => {
       
       if (res.ok) {
         setEntries(prev => {
-          const idx = prev.findIndex(e => e.id === newEntry.id);
+          let filtered = prev;
+          if (entriesToRemove.length > 0) {
+            filtered = prev.filter(e => !entriesToRemove.includes(e.id));
+          }
+          const idx = filtered.findIndex(e => e.id === newEntry.id);
           if (idx >= 0) {
-            const copy = [...prev];
+            const copy = [...filtered];
             copy[idx] = newEntry;
             return copy;
           }
-          return [...prev, newEntry];
+          return [...filtered, newEntry];
         });
         setShowForm(false);
         setEditingEntry(null);
