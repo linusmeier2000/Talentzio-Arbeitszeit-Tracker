@@ -28,7 +28,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, noti
     { id: 'settings', label: 'Einstellungen', icon: SettingsIcon },
   ];
 
-  const mobileMenuItems = menuItems.filter(item => item.id !== 'notifications');
+  const mobileMenuItems = menuItems;
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return (
@@ -133,6 +133,11 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, noti
               )}
               <item.icon className="w-5 h-5" />
               <span className="text-[8px] mt-1 font-black uppercase tracking-widest">{item.label}</span>
+              {item.badge !== undefined && item.badge > 0 && (
+                <span className="absolute top-1 right-1 bg-brand-500 text-white text-[7px] font-black px-1.5 py-0.5 rounded-full ring-2 ring-white">
+                  {item.badge}
+                </span>
+              )}
             </motion.button>
           ))}
         </nav>

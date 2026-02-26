@@ -159,11 +159,13 @@ const App: React.FC = () => {
               ? 'Deine Planung für nächste Woche ist bereit. Du kannst sie hier noch anpassen.'
               : 'An welchen Tagen wirst du nächste Woche arbeiten? Plane jetzt deine Woche vor.',
           };
-          fetch('/api/notifications', {
+          await fetch('/api/notifications', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(updated)
           });
+          const res = await fetch('/api/notifications');
+          if (res.ok) setNotifications(await res.json());
         }
       }
       // 3. Draft Ready Notification

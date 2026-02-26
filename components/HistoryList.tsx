@@ -79,7 +79,11 @@ const HistoryList: React.FC<HistoryListProps> = ({ entries, onEdit, onDelete }) 
                       layout
                       variants={itemVariants}
                       exit={{ opacity: 0, scale: 0.95 }}
-                      className="hover:bg-brand-50/30 transition-colors group/row"
+                      className={`transition-colors group/row ${
+                        entry.isDraft 
+                          ? 'bg-amber-50/40 hover:bg-amber-50/60 border-l-4 border-l-amber-400' 
+                          : 'hover:bg-brand-50/30'
+                      }`}
                     >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-2">
@@ -178,7 +182,11 @@ const HistoryList: React.FC<HistoryListProps> = ({ entries, onEdit, onDelete }) 
                 layout
                 variants={itemVariants}
                 exit={{ opacity: 0, scale: 0.9 }}
-                className="p-4 space-y-3 hover:bg-gray-50 transition-colors"
+                className={`p-4 space-y-3 transition-colors ${
+                  entry.isDraft 
+                    ? 'bg-amber-50/50 border-l-4 border-l-amber-400' 
+                    : 'hover:bg-gray-50'
+                }`}
               >
               <div className="flex justify-between items-start">
                 <div>

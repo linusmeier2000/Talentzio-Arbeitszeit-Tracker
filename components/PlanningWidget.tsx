@@ -59,7 +59,7 @@ const PlanningWidget: React.FC<PlanningWidgetProps> = ({ onPlan, initialDays, va
         </>
       )}
 
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-6">
+      <div className={`grid grid-cols-2 sm:grid-cols-5 gap-3 md:gap-2 ${isEmbedded ? 'mb-4' : 'mb-6'}`}>
         {weekdays.map(day => (
           <button 
             key={day.id}

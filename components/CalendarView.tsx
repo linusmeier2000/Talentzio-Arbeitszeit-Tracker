@@ -123,7 +123,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ entries, viewMonth, viewYea
                   <div 
                     className={`absolute rounded-full border transition-all duration-500 group-hover/day:scale-110 aspect-square ${
                       isDraft 
-                        ? 'bg-amber-500/20 border-amber-400/30 border-dashed' 
+                        ? 'bg-amber-500/30 border-amber-400 border-2 border-dashed animate-pulse' 
                         : 'bg-brand-500/40 border-brand-400/30 group-hover/day:bg-brand-500/60'
                     }`}
                     style={{ 
