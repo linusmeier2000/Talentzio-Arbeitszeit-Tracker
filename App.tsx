@@ -127,8 +127,45 @@ const App: React.FC = () => {
         }
       }
 
-      // 2. Weekly Planning Notification (DEPRECATED - Moved to Dashboard Widget)
+      // 2. Weekly Planning Notification
+      const nextMonday = new Date();
+      nextMonday.setDate(now.getDate() + ((1 + 7 - now.getDay()) % 7 || 7));
+      const nextMondayStr = getLocalDateString(nextMonday);
       
+      const isInPlanningWindow = (day === 3 && hour >= 8) || day === 4 || day === 5 || day === 6 || (day === 0 && hour < 22);
+      
+      if (isInPlanningWindow) {
+        const id = `weekly-planning-${nextMondayStr}`;
+        const existing = notifications.find(n => n.id === id);
+        const hasPlanned = entries.some(e => e.date >= nextMondayStr);
+        
+        if (!existing) {
+          newNotifications.push({
+            id,
+            type: 'planning',
+            title: 'Wochenplanung',
+            message: hasPlanned 
+              ? 'Deine Planung für nächste Woche ist bereit. Du kannst sie hier noch anpassen.'
+              : 'An welchen Tagen wirst du nächste Woche arbeiten? Plane jetzt deine Woche vor.',
+            timestamp: now.toISOString(),
+            isRead: false,
+            data: { isPlanned: hasPlanned, plannedDays: [] }
+          });
+        } else if (existing.message.includes('bereit') !== hasPlanned) {
+          // Update message if planning status changed
+          const updated = {
+            ...existing,
+            message: hasPlanned 
+              ? 'Deine Planung für nächste Woche ist bereit. Du kannst sie hier noch anpassen.'
+              : 'An welchen Tagen wirst du nächste Woche arbeiten? Plane jetzt deine Woche vor.',
+          };
+          fetch('/api/notifications', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updated)
+          });
+        }
+      }
       // 3. Draft Ready Notification
       const todayDraft = entries.find(e => e.date === todayStr && e.isDraft);
       if (todayDraft) {
@@ -208,11 +245,23 @@ const App: React.FC = () => {
     const nextMonday = new Date();
     nextMonday.setDate(now.getDate() + ((1 + 7 - now.getDay()) % 7 || 7));
     
-    // 1. Create/Update Draft Entries
-    for (const dayId of dayIds) {
-      const targetDate = new Date(nextMonday);
-      targetDate.setDate(nextMonday.getDate() + (parseInt(dayId) - 1));
-      const dateStr = getLocalDateString(targetDate);
+    const nextWeekDates: string[] = [];
+    for (let i = 0; i < 5; i++) {
+      const d = new Date(nextMonday);
+      d.setDate(nextMonday.getDate() + i);
+      nextWeekDates.push(getLocalDateString(d));
+    }
+
+    const selectedDates = dayIds.map(id => {
+      const d = new Date(nextMonday);
+      d.setDate(nextMonday.getDate() + (parseInt(id) - 1));
+      return getLocalDateString(d);
+    });
+
+    // 1. Create/Update selected days
+    for (const dateStr of selectedDates) {
+      const existing = entries.find(e => e.date === dateStr);
+      if (existing) continue;
       
       const draftEntry: TimeEntry = {
         id: `draft-${dateStr}`,
@@ -232,12 +281,29 @@ const App: React.FC = () => {
       await handleSaveEntry(draftEntry);
     }
 
-    // 2. Update the notification with planned data
-    if (notificationId) {
-      const notification = notifications.find(n => n.id === notificationId);
+    // 2. Remove unselected days that are still drafts
+    const unselectedDates = nextWeekDates.filter(d => !selectedDates.includes(d));
+    for (const dateStr of unselectedDates) {
+      const entry = entries.find(e => e.date === dateStr);
+      if (entry && entry.isDraft) {
+        await handleDeleteEntry(entry.id);
+      }
+    }
+
+    // 3. Update the notification with planned data
+    let targetId = notificationId;
+    if (!targetId) {
+      const nextMondayStr = getLocalDateString(nextMonday);
+      const planningNotif = notifications.find(n => n.id === `weekly-planning-${nextMondayStr}`);
+      if (planningNotif) targetId = planningNotif.id;
+    }
+
+    if (targetId) {
+      const notification = notifications.find(n => n.id === targetId);
       if (notification) {
         const updatedNotification = {
           ...notification,
+          message: 'Deine Planung für nächste Woche ist bereit. Du kannst sie hier noch anpassen.',
           data: {
             ...notification.data,
             isPlanned: true,
@@ -256,7 +322,7 @@ const App: React.FC = () => {
       }
     }
 
-    alert('Entwürfe für nächste Woche wurden erstellt.');
+    alert('Planung für nächste Woche wurde aktualisiert.');
   };
 
   // Initialisiere Quick-Edit wenn ein heutiger Eintrag gefunden wird
@@ -660,6 +726,7 @@ const App: React.FC = () => {
           </div>
           <NotificationCenter 
             notifications={notifications} 
+            entries={entries}
             onMarkAsDone={handleMarkAsDone}
             onPlanNextWeek={handlePlanNextWeek}
           />

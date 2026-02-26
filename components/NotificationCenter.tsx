@@ -12,37 +12,41 @@ import {
   CheckSquare,
   Square
 } from 'lucide-react';
-import { Notification } from '../types';
+import { Notification, TimeEntry } from '../types';
+import PlanningWidget from './PlanningWidget';
+import { getLocalDateString } from '../utils';
 
 interface NotificationCenterProps {
   notifications: Notification[];
+  entries: TimeEntry[];
   onMarkAsDone: (id: string) => void;
   onPlanNextWeek: (days: string[], notificationId: string) => void;
 }
 
 const NotificationCenter: React.FC<NotificationCenterProps> = ({ 
   notifications, 
+  entries,
   onMarkAsDone,
   onPlanNextWeek
 }) => {
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [selectedDays, setSelectedDays] = useState<string[]>([]);
-
-  const weekdays = [
-    { id: '1', label: 'Montag' },
-    { id: '2', label: 'Dienstag' },
-    { id: '3', label: 'Mittwoch' },
-    { id: '4', label: 'Donnerstag' },
-    { id: '5', label: 'Freitag' },
-  ];
-
-  const toggleDay = (day: string) => {
-    setSelectedDays(prev => 
-      prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]
-    );
-  };
-
   const activeNotifications = notifications.filter(n => !n.isRead);
+
+  const getPlannedDaysForNextWeek = () => {
+    const now = new Date();
+    const nextMonday = new Date();
+    nextMonday.setDate(now.getDate() + ((1 + 7 - now.getDay()) % 7 || 7));
+    
+    const plannedDays: string[] = [];
+    for (let i = 0; i < 5; i++) {
+      const d = new Date(nextMonday);
+      d.setDate(nextMonday.getDate() + i);
+      const dStr = getLocalDateString(d);
+      if (entries.some(e => e.date === dStr)) {
+        plannedDays.push((i + 1).toString());
+      }
+    }
+    return plannedDays;
+  };
 
   if (activeNotifications.length === 0) {
     return (
@@ -88,13 +92,15 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
                 </div>
                 <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-900">{n.title}</h4>
               </div>
-              <button 
-                onClick={() => onMarkAsDone(n.id)}
-                className="p-1 text-gray-300 hover:text-emerald-500 transition-colors"
-                title="Als erledigt markieren"
-              >
-                <Check className="w-4 h-4" />
-              </button>
+              {n.type !== 'planning' && (
+                <button 
+                  onClick={() => onMarkAsDone(n.id)}
+                  className="p-1 text-gray-300 hover:text-emerald-500 transition-colors"
+                  title="Als erledigt markieren"
+                >
+                  <Check className="w-4 h-4" />
+                </button>
+              )}
             </div>
 
             <p className="text-xs font-medium text-gray-600 leading-relaxed mb-3">
@@ -102,66 +108,12 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
             </p>
 
             {n.type === 'planning' && (
-              <div className="space-y-3 mt-4 pt-4 border-t border-brand-100">
-                {(!n.data?.isPlanned || editingId === n.id) ? (
-                  <>
-                    <div className="grid grid-cols-1 gap-2">
-                      {weekdays.map(day => (
-                        <button 
-                          key={day.id}
-                          onClick={() => toggleDay(day.id)}
-                          className="flex items-center space-x-3 p-2 hover:bg-white/50 rounded-xl transition-colors"
-                        >
-                          {selectedDays.includes(day.id) ? (
-                            <CheckSquare className="w-4 h-4 text-brand-500" />
-                          ) : (
-                            <Square className="w-4 h-4 text-gray-300" />
-                          )}
-                          <span className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">{day.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      {editingId === n.id && (
-                        <button 
-                          onClick={() => setEditingId(null)}
-                          className="flex-1 bg-gray-100 text-gray-500 font-black py-2 rounded-xl text-[10px] uppercase tracking-widest transition-all"
-                        >
-                          Abbrechen
-                        </button>
-                      )}
-                      <button 
-                        disabled={selectedDays.length === 0}
-                        onClick={() => {
-                          onPlanNextWeek(selectedDays, n.id);
-                          setEditingId(null);
-                        }}
-                        className="flex-[2] bg-brand-500 hover:bg-brand-600 disabled:bg-gray-200 text-white font-black py-2 rounded-xl text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-brand-500/20"
-                      >
-                        Planung bestätigen
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <div className="space-y-3">
-                    <div className="flex flex-wrap gap-1.5">
-                      {weekdays.filter(d => n.data?.plannedDays?.includes(d.id)).map(d => (
-                        <span key={d.id} className="px-2 py-1 bg-brand-100 text-brand-700 text-[9px] font-black uppercase rounded-lg">
-                          {d.label}
-                        </span>
-                      ))}
-                    </div>
-                    <button 
-                      onClick={() => {
-                        setEditingId(n.id);
-                        setSelectedDays(n.data?.plannedDays || []);
-                      }}
-                      className="w-full bg-white border border-brand-200 text-brand-500 hover:bg-brand-50 font-black py-2 rounded-xl text-[10px] uppercase tracking-widest transition-all"
-                    >
-                      Wochenplanung anpassen
-                    </button>
-                  </div>
-                )}
+              <div className="mt-4 pt-4 border-t border-brand-100">
+                <PlanningWidget 
+                  variant="embedded"
+                  initialDays={getPlannedDaysForNextWeek()} 
+                  onPlan={(days) => onPlanNextWeek(days, n.id)} 
+                />
               </div>
             )}
           </motion.div>
