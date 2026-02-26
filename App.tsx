@@ -184,7 +184,22 @@ const App: React.FC = () => {
         }
       }
 
-      // 4. Random Facts/Stats
+      // 4. Wednesday 10:00: Cursum Reminder
+      if (day === 3 && hour >= 10 && hour < 11) {
+        const id = `cursum-reminder-${todayStr}`;
+        if (!notifications.some(n => n.id === id)) {
+          newNotifications.push({
+            id,
+            type: 'info',
+            title: 'Cursum AG Reminder',
+            message: 'Du solltest die Arbeiten für die Cursum AG im Blick behalten.',
+            timestamp: now.toISOString(),
+            isRead: false
+          });
+        }
+      }
+
+      // 5. Random Facts/Stats
 
       for (const n of newNotifications) {
         await fetch('/api/notifications', {
