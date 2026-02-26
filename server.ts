@@ -35,8 +35,9 @@ async function startServer() {
       const rows = db.prepare("SELECT * FROM entries ORDER BY date DESC").all() as any[];
       const entries = rows.map(row => ({
         ...row,
-        isLocked: Boolean(row.isLocked),
-        isDraft: Boolean(row.isDraft),
+        isLocked: row.isLocked === 1,
+        // Robust check for isDraft column
+        isDraft: row.isDraft === 1 || (row.isDraft === undefined ? false : Boolean(row.isDraft)),
         splits: row.splits ? JSON.parse(row.splits) : {
           med: row.med_hours || 0,
           bau: row.bau_hours || 0,

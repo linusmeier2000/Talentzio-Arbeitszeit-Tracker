@@ -172,18 +172,23 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage, notification
     
     // Find days already planned for next week
     const plannedDays: string[] = [];
+    let hasDefinitivePlanning = false;
+    
     for (let i = 0; i < 5; i++) {
       const d = new Date(nextMonday);
       d.setDate(nextMonday.getDate() + i);
       const dStr = getLocalDateString(d);
-      if (entries.some(e => e.date === dStr)) {
+      const entry = entries.find(e => e.date === dStr);
+      if (entry) {
         plannedDays.push((i + 1).toString());
+        if (!entry.isDraft) hasDefinitivePlanning = true;
       }
     }
     
     return {
       show: isInPlanningWindow,
       hasPlanned: plannedDays.length > 0,
+      hasDefinitivePlanning,
       nextMondayStr: getLocalDateString(nextMonday),
       plannedDays
     };
