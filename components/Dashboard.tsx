@@ -181,7 +181,7 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage, notification
       const entry = entries.find(e => e.date === dStr);
       if (entry) {
         plannedDays.push((i + 1).toString());
-        if (!(entry.isDraft === true || entry.isDraft === 'DRAFT')) hasDefinitivePlanning = true;
+        if (!entry.isDraft) hasDefinitivePlanning = true;
       }
     }
     

@@ -185,51 +185,6 @@ const App: React.FC = () => {
       }
 
       // 4. Random Facts/Stats
-      if (Math.random() > 0.95 && notifications.filter(n => n.type === 'fact').length < 2) {
-        const facts = [
-          "Wusstest du? Deine produktivste Zeit ist statistisch gesehen am Mittwochmorgen.",
-          "Statistik: Du hast diesen Monat bereits 15% mehr für Cursum gearbeitet als im Vormonat.",
-          "Tipp: Kurze Pausen alle 90 Minuten steigern die Konzentration um bis zu 20%.",
-          "Fact: Talentzio Med AG macht aktuell 45% deiner Gesamtarbeitszeit aus."
-        ];
-        const fact = facts[Math.floor(Math.random() * facts.length)];
-        const id = `fact-${Date.now()}`;
-        newNotifications.push({
-          id,
-          type: 'fact',
-          title: 'Wusstest du schon?',
-          message: fact,
-          timestamp: now.toISOString(),
-          isRead: false
-        });
-      }
-
-      // 5. Cleanup Expired Drafts
-      const expiredDrafts = entries.filter(e => {
-        if (e.isDraft !== true) return false;
-        // Expired if date is in the past OR if it's today and late (after 20:00)
-        if (e.date < todayStr) return true;
-        if (e.date === todayStr && hour >= 20) return true;
-        return false;
-      });
-
-      if (expiredDrafts.length > 0) {
-        for (const draft of expiredDrafts) {
-          await handleDeleteEntry(draft.id);
-          
-          const notifId = `draft-deleted-${draft.date}`;
-          if (!notifications.some(n => n.id === notifId)) {
-            newNotifications.push({
-              id: notifId,
-              type: 'info',
-              title: 'Entwurf entfernt',
-              message: `Der Entwurf für den ${formatDate(draft.date)} wurde entfernt, da keine effektive Zeit eingetragen wurde.`,
-              timestamp: now.toISOString(),
-              isRead: false
-            });
-          }
-        }
-      }
 
       for (const n of newNotifications) {
         await fetch('/api/notifications', {

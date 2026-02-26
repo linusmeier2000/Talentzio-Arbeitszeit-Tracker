@@ -122,7 +122,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ entries, viewMonth, viewYea
                 {hours > 0 && (
                   <div 
                     className={`absolute rounded-full border transition-all duration-500 group-hover/day:scale-110 aspect-square ${
-                      (isDraft === true || isDraft === 'DRAFT')
+                      isDraft === true 
                         ? 'bg-amber-500/30 border-amber-400 border-2 border-dashed animate-pulse' 
                         : 'bg-brand-500/40 border-brand-400/30 group-hover/day:bg-brand-500/60'
                     }`}
@@ -131,7 +131,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ entries, viewMonth, viewYea
                     }}
                   />
                 )}
-                <span className={`relative z-10 text-xs md:text-sm font-black transition-colors ${hours > 0 ? ((isDraft === true || isDraft === 'DRAFT') ? 'text-amber-200' : 'text-white') : 'text-slate-600'}`}>
+                <span className={`relative z-10 text-xs md:text-sm font-black transition-colors ${hours > 0 ? (isDraft === true ? 'text-amber-200' : 'text-white') : 'text-slate-600'}`}>
                   {day}
                 </span>
                 
@@ -140,7 +140,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ entries, viewMonth, viewYea
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/day:block z-50 animate-in fade-in zoom-in-95 duration-200">
                     <div className="bg-white text-slate-900 px-3 py-1.5 rounded-xl shadow-xl text-[10px] font-black whitespace-nowrap border border-slate-100 flex items-center space-x-1">
                       <span>{hours.toFixed(2)} h</span>
-                      {(isDraft === true || isDraft === 'DRAFT') && <span className="text-[8px] bg-amber-100 text-amber-700 px-1 rounded">ENTWURF</span>}
+                      {isDraft === true && <span className="text-[8px] bg-amber-100 text-amber-700 px-1 rounded">ENTWURF</span>}
                     </div>
                     <div className="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[4px] border-t-white mx-auto" />
                   </div>

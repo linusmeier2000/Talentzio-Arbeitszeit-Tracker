@@ -46,7 +46,7 @@ async function startServer() {
         return {
           ...rest,
           isLocked: row.isLocked === 1 || row.isLocked === true || row.isLocked === '1' || row.isLocked === 'true',
-          isDraft: row.isDraft === 'DRAFT' || row.isDraft === 1 || row.isDraft === true || row.isDraft === '1' || row.isDraft === 'true',
+          isDraft: row.isDraft === 'ENTWURF' || row.isDraft === 'DRAFT' || row.isDraft === 1 || row.isDraft === true || row.isDraft === 'true' || row.isDraft === '1',
           splits: row.splits ? JSON.parse(row.splits) : {
             med: row.med_hours || 0,
             bau: row.bau_hours || 0,
@@ -90,8 +90,8 @@ async function startServer() {
           bau_hours=excluded.bau_hours, bau_notes=excluded.bau_notes
       `);
       
-      const isDraftVal = (entry.isDraft === true || entry.isDraft === 'true' || entry.isDraft === 'DRAFT' || entry.isDraft === 1) ? 'DRAFT' : 'REAL';
-      const isLockedVal = (entry.isLocked === true || entry.isLocked === 'true' || entry.isLocked === 1) ? 1 : 0;
+      const isDraftVal = (entry.isDraft === true || entry.isDraft === 'ENTWURF' || entry.isDraft === 'DRAFT') ? 'ENTWURF' : 'CONFIRMED';
+      const isLockedVal = (entry.isLocked === true || entry.isLocked === 1) ? 1 : 0;
 
       stmt.run(
         entry.id, entry.date, entry.startM, entry.lunch, entry.startN, entry.end,
