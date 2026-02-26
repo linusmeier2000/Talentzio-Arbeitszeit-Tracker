@@ -30,7 +30,7 @@ import {
   Trash2,
   Bell
 } from 'lucide-react';
-import { calculateWageBreakdown, formatCurrency, calculateTotalHours, roundTo, getLocalDateString } from './utils';
+import { calculateWageBreakdown, formatCurrency, calculateTotalHours, roundTo, getLocalDateString, formatDate } from './utils';
 import { generateWorkComment } from './services/geminiService';
 
 const STORAGE_KEY_ENTRIES = 'at_entries_v1';
@@ -202,6 +202,33 @@ const App: React.FC = () => {
           timestamp: now.toISOString(),
           isRead: false
         });
+      }
+
+      // 5. Cleanup Expired Drafts
+      const expiredDrafts = entries.filter(e => {
+        if (!e.isDraft) return false;
+        // Expired if date is in the past OR if it's today and late (after 20:00)
+        if (e.date < todayStr) return true;
+        if (e.date === todayStr && hour >= 20) return true;
+        return false;
+      });
+
+      if (expiredDrafts.length > 0) {
+        for (const draft of expiredDrafts) {
+          await handleDeleteEntry(draft.id);
+          
+          const notifId = `draft-deleted-${draft.date}`;
+          if (!notifications.some(n => n.id === notifId)) {
+            newNotifications.push({
+              id: notifId,
+              type: 'info',
+              title: 'Entwurf entfernt',
+              message: `Der Entwurf für den ${formatDate(draft.date)} wurde entfernt, da keine effektive Zeit eingetragen wurde.`,
+              timestamp: now.toISOString(),
+              isRead: false
+            });
+          }
+        }
       }
 
       for (const n of newNotifications) {
@@ -417,6 +444,7 @@ const App: React.FC = () => {
     const updated: TimeEntry = {
       ...quickEditData,
       totalHours: roundedTotal,
+      isDraft: false,
       splits: {
         ...quickEditData.splits,
         talentzio: newMain

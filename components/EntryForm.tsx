@@ -186,6 +186,7 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
         note: formData.note || '',
         totalHours: formData.totalHours || 0,
         isLocked: formData.isLocked || false,
+        isDraft: false, // NEW: Explicitly mark as not a draft when saved via form
         splits: {
           med: formData.splits?.med || 0,
           bau: formData.splits?.bau || 0,
