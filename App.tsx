@@ -211,7 +211,7 @@ const App: React.FC = () => {
     };
 
     checkNotifications();
-    const interval = setInterval(checkNotifications, 1000 * 60 * 30); // Every 30 mins
+    const interval = setInterval(checkNotifications, 1000 * 60); // Check every minute
     return () => clearInterval(interval);
   }, [isLoading, entries, notifications]);
 
