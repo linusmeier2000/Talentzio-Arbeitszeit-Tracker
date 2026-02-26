@@ -41,24 +41,26 @@ async function startServer() {
     if (!db) return res.status(500).json({ error: "Datenbank nicht initialisiert" });
     try {
       const rows = db.prepare("SELECT * FROM entries ORDER BY date DESC").all() as any[];
-      const entries = rows.map(row => ({
-        ...row,
-        isLocked: row.isLocked === 1,
-        // Robust check for isDraft column
-        isDraft: row.isDraft === 1 || (row.isDraft === undefined ? false : Boolean(row.isDraft)),
-        splits: row.splits ? JSON.parse(row.splits) : {
-          med: row.med_hours || 0,
-          bau: row.bau_hours || 0,
-          cursum: row.cursum_hours || 0,
-          talentzio: row.totalHours - ((row.med_hours || 0) + (row.bau_hours || 0) + (row.cursum_hours || 0))
-        },
-        comments: row.comments ? JSON.parse(row.comments) : {
-          med: row.med_notes || '',
-          bau: row.bau_notes || '',
-          cursum: row.cursum_notes || '',
-          talentzio: ''
-        }
-      }));
+      const entries = rows.map(row => {
+        const { isLocked, isDraft, ...rest } = row;
+        return {
+          ...rest,
+          isLocked: isLocked === 1,
+          isDraft: isDraft === 1,
+          splits: row.splits ? JSON.parse(row.splits) : {
+            med: row.med_hours || 0,
+            bau: row.bau_hours || 0,
+            cursum: row.cursum_hours || 0,
+            talentzio: row.totalHours - ((row.med_hours || 0) + (row.bau_hours || 0) + (row.cursum_hours || 0))
+          },
+          comments: row.comments ? JSON.parse(row.comments) : {
+            med: row.med_notes || '',
+            bau: row.bau_notes || '',
+            cursum: row.cursum_notes || '',
+            talentzio: ''
+          }
+        };
+      });
       res.json(entries);
     } catch (err: any) {
       res.status(500).json({ error: err.message });

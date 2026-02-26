@@ -80,7 +80,7 @@ const HistoryList: React.FC<HistoryListProps> = ({ entries, onEdit, onDelete }) 
                       variants={itemVariants}
                       exit={{ opacity: 0, scale: 0.95 }}
                       className={`transition-colors group/row ${
-                        !!entry.isDraft 
+                        entry.isDraft === true 
                           ? 'bg-amber-50/40 hover:bg-amber-50/60 border-l-4 border-l-amber-400' 
                           : 'hover:bg-brand-50/30'
                       }`}
@@ -88,7 +88,7 @@ const HistoryList: React.FC<HistoryListProps> = ({ entries, onEdit, onDelete }) 
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-2">
                       <div className="font-semibold text-gray-900">{formatDate(entry.date)}</div>
-                      {!!entry.isDraft && (
+                      {entry.isDraft === true && (
                         <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[8px] font-black uppercase rounded tracking-tighter">Entwurf</span>
                       )}
                     </div>
@@ -183,7 +183,7 @@ const HistoryList: React.FC<HistoryListProps> = ({ entries, onEdit, onDelete }) 
                 variants={itemVariants}
                 exit={{ opacity: 0, scale: 0.9 }}
                 className={`p-4 space-y-3 transition-colors ${
-                  !!entry.isDraft 
+                  entry.isDraft === true 
                     ? 'bg-amber-50/50 border-l-4 border-l-amber-400' 
                     : 'hover:bg-gray-50'
                 }`}
@@ -192,7 +192,7 @@ const HistoryList: React.FC<HistoryListProps> = ({ entries, onEdit, onDelete }) 
                 <div>
                   <div className="flex items-center space-x-2">
                     <div className="font-bold text-gray-900">{formatDate(entry.date)}</div>
-                    {!!entry.isDraft && (
+                    {entry.isDraft === true && (
                       <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[8px] font-black uppercase rounded tracking-tighter">Entwurf</span>
                     )}
                   </div>
@@ -218,7 +218,7 @@ const HistoryList: React.FC<HistoryListProps> = ({ entries, onEdit, onDelete }) 
                       </button>
                     </div>
                   )}
-                  {!!entry.isLocked && <Lock className="w-3.5 h-3.5 text-gray-300" />}
+                  {entry.isLocked === true && <Lock className="w-3.5 h-3.5 text-gray-300" />}
                 </div>
               </div>
 

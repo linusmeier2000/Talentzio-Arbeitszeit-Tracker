@@ -169,7 +169,7 @@ const App: React.FC = () => {
         }
       }
       // 3. Draft Ready Notification
-      const todayDraft = entries.find(e => e.date === todayStr && e.isDraft);
+      const todayDraft = entries.find(e => e.date === todayStr && e.isDraft === true);
       if (todayDraft) {
         const id = `draft-ready-${todayStr}`;
         if (!notifications.some(n => n.id === id)) {
@@ -206,7 +206,7 @@ const App: React.FC = () => {
 
       // 5. Cleanup Expired Drafts
       const expiredDrafts = entries.filter(e => {
-        if (!e.isDraft) return false;
+        if (e.isDraft !== true) return false;
         // Expired if date is in the past OR if it's today and late (after 20:00)
         if (e.date < todayStr) return true;
         if (e.date === todayStr && hour >= 20) return true;
@@ -314,7 +314,7 @@ const App: React.FC = () => {
     const unselectedDates = nextWeekDates.filter(d => !selectedDates.includes(d));
     for (const dateStr of unselectedDates) {
       const entry = entries.find(e => e.date === dateStr);
-      if (entry && entry.isDraft) {
+      if (entry && entry.isDraft === true) {
         await handleDeleteEntry(entry.id);
       }
     }
