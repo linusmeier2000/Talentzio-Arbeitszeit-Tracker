@@ -133,8 +133,15 @@ const TimePicker: React.FC<TimePickerProps> = ({
       </div>
 
       {isOpen && (
-        <div className="absolute z-50 mt-3 w-72 left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0 bg-white rounded-[2rem] shadow-2xl border border-gray-100 p-6 animate-in fade-in zoom-in-95 duration-200">
-          <div className="mb-4">
+        <>
+          {/* Mobile Backdrop */}
+          <div 
+            className="md:hidden fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-[60]" 
+            onClick={() => setIsOpen(false)} 
+          />
+          
+          <div className="fixed md:absolute z-[70] md:z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 md:top-full md:left-0 md:translate-x-0 md:translate-y-0 mt-0 md:mt-3 w-[calc(100%-2rem)] max-w-[320px] md:w-72 bg-white rounded-[2rem] shadow-2xl border border-gray-100 p-6 animate-in fade-in zoom-in-95 duration-200">
+            <div className="mb-4">
             <div className="flex justify-between items-center mb-2">
               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Schnellauswahl</p>
               <button 
@@ -215,7 +222,8 @@ const TimePicker: React.FC<TimePickerProps> = ({
             </button>
           </div>
         </div>
-      )}
+      </>
+    )}
     </div>
   );
 };

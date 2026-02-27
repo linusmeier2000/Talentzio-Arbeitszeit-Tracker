@@ -767,18 +767,6 @@ const App: React.FC = () => {
             </motion.div>
           </div>
 
-          <div className="w-full">
-            <div className="flex items-center space-x-4 mb-8">
-              <div className="h-px bg-gray-200 flex-1" />
-              <h4 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.4em]">Letzte 10 Aktivitäten</h4>
-              <div className="h-px bg-gray-200 flex-1" />
-            </div>
-            <HistoryList 
-              entries={sortedRecentEntries} 
-              onEdit={(e) => { setEditingEntry(e); setShowForm(true); }} 
-              onDelete={handleDeleteEntry}
-            />
-          </div>
         </motion.div>
       );
       case 'history': return (
@@ -941,30 +929,32 @@ const QuickSplitCard = ({ label, color, hours, comment, onHourChange, onCommentC
         </div>
       </div>
       
-      <div className="relative group/input">
-        <input 
-          type="text" 
-          value={comment} 
-          onChange={e => onCommentChange(e.target.value)}
-          placeholder={isSelected ? "Was wurde erledigt?" : "Keine Zeit eingetragen"}
-          disabled={!isSelected}
-          className={`w-full pl-4 pr-12 py-3 rounded-xl border-none text-xs font-bold outline-none transition-all ${
-            isSelected 
-              ? 'bg-gray-50 focus:bg-white focus:ring-2 focus:ring-brand-100 placeholder:text-gray-300' 
-              : 'bg-transparent text-gray-300 placeholder:text-gray-200'
-          }`}
-        />
+      <AnimatePresence>
         {isSelected && (
-          <button 
-            onClick={onGenerate} 
-            disabled={!comment || isLoading} 
-            className="absolute right-3 top-3 text-brand-500 hover:text-emerald-500 disabled:text-gray-300 transition-all hover:scale-110"
-            title="KI Kommentar generieren"
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="relative group/input overflow-hidden"
           >
-            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-          </button>
+            <input 
+              type="text" 
+              value={comment} 
+              onChange={e => onCommentChange(e.target.value)}
+              placeholder="Was wurde erledigt?"
+              className="w-full pl-4 pr-12 py-3 rounded-xl border-none text-xs font-bold outline-none transition-all bg-gray-50 focus:bg-white focus:ring-2 focus:ring-brand-100 placeholder:text-gray-300"
+            />
+            <button 
+              onClick={onGenerate} 
+              disabled={!comment || isLoading} 
+              className="absolute right-3 top-3 text-brand-500 hover:text-emerald-500 disabled:text-gray-300 transition-all hover:scale-110"
+              title="KI Kommentar generieren"
+            >
+              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+            </button>
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
     </div>
   );
 };
