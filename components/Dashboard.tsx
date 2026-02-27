@@ -93,20 +93,25 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage, notification
     const today = new Date();
     const dayOfWeek = today.getDay();
     const diffToMonday = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
+    
     const mondayThisWeek = new Date(today);
     mondayThisWeek.setDate(today.getDate() + diffToMonday);
-    mondayThisWeek.setHours(0, 0, 0, 0);
+    const mondayStr = getLocalDateString(mondayThisWeek);
+    
+    const sundayThisWeek = new Date(mondayThisWeek);
+    sundayThisWeek.setDate(mondayThisWeek.getDate() + 6);
+    const sundayStr = getLocalDateString(sundayThisWeek);
 
     const mondayLastWeek = new Date(mondayThisWeek);
     mondayLastWeek.setDate(mondayThisWeek.getDate() - 7);
-    const sundayLastWeek = new Date(mondayThisWeek);
-    sundayLastWeek.setSeconds(-1);
+    const lastMondayStr = getLocalDateString(mondayLastWeek);
+    
+    const sundayLastWeek = new Date(mondayLastWeek);
+    sundayLastWeek.setDate(mondayLastWeek.getDate() + 6);
+    const lastSundayStr = getLocalDateString(sundayLastWeek);
 
-    const weekEntries = entries.filter(e => new Date(e.date) >= mondayThisWeek);
-    const lastWeekEntries = entries.filter(e => {
-      const d = new Date(e.date);
-      return d >= mondayLastWeek && d <= sundayLastWeek;
-    });
+    const weekEntries = entries.filter(e => e.date >= mondayStr && e.date <= sundayStr);
+    const lastWeekEntries = entries.filter(e => e.date >= lastMondayStr && e.date <= lastSundayStr);
 
     const hoursWeek = weekEntries.reduce((sum, e) => sum + e.totalHours, 0);
     const netWeek = hoursWeek * wageInfo.netRate;
