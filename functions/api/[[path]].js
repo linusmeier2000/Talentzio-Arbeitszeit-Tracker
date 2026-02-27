@@ -136,6 +136,41 @@ export async function onRequest(context) {
       return jsonResponse({ success: true });
     }
 
+    // --- NOTIFICATIONS ENDPOINTS ---
+    if (path === '/api/notifications') {
+      if (method === 'GET') {
+        const { results } = await env.db.prepare("SELECT * FROM notifications ORDER BY timestamp DESC").all();
+        const notifications = results.map(row => ({
+          ...row,
+          isRead: Boolean(row.isRead),
+          data: row.data ? JSON.parse(row.data) : null
+        }));
+        return jsonResponse(notifications);
+      }
+      if (method === 'POST') {
+        const n = await request.json();
+        await env.db.prepare(`
+          INSERT INTO notifications (id, type, title, message, timestamp, isRead, data)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+          ON CONFLICT(id) DO UPDATE SET
+            type=excluded.type, title=excluded.title, message=excluded.message,
+            timestamp=excluded.timestamp, isRead=excluded.isRead, data=excluded.data
+        `).bind(
+          n.id, n.type, n.title, n.message, n.timestamp, n.isRead ? 1 : 0,
+          n.data ? JSON.stringify(n.data) : null
+        ).run();
+        return jsonResponse({ success: true }, 201);
+      }
+    }
+
+    if (path.startsWith('/api/notifications/')) {
+      const id = path.split('/').pop();
+      if (method === 'DELETE') {
+        await env.db.prepare("DELETE FROM notifications WHERE id = ?").bind(id).run();
+        return new Response(null, { status: 204 });
+      }
+    }
+
     return new Response("Not Found", { status: 404 });
   } catch (err) {
     return jsonResponse({ error: err.message }, 500);
