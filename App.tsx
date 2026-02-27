@@ -139,25 +139,27 @@ const App: React.FC = () => {
         const existing = notifications.find(n => n.id === id);
         const hasPlanned = entries.some(e => e.date >= nextMondayStr);
         
+        const planningTitle = 'Wochenplanung';
+        const planningMessage = hasPlanned 
+          ? 'Deine Planung für nächste Woche ist bereit. Du kannst sie hier jederzeit noch anpassen.'
+          : 'An welchen Tagen wirst du nächste Woche arbeiten? Plane jetzt deine Woche vor.';
+
         if (!existing) {
           newNotifications.push({
             id,
             type: 'planning',
-            title: 'Wochenplanung',
-            message: hasPlanned 
-              ? 'Deine Planung für nächste Woche ist bereit. Du kannst sie hier noch anpassen.'
-              : 'An welchen Tagen wirst du nächste Woche arbeiten? Plane jetzt deine Woche vor.',
+            title: planningTitle,
+            message: planningMessage,
             timestamp: now.toISOString(),
             isRead: false,
             data: { isPlanned: hasPlanned, plannedDays: [] }
           });
-        } else if (existing.message.includes('bereit') !== hasPlanned) {
-          // Update message if planning status changed
+        } else if (existing.message !== planningMessage || existing.isRead) {
+          // Update message if planning status changed or ensure it's unread during window
           const updated = {
             ...existing,
-            message: hasPlanned 
-              ? 'Deine Planung für nächste Woche ist bereit. Du kannst sie hier noch anpassen.'
-              : 'An welchen Tagen wirst du nächste Woche arbeiten? Plane jetzt deine Woche vor.',
+            message: planningMessage,
+            isRead: false // Ensure it stays visible in Notification Center during the window
           };
           await fetch('/api/notifications', {
             method: 'POST',
@@ -300,9 +302,10 @@ const App: React.FC = () => {
     if (targetId) {
       const notification = notifications.find(n => n.id === targetId);
       if (notification) {
-        const updatedNotification = {
+        const updatedNotification: Notification = {
           ...notification,
-          message: 'Deine Planung für nächste Woche ist bereit. Du kannst sie hier noch anpassen.',
+          message: 'Deine Planung für nächste Woche ist bereit. Du kannst sie hier jederzeit noch anpassen.',
+          isRead: false,
           data: {
             ...notification.data,
             isPlanned: true,
@@ -310,14 +313,14 @@ const App: React.FC = () => {
           }
         };
 
+        // Update local state immediately for better UX
+        setNotifications(prev => prev.map(n => n.id === targetId ? updatedNotification : n));
+
         await fetch('/api/notifications', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(updatedNotification)
         });
-        
-        const res = await fetch('/api/notifications');
-        if (res.ok) setNotifications(await res.json());
       }
     }
 
