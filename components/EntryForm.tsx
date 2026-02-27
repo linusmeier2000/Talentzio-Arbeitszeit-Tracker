@@ -120,6 +120,26 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
     setAiLoading(prev => ({ ...prev, [company]: false }));
   };
 
+  const getFieldSuggestions = (field: 'startM' | 'lunch' | 'startN' | 'end') => {
+    const last20 = entries.slice(0, 20);
+    const counts: Record<string, number> = {};
+    last20.forEach(e => {
+      const val = e[field];
+      if (val) counts[val] = (counts[val] || 0) + 1;
+    });
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(entry => entry[0]);
+  };
+
+  const suggestions = useMemo(() => ({
+    startM: getFieldSuggestions('startM'),
+    lunch: getFieldSuggestions('lunch'),
+    startN: getFieldSuggestions('startN'),
+    end: getFieldSuggestions('end'),
+  }), [entries]);
+
   const steps: { id: Step; label: string; icon: any }[] = [
     { id: 'basis', label: 'Tag', icon: Calendar },
     { id: 'times', label: 'Zeiten', icon: Clock },
@@ -289,18 +309,64 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
                     <h3 className="text-lg md:text-2xl font-black text-gray-900">Zeiten erfassen</h3>
                     <p className="text-[10px] md:text-sm text-gray-400 font-medium">Trage deine Präsenzzeiten ein.</p>
                   </div>
-                 <div className="bg-brand-500 p-4 md:p-6 rounded-xl md:rounded-[2rem] text-white flex justify-between items-center shadow-lg shadow-brand-200 mb-1 md:mb-4">
+                  <div className="bg-brand-500 p-4 md:p-6 rounded-xl md:rounded-[2rem] text-white flex justify-between items-center shadow-lg shadow-brand-200 mb-1 md:mb-4">
                     <div>
                       <p className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-brand-200">Total</p>
                       <p className="text-xl md:text-3xl font-black">{formData.totalHours?.toFixed(2)} h</p>
                     </div>
-                    <Clock className="w-5 h-5 md:w-8 md:h-8 opacity-40" />
+                    <div className="flex gap-2">
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          setFormData(prev => ({
+                            ...prev,
+                            startM: '08:00',
+                            lunch: '12:00',
+                            startN: '13:00',
+                            end: '17:00'
+                          }));
+                        }}
+                        className="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors"
+                      >
+                        Standard
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          setFormData(prev => ({
+                            ...prev,
+                            startM: '08:00',
+                            lunch: '12:00',
+                            startN: '',
+                            end: ''
+                          }));
+                        }}
+                        className="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors"
+                      >
+                        Vormittag
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          setFormData(prev => ({
+                            ...prev,
+                            startM: '',
+                            lunch: '',
+                            startN: '13:00',
+                            end: '17:00'
+                          }));
+                        }}
+                        className="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors"
+                      >
+                        Nachmittag
+                      </button>
+                    </div>
                  </div>
                  <div className="grid grid-cols-2 gap-2 md:gap-4">
-                   <TimeInputLarge label="Morgens" value={formData.startM!} onChange={(v) => handleChange('startM', v)} icon="☀️" />
-                   <TimeInputLarge label="Mittag" value={formData.lunch!} onChange={(v) => handleChange('lunch', v)} icon="🥗" />
-                   <TimeInputLarge label="Nachmittag" value={formData.startN!} onChange={(v) => handleChange('startN', v)} placeholder="Opt." icon="☕" />
-                   <TimeInputLarge label="Ende" value={formData.end!} onChange={(v) => handleChange('end', v)} icon="🌙" placeholder={!formData.startN ? "Opt." : undefined} />
+                   <TimeInputLarge label="Morgens" value={formData.startM!} onChange={(v) => handleChange('startM', v)} icon="☀️" suggestions={suggestions.startM} roundingMode="down" />
+                   <TimeInputLarge label="Mittag" value={formData.lunch!} onChange={(v) => handleChange('lunch', v)} icon="🥗" suggestions={suggestions.lunch} roundingMode="up" />
+                   <TimeInputLarge label="Nachmittag" value={formData.startN!} onChange={(v) => handleChange('startN', v)} placeholder="Opt." icon="☕" suggestions={suggestions.startN} roundingMode="down" />
+                   <TimeInputLarge label="Ende" value={formData.end!} onChange={(v) => handleChange('end', v)} icon="🌙" placeholder={!formData.startN ? "Opt." : undefined} suggestions={suggestions.end} roundingMode="up" />
                  </div>
               </motion.div>
             )}
@@ -413,7 +479,15 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
   );
 };
 
-const TimeInputLarge = ({ label, value, onChange, placeholder, icon }: { label: string, value: string, onChange: (v: string) => void, placeholder?: string, icon: string }) => (
+const TimeInputLarge = ({ label, value, onChange, placeholder, icon, suggestions, roundingMode }: { 
+  label: string, 
+  value: string, 
+  onChange: (v: string) => void, 
+  placeholder?: string, 
+  icon: string,
+  suggestions?: string[],
+  roundingMode?: 'up' | 'down'
+}) => (
   <div className="space-y-2">
     <div className="flex items-center justify-between ml-1">
       <div className="flex items-center space-x-2">
@@ -435,6 +509,8 @@ const TimeInputLarge = ({ label, value, onChange, placeholder, icon }: { label: 
       value={value} 
       onChange={onChange}
       placeholder={placeholder}
+      suggestions={suggestions}
+      roundingMode={roundingMode}
     />
   </div>
 );

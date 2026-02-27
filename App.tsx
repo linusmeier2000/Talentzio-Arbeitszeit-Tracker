@@ -61,6 +61,7 @@ const App: React.FC = () => {
     const loadData = async () => {
       setIsLoading(true);
       try {
+        console.log("[App] Loading data...");
         const [entriesRes, settingsRes, notificationsRes] = await Promise.all([
           fetch('/api/entries'),
           fetch('/api/settings'),
@@ -69,11 +70,14 @@ const App: React.FC = () => {
         
         if (entriesRes.ok) {
           const data = await entriesRes.json();
+          console.log("[App] Entries loaded:", data.length);
           if (Array.isArray(data)) {
             setEntries(data.length > 0 ? data : INITIAL_IMPORT_DATA);
           } else {
             setEntries(INITIAL_IMPORT_DATA);
           }
+        } else {
+          console.error("[App] Failed to load entries:", entriesRes.status);
         }
         
         if (settingsRes.ok) {
@@ -83,10 +87,15 @@ const App: React.FC = () => {
 
         if (notificationsRes.ok) {
           const data = await notificationsRes.json();
+          console.log("[App] Notifications loaded:", data.length);
           setNotifications(data || []);
+        } else {
+          const errData = await notificationsRes.json().catch(() => ({}));
+          console.error("[App] Failed to load notifications:", notificationsRes.status, errData.error);
+          // If the table is missing, we might get a 500 error
         }
       } catch (err) {
-        console.error("Failed to load data", err);
+        console.error("[App] Failed to load data", err);
       } finally {
         setIsLoading(false);
       }
@@ -204,16 +213,25 @@ const App: React.FC = () => {
       // 5. Random Facts/Stats
 
       for (const n of newNotifications) {
-        await fetch('/api/notifications', {
+        console.log("[App] Creating new notification:", n.id);
+        const postRes = await fetch('/api/notifications', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(n)
         });
+        if (!postRes.ok) {
+          const errData = await postRes.json().catch(() => ({}));
+          console.error("[App] Failed to save notification:", n.id, postRes.status, errData.error);
+        }
       }
 
       if (newNotifications.length > 0) {
         const res = await fetch('/api/notifications');
-        if (res.ok) setNotifications(await res.json());
+        if (res.ok) {
+          const data = await res.json();
+          console.log("[App] Refreshing notifications after update:", data.length);
+          setNotifications(data);
+        }
       }
     };
 
@@ -335,6 +353,26 @@ const App: React.FC = () => {
       setQuickEditData(null);
     }
   }, [todayEntry]);
+
+  const getFieldSuggestions = (field: 'startM' | 'lunch' | 'startN' | 'end') => {
+    const last20 = entries.slice(0, 20);
+    const counts: Record<string, number> = {};
+    last20.forEach(e => {
+      const val = e[field];
+      if (val) counts[val] = (counts[val] || 0) + 1;
+    });
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(entry => entry[0]);
+  };
+
+  const suggestions = useMemo(() => ({
+    startM: getFieldSuggestions('startM'),
+    lunch: getFieldSuggestions('lunch'),
+    startN: getFieldSuggestions('startN'),
+    end: getFieldSuggestions('end'),
+  }), [entries]);
 
   const handleSaveEntry = async (newEntry: TimeEntry) => {
     try {
@@ -602,10 +640,10 @@ const App: React.FC = () => {
                     <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
                       {quickEditStep === 'times' && (
                         <div className="grid grid-cols-2 gap-3 md:gap-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                          <QuickInputLarge label="Beginn M" value={quickEditData.startM} onChange={v => setQuickEditData({...quickEditData, startM: v})} />
-                          <QuickInputLarge label="Mittag" value={quickEditData.lunch} onChange={v => setQuickEditData({...quickEditData, lunch: v})} />
-                          <QuickInputLarge label="Beginn N" value={quickEditData.startN} onChange={v => setQuickEditData({...quickEditData, startN: v})} />
-                          <QuickInputLarge label="Ende" value={quickEditData.end} onChange={v => setQuickEditData({...quickEditData, end: v})} placeholder={!quickEditData.startN ? "Opt." : undefined} />
+                          <QuickInputLarge label="Beginn M" value={quickEditData.startM} onChange={v => setQuickEditData({...quickEditData, startM: v})} suggestions={suggestions.startM} roundingMode="down" />
+                          <QuickInputLarge label="Mittag" value={quickEditData.lunch} onChange={v => setQuickEditData({...quickEditData, lunch: v})} suggestions={suggestions.lunch} roundingMode="up" />
+                          <QuickInputLarge label="Beginn N" value={quickEditData.startN} onChange={v => setQuickEditData({...quickEditData, startN: v})} suggestions={suggestions.startN} roundingMode="down" />
+                          <QuickInputLarge label="Ende" value={quickEditData.end} onChange={v => setQuickEditData({...quickEditData, end: v})} placeholder={!quickEditData.startN ? "Opt." : undefined} suggestions={suggestions.end} roundingMode="up" />
                           <div className="col-span-2 mt-3 md:mt-8 p-4 md:p-6 bg-emerald-50/50 rounded-xl md:rounded-[2rem] flex justify-between items-center border border-emerald-100/50 group">
                             <div>
                               <span className="text-[8px] md:text-[10px] font-black text-emerald-800/60 uppercase tracking-widest block mb-0.5">Total</span>
@@ -789,7 +827,14 @@ const App: React.FC = () => {
 
 // --- Refined Quick Edit Components ---
 
-const QuickInputLarge = ({ label, value, onChange, placeholder }: { label: string, value: string, onChange: (v: string) => void, placeholder?: string }) => (
+const QuickInputLarge = ({ label, value, onChange, placeholder, suggestions, roundingMode }: { 
+  label: string, 
+  value: string, 
+  onChange: (v: string) => void, 
+  placeholder?: string,
+  suggestions?: string[],
+  roundingMode?: 'up' | 'down'
+}) => (
   <div className="space-y-3 group text-center relative">
     <div className="flex items-center justify-center space-x-2">
       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest group-focus-within:text-emerald-500 transition-colors">{label}</label>
@@ -808,6 +853,8 @@ const QuickInputLarge = ({ label, value, onChange, placeholder }: { label: strin
       value={value} 
       onChange={onChange}
       placeholder={placeholder}
+      suggestions={suggestions}
+      roundingMode={roundingMode}
     />
   </div>
 );

@@ -55,6 +55,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
           <Bell className="w-6 h-6" />
         </div>
         <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Keine neuen Meldungen</p>
+        <p className="text-[8px] text-gray-300 font-medium">Alle anstehenden Aufgaben und Hinweise wurden erledigt.</p>
       </div>
     );
   }

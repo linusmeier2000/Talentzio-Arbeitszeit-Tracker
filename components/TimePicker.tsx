@@ -7,9 +7,11 @@ interface TimePickerProps {
   onChange: (value: string) => void;
   label?: string;
   placeholder?: string;
+  suggestions?: string[];
+  roundingMode?: 'up' | 'down';
 }
 
-const TimePicker: React.FC<TimePickerProps> = ({ value, onChange, label, placeholder }) => {
+const TimePicker: React.FC<TimePickerProps> = ({ value, onChange, label, placeholder, suggestions = [], roundingMode = 'down' }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -42,6 +44,35 @@ const TimePicker: React.FC<TimePickerProps> = ({ value, onChange, label, placeho
   const hourOptions = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
   const minuteOptions = Array.from({ length: 12 }, (_, i) => (i * 5).toString().padStart(2, '0'));
 
+  const defaultPresets = ['07:00', '08:00', '09:00', '12:00', '13:00', '16:00', '17:00', '18:00'];
+  const displayPresets = suggestions.length > 0 ? suggestions : defaultPresets;
+
+  const handleSetNow = () => {
+    const now = new Date();
+    const h = now.getHours();
+    const m = now.getMinutes();
+    
+    let finalH = h;
+    let finalM = 0;
+
+    if (roundingMode === 'down') {
+      // Immer abrunden auf 5 Min
+      finalM = Math.floor(m / 5) * 5;
+    } else {
+      // Immer aufrunden auf 5 Min
+      finalM = Math.ceil(m / 5) * 5;
+      if (finalM === 60) {
+        finalM = 0;
+        finalH = (h + 1) % 24;
+      }
+    }
+
+    const formattedH = finalH.toString().padStart(2, '0');
+    const formattedM = finalM.toString().padStart(2, '0');
+    onChange(`${formattedH}:${formattedM}`);
+    setIsOpen(false);
+  };
+
   return (
     <div className="relative" ref={containerRef}>
       <div 
@@ -58,7 +89,35 @@ const TimePicker: React.FC<TimePickerProps> = ({ value, onChange, label, placeho
       </div>
 
       {isOpen && (
-        <div className="absolute z-50 mt-3 w-64 bg-white rounded-[2rem] shadow-2xl border border-gray-100 p-6 animate-in fade-in zoom-in-95 duration-200">
+        <div className="absolute z-50 mt-3 w-72 bg-white rounded-[2rem] shadow-2xl border border-gray-100 p-6 animate-in fade-in zoom-in-95 duration-200">
+          <div className="mb-4">
+            <div className="flex justify-between items-center mb-2">
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Schnellauswahl</p>
+              <button 
+                type="button" 
+                onClick={handleSetNow}
+                className="text-[10px] font-black text-brand-600 hover:text-brand-700 uppercase tracking-widest"
+              >
+                Jetzt
+              </button>
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+              {displayPresets.map(p => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => {
+                    onChange(p);
+                    setIsOpen(false);
+                  }}
+                  className={`py-2 rounded-lg text-[10px] font-black transition-all border ${value === p ? 'bg-brand-500 text-white border-brand-500' : 'bg-gray-50 text-gray-600 border-gray-100 hover:border-brand-200'}`}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="flex gap-4">
             {/* Hours Column */}
             <div className="flex-1">
