@@ -13,6 +13,8 @@ interface HistoryListProps {
 
 const HistoryList: React.FC<HistoryListProps> = ({ entries, onEdit, onDelete }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const containerVariants = {
@@ -35,13 +37,23 @@ const HistoryList: React.FC<HistoryListProps> = ({ entries, onEdit, onDelete }) 
                           (e.comments?.med || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
                           (e.comments?.bau || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
                           (e.comments?.cursum || '').toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesSearch;
+    
+    const matchesStartDate = !startDate || e.date >= startDate;
+    const matchesEndDate = !endDate || e.date <= endDate;
+    
+    return matchesSearch && matchesStartDate && matchesEndDate;
   }).sort((a, b) => b.date.localeCompare(a.date));
+
+  const clearFilters = () => {
+    setSearchTerm('');
+    setStartDate('');
+    setEndDate('');
+  };
 
   return (
     <div className="space-y-4 pb-24 md:pb-0">
       <div className="flex flex-col md:flex-row gap-4">
-        <div className="flex-1 relative">
+        <div className="flex-[2] relative">
           <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
           <input 
             type="text" 
@@ -50,6 +62,39 @@ const HistoryList: React.FC<HistoryListProps> = ({ entries, onEdit, onDelete }) 
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 bg-white border rounded-xl outline-none focus:ring-2 focus:ring-brand-500 shadow-sm transition-all"
           />
+        </div>
+        <div className="flex-1 flex gap-2 items-end">
+          <div className="flex-1 space-y-1">
+            <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Von</label>
+            <input 
+              type="date" 
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full px-3 py-2 bg-white border rounded-xl outline-none focus:ring-2 focus:ring-brand-500 shadow-sm transition-all text-xs font-bold"
+              title="Startdatum"
+            />
+          </div>
+          <div className="flex-1 space-y-1">
+            <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Bis</label>
+            <input 
+              type="date" 
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="w-full px-3 py-2 bg-white border rounded-xl outline-none focus:ring-2 focus:ring-brand-500 shadow-sm transition-all text-xs font-bold"
+              title="Enddatum"
+            />
+          </div>
+          {(searchTerm || startDate || endDate) && (
+            <div className="pb-1">
+              <button 
+                onClick={clearFilters}
+                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                title="Filter zurücksetzen"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
