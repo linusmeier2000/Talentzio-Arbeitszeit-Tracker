@@ -327,57 +327,10 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
                     <h3 className="text-lg md:text-2xl font-black text-gray-900">Zeiten erfassen</h3>
                     <p className="text-[10px] md:text-sm text-gray-400 font-medium">Trage deine Präsenzzeiten ein.</p>
                   </div>
-                  <div className="bg-brand-500 p-4 md:p-6 rounded-xl md:rounded-[2rem] text-white flex justify-between items-center shadow-lg shadow-brand-200 mb-1 md:mb-4">
-                    <div>
+                  <div className="bg-brand-500 p-4 md:p-6 rounded-xl md:rounded-[2rem] text-white flex justify-center items-center shadow-lg shadow-brand-200 mb-1 md:mb-4">
+                    <div className="text-center">
                       <p className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-brand-200">Total</p>
                       <p className="text-xl md:text-3xl font-black">{formData.totalHours?.toFixed(2)} h</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <button 
-                        type="button"
-                        onClick={() => {
-                          setFormData(prev => ({
-                            ...prev,
-                            startM: '08:00',
-                            lunch: '12:00',
-                            startN: '13:00',
-                            end: '17:00'
-                          }));
-                        }}
-                        className="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors"
-                      >
-                        Standard
-                      </button>
-                      <button 
-                        type="button"
-                        onClick={() => {
-                          setFormData(prev => ({
-                            ...prev,
-                            startM: '08:00',
-                            lunch: '12:00',
-                            startN: '',
-                            end: ''
-                          }));
-                        }}
-                        className="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors"
-                      >
-                        Vormittag
-                      </button>
-                      <button 
-                        type="button"
-                        onClick={() => {
-                          setFormData(prev => ({
-                            ...prev,
-                            startM: '',
-                            lunch: '',
-                            startN: '13:00',
-                            end: '17:00'
-                          }));
-                        }}
-                        className="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors"
-                      >
-                        Nachmittag
-                      </button>
                     </div>
                  </div>
                  <div className="grid grid-cols-2 gap-2 md:gap-4">
