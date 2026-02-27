@@ -80,7 +80,7 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage, notification
     const REFERENCE_WEEK_HOURS = 42.5;
     const HOURS_PER_DAY = 8.5;
 
-    // Filter für ausgewählten Monat/Jahr
+    // Filter für ausgewählten Monat/Jahr - Entwürfe einbeziehen
     const monthEntries = entries.filter(e => {
       const d = new Date(e.date);
       return d.getMonth() === viewMonth && d.getFullYear() === viewYear;
@@ -89,7 +89,7 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage, notification
     const hoursMonth = monthEntries.reduce((sum, e) => sum + e.totalHours, 0);
     const netMonth = hoursMonth * wageInfo.netRate;
 
-    // Aktuelle Woche (Montag-Sonntag) - Unabhängig vom Filter
+    // Aktuelle Woche (Montag-Sonntag) - Unabhängig vom Filter - Entwürfe ausschließen
     const today = new Date();
     const dayOfWeek = today.getDay();
     const diffToMonday = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
@@ -128,7 +128,7 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage, notification
     const capacityMonth = businessDaysMonth * HOURS_PER_DAY;
     const pensumMonth = capacityMonth > 0 ? (hoursMonth / capacityMonth) * 100 : 0;
 
-    // Pensum Jahr YTD
+    // Pensum Jahr YTD - Entwürfe einbeziehen
     const yearEntries = entries.filter(e => new Date(e.date).getFullYear() === viewYear);
     const hoursYear = yearEntries.reduce((sum, e) => sum + e.totalHours, 0);
     const startOfYear = new Date(viewYear, 0, 1);
