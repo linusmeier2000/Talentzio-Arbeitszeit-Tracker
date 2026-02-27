@@ -86,7 +86,7 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
     
     let headers = ['Datum', 'Tag', 'B. M', 'Pause', 'B. N', 'Ende', 'Total'];
     if (companyFilter === 'all') {
-      headers = [...headers, 'Med AG', 'Bau AG', 'Cursum', 'Talentzio'];
+      headers = [...headers, 'Med AG', 'Bau AG', 'Cursum'];
     } else {
       headers = [...headers, companyFilter.toUpperCase()];
     }
@@ -106,8 +106,7 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
         row = [...row, 
           e.splits.med.toFixed(2).replace('.', ','),
           e.splits.bau.toFixed(2).replace('.', ','),
-          e.splits.cursum.toFixed(2).replace('.', ','),
-          e.splits.talentzio.toFixed(2).replace('.', ',')
+          e.splits.cursum.toFixed(2).replace('.', ',')
         ];
       } else {
         row = [...row, e.splits[companyFilter].toFixed(2).replace('.', ',')];
@@ -120,8 +119,7 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
       totalRow = [...totalRow, 
         totals.med.toFixed(2).replace('.', ','), 
         totals.bau.toFixed(2).replace('.', ','), 
-        totals.cursum.toFixed(2).replace('.', ','),
-        totals.talentzio.toFixed(2).replace('.', ',')
+        totals.cursum.toFixed(2).replace('.', ',')
       ];
     } else {
       totalRow = [...totalRow, totals.total.toFixed(2).replace('.', ',')];
@@ -220,7 +218,6 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
                 <option value="med">Talentzio Med AG</option>
                 <option value="bau">Talentzio Bau AG</option>
                 <option value="cursum">Cursum AG</option>
-                <option value="talentzio">Talentzio (Rest)</option>
               </select>
             </div>
           </div>
@@ -312,7 +309,6 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
                         <th className="px-2 py-4 text-center border-l border-slate-200">Med</th>
                         <th className="px-2 py-4 text-center">Bau</th>
                         <th className="px-2 py-4 text-center">Cur.</th>
-                        <th className="px-2 py-4 text-center">Tal.</th>
                       </>
                     ) : (
                       <th className="px-2 py-4 text-center border-l border-slate-200 uppercase">{companyFilter.substring(0, 3)}.</th>
@@ -336,7 +332,6 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
                           <td className="px-2 py-2.5 text-center font-bold text-gray-700 border-l border-slate-100">{e.splits.med > 0 ? e.splits.med.toFixed(2) : ''}</td>
                           <td className="px-2 py-2.5 text-center font-bold text-gray-700">{e.splits.bau > 0 ? e.splits.bau.toFixed(2) : ''}</td>
                           <td className="px-2 py-2.5 text-center font-bold text-gray-700">{e.splits.cursum > 0 ? e.splits.cursum.toFixed(2) : ''}</td>
-                          <td className="px-2 py-2.5 text-center font-bold text-gray-700">{e.splits.talentzio > 0 ? e.splits.talentzio.toFixed(2) : ''}</td>
                         </>
                       ) : (
                         <td className="px-2 py-2.5 text-center font-black text-brand-600 border-l border-slate-100">
@@ -355,7 +350,6 @@ const ExportPanel: React.FC<ExportPanelProps> = ({ entries, settings, onToggleLo
                         <td className="px-2 py-6 text-center border-l border-slate-700 bg-slate-800/50">{totals.med.toFixed(2)}</td>
                         <td className="px-2 py-6 text-center bg-slate-800/50">{totals.bau.toFixed(2)}</td>
                         <td className="px-2 py-6 text-center bg-slate-800/50">{totals.cursum.toFixed(2)}</td>
-                        <td className="px-2 py-6 text-center bg-slate-800/50">{totals.talentzio.toFixed(2)}</td>
                       </>
                     ) : (
                       <td className="px-2 py-6 text-center border-l border-slate-700 bg-slate-800/50">{totals.total.toFixed(2)}</td>

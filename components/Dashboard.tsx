@@ -272,27 +272,26 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, hourlyWage, notification
           </button>
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-3 w-full lg:w-auto">
-          <div className="flex items-center space-x-2 bg-gray-50 px-3 py-2 rounded-xl border border-gray-100">
-            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Zeitraum</span>
-            <select value={viewMonth} onChange={(e) => setViewMonth(parseInt(e.target.value))} className="bg-transparent font-bold text-xs md:text-sm outline-none cursor-pointer">
+        <div className="flex items-center justify-between lg:justify-center gap-2 w-full lg:w-auto">
+          <div className="flex items-center space-x-1.5 bg-gray-50 px-2.5 py-2 rounded-xl border border-gray-100 flex-1 lg:flex-none justify-center">
+            <select value={viewMonth} onChange={(e) => setViewMonth(parseInt(e.target.value))} className="bg-transparent font-bold text-xs outline-none cursor-pointer">
               {Array.from({ length: 12 }, (_, i) => (
                 <option key={i} value={i}>{getMonthName(i)}</option>
               ))}
             </select>
             <span className="text-gray-300">/</span>
-            <select value={viewYear} onChange={(e) => setViewYear(parseInt(e.target.value))} className="bg-transparent font-bold text-xs md:text-sm outline-none cursor-pointer">
+            <select value={viewYear} onChange={(e) => setViewYear(parseInt(e.target.value))} className="bg-transparent font-bold text-xs outline-none cursor-pointer">
               {availableYears.map(y => <option key={y} value={y}>{y}</option>)}
             </select>
           </div>
           
           <button 
             onClick={handleReset}
-            className={`p-2 md:p-2.5 rounded-xl transition-all flex items-center group ${isCurrentView ? 'bg-brand-50 text-brand-600' : 'bg-gray-100 text-gray-500 hover:bg-brand-50 hover:text-brand-600'}`}
+            className={`p-2 rounded-xl transition-all flex items-center justify-center group ${isCurrentView ? 'bg-brand-50 text-brand-600' : 'bg-gray-100 text-gray-500 hover:bg-brand-50 hover:text-brand-600'}`}
             title="Auf heute zurücksetzen"
           >
-            <RotateCcw className={`w-4 h-4 mr-2 transition-transform duration-500 ${!isCurrentView ? 'group-hover:rotate-180' : ''}`} />
-            <span className="text-[10px] font-black uppercase">Aktuell</span>
+            <RotateCcw className={`w-4 h-4 md:mr-2 transition-transform duration-500 ${!isCurrentView ? 'group-hover:rotate-180' : ''}`} />
+            <span className="hidden md:inline text-[10px] font-black uppercase">Aktuell</span>
           </button>
         </div>
       </motion.div>

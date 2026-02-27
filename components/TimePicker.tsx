@@ -9,9 +9,18 @@ interface TimePickerProps {
   placeholder?: string;
   suggestions?: string[];
   roundingMode?: 'up' | 'down';
+  error?: boolean;
 }
 
-const TimePicker: React.FC<TimePickerProps> = ({ value, onChange, label, placeholder, suggestions = [], roundingMode = 'down' }) => {
+const TimePicker: React.FC<TimePickerProps> = ({ 
+  value, 
+  onChange, 
+  label, 
+  placeholder, 
+  suggestions = [], 
+  roundingMode = 'down',
+  error
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -73,23 +82,58 @@ const TimePicker: React.FC<TimePickerProps> = ({ value, onChange, label, placeho
     setIsOpen(false);
   };
 
+  const adjustTime = (minutesDiff: number) => {
+    if (!value) return;
+    const [h, m] = value.split(':').map(Number);
+    const date = new Date();
+    date.setHours(h, m, 0, 0);
+    date.setMinutes(date.getMinutes() + minutesDiff);
+    const newH = date.getHours().toString().padStart(2, '0');
+    const newM = date.getMinutes().toString().padStart(2, '0');
+    onChange(`${newH}:${newM}`);
+  };
+
   return (
     <div className="relative" ref={containerRef}>
       <div 
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-5 py-5 bg-white border border-gray-100 rounded-[1.5rem] focus-within:ring-4 focus-within:ring-brand-50 outline-none flex items-center justify-between cursor-pointer shadow-sm transition-all hover:border-brand-200"
+        className={`w-full px-5 py-5 bg-white border rounded-[1.5rem] focus-within:ring-4 outline-none flex items-center justify-between cursor-pointer shadow-sm transition-all ${
+          error 
+            ? 'border-red-300 bg-red-50/30 ring-red-100' 
+            : 'border-gray-100 focus-within:ring-brand-50 hover:border-brand-200'
+        }`}
       >
         <div className="flex flex-col">
-          {label && <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{label}</span>}
-          <span className={`text-xl font-black ${!value ? 'text-gray-300' : 'text-gray-900'}`}>
+          {label && <span className={`text-[10px] font-black uppercase tracking-widest mb-1 ${error ? 'text-red-400' : 'text-gray-400'}`}>{label}</span>}
+          <span className={`text-xl font-black ${!value ? 'text-gray-300' : (error ? 'text-red-600' : 'text-gray-900')}`}>
             {value || placeholder || '--:--'}
           </span>
         </div>
-        <Clock className={`w-5 h-5 transition-colors ${isOpen ? 'text-brand-500' : 'text-gray-300'}`} />
+        <div className="flex items-center space-x-2">
+          {value && (
+            <div className="flex flex-col -space-y-1 mr-2">
+              <button 
+                type="button" 
+                onClick={(e) => { e.stopPropagation(); adjustTime(5); }}
+                className="p-1 text-gray-300 hover:text-brand-500 transition-colors"
+              >
+                <ChevronDown className="w-3 h-3 rotate-180" />
+              </button>
+              <button 
+                type="button" 
+                onClick={(e) => { e.stopPropagation(); adjustTime(-5); }}
+                className="p-1 text-gray-300 hover:text-brand-500 transition-colors"
+              >
+                <ChevronDown className="w-3 h-3" />
+              </button>
+            </div>
+          )}
+          <Clock className={`w-5 h-5 transition-colors ${isOpen ? 'text-brand-500' : (error ? 'text-red-400' : 'text-gray-300')}`} />
+        </div>
       </div>
 
       {isOpen && (
-        <div className="absolute z-50 mt-3 w-72 bg-white rounded-[2rem] shadow-2xl border border-gray-100 p-6 animate-in fade-in zoom-in-95 duration-200">
+        <div className="absolute z-50 mt-3 w-72 left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0 bg-white rounded-[2rem] shadow-2xl border border-gray-100 p-6 animate-in fade-in zoom-in-95 duration-200">
           <div className="mb-4">
             <div className="flex justify-between items-center mb-2">
               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Schnellauswahl</p>

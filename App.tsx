@@ -28,9 +28,10 @@ import {
   ArrowDown,
   Timer,
   Trash2,
-  Bell
+  Bell,
+  AlertTriangle
 } from 'lucide-react';
-import { calculateWageBreakdown, formatCurrency, calculateTotalHours, roundTo, getLocalDateString, formatDate } from './utils';
+import { calculateWageBreakdown, formatCurrency, calculateTotalHours, roundTo, getLocalDateString, formatDate, timeToDecimal } from './utils';
 import { generateWorkComment } from './services/geminiService';
 
 const STORAGE_KEY_ENTRIES = 'at_entries_v1';
@@ -371,6 +372,22 @@ const App: React.FC = () => {
     }
   }, [todayEntry]);
 
+  const timeErrors = useMemo(() => {
+    if (!quickEditData) return {};
+    const errors: Record<string, boolean> = {};
+    const t1 = quickEditData.startM ? timeToDecimal(quickEditData.startM) : null;
+    const t2 = quickEditData.lunch ? timeToDecimal(quickEditData.lunch) : null;
+    const t3 = quickEditData.startN ? timeToDecimal(quickEditData.startN) : null;
+    const t4 = quickEditData.end ? timeToDecimal(quickEditData.end) : null;
+
+    if (t1 !== null && t2 !== null && t2 <= t1) errors.lunch = true;
+    if (t2 !== null && t3 !== null && t3 <= t2) errors.startN = true;
+    if (t3 !== null && t4 !== null && t4 <= t3) errors.end = true;
+    if (t1 !== null && t4 !== null && t4 <= t1) errors.end = true;
+
+    return errors;
+  }, [quickEditData?.startM, quickEditData?.lunch, quickEditData?.startN, quickEditData?.end]);
+
   const getFieldSuggestions = (field: 'startM' | 'lunch' | 'startN' | 'end') => {
     const last20 = entries.slice(0, 20);
     const counts: Record<string, number> = {};
@@ -657,10 +674,16 @@ const App: React.FC = () => {
                     <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
                       {quickEditStep === 'times' && (
                         <div className="grid grid-cols-2 gap-3 md:gap-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                          <QuickInputLarge label="Beginn M" value={quickEditData.startM} onChange={v => setQuickEditData({...quickEditData, startM: v})} suggestions={suggestions.startM} roundingMode="down" />
-                          <QuickInputLarge label="Mittag" value={quickEditData.lunch} onChange={v => setQuickEditData({...quickEditData, lunch: v})} suggestions={suggestions.lunch} roundingMode="up" />
-                          <QuickInputLarge label="Beginn N" value={quickEditData.startN} onChange={v => setQuickEditData({...quickEditData, startN: v})} suggestions={suggestions.startN} roundingMode="down" />
-                          <QuickInputLarge label="Ende" value={quickEditData.end} onChange={v => setQuickEditData({...quickEditData, end: v})} placeholder={!quickEditData.startN ? "Opt." : undefined} suggestions={suggestions.end} roundingMode="up" />
+                          <QuickInputLarge label="Beginn M" value={quickEditData.startM} onChange={v => setQuickEditData({...quickEditData, startM: v})} suggestions={suggestions.startM} roundingMode="down" error={timeErrors.startM} />
+                          <QuickInputLarge label="Mittag" value={quickEditData.lunch} onChange={v => setQuickEditData({...quickEditData, lunch: v})} suggestions={suggestions.lunch} roundingMode="up" error={timeErrors.lunch} />
+                          <QuickInputLarge label="Beginn N" value={quickEditData.startN} onChange={v => setQuickEditData({...quickEditData, startN: v})} suggestions={suggestions.startN} roundingMode="down" error={timeErrors.startN} />
+                          <QuickInputLarge label="Ende" value={quickEditData.end} onChange={v => setQuickEditData({...quickEditData, end: v})} placeholder={!quickEditData.startN ? "Opt." : undefined} suggestions={suggestions.end} roundingMode="up" error={timeErrors.end} />
+                          {Object.keys(timeErrors).length > 0 && (
+                            <div className="col-span-2 p-3 bg-red-50 border border-red-100 rounded-xl flex items-center space-x-2 text-red-600">
+                              <AlertTriangle className="w-3 h-3 shrink-0" />
+                              <p className="text-[8px] font-bold uppercase tracking-tight">Zeitfolge unlogisch</p>
+                            </div>
+                          )}
                           <div className="col-span-2 mt-3 md:mt-8 p-4 md:p-6 bg-emerald-50/50 rounded-xl md:rounded-[2rem] flex justify-between items-center border border-emerald-100/50 group">
                             <div>
                               <span className="text-[8px] md:text-[10px] font-black text-emerald-800/60 uppercase tracking-widest block mb-0.5">Total</span>
@@ -844,17 +867,18 @@ const App: React.FC = () => {
 
 // --- Refined Quick Edit Components ---
 
-const QuickInputLarge = ({ label, value, onChange, placeholder, suggestions, roundingMode }: { 
+const QuickInputLarge = ({ label, value, onChange, placeholder, suggestions, roundingMode, error }: { 
   label: string, 
   value: string, 
   onChange: (v: string) => void, 
   placeholder?: string,
   suggestions?: string[],
-  roundingMode?: 'up' | 'down'
+  roundingMode?: 'up' | 'down',
+  error?: boolean
 }) => (
   <div className="space-y-3 group text-center relative">
     <div className="flex items-center justify-center space-x-2">
-      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest group-focus-within:text-emerald-500 transition-colors">{label}</label>
+      <label className={`text-[10px] font-black uppercase tracking-widest transition-colors ${error ? 'text-red-400' : 'text-gray-400 group-focus-within:text-emerald-500'}`}>{label}</label>
       {value && (
         <button 
           type="button" 
@@ -872,6 +896,7 @@ const QuickInputLarge = ({ label, value, onChange, placeholder, suggestions, rou
       placeholder={placeholder}
       suggestions={suggestions}
       roundingMode={roundingMode}
+      error={error}
     />
   </div>
 );

@@ -11,6 +11,7 @@ import {
   calculateTotalHours, 
   getWeekday, 
   roundTo, 
+  timeToDecimal
 } from '../utils';
 import { generateWorkComment } from '../services/geminiService';
 import { 
@@ -61,6 +62,21 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
   });
 
   const [aiLoading, setAiLoading] = useState<Record<string, boolean>>({});
+
+  const timeErrors = useMemo(() => {
+    const errors: Record<string, boolean> = {};
+    const t1 = formData.startM ? timeToDecimal(formData.startM) : null;
+    const t2 = formData.lunch ? timeToDecimal(formData.lunch) : null;
+    const t3 = formData.startN ? timeToDecimal(formData.startN) : null;
+    const t4 = formData.end ? timeToDecimal(formData.end) : null;
+
+    if (t1 !== null && t2 !== null && t2 <= t1) errors.lunch = true;
+    if (t2 !== null && t3 !== null && t3 <= t2) errors.startN = true;
+    if (t3 !== null && t4 !== null && t4 <= t3) errors.end = true;
+    if (t1 !== null && t4 !== null && t4 <= t1) errors.end = true;
+
+    return errors;
+  }, [formData.startM, formData.lunch, formData.startN, formData.end]);
 
   const totalDayHours = calculateTotalHours(
     formData.startM || '',
@@ -152,6 +168,8 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
   const validateStep = (step: Step): boolean => {
     if (step === 'basis') return !!formData.date;
     if (step === 'times') {
+      if (Object.keys(timeErrors).length > 0) return false;
+
       // Valid if: (StartM & Lunch) OR (StartN & End) OR (StartM & End)
       // NEW: Also valid if only Morning is filled (StartM & Lunch) and Afternoon is empty
       const hasMorning = !!formData.startM && !!formData.lunch;
@@ -363,11 +381,17 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
                     </div>
                  </div>
                  <div className="grid grid-cols-2 gap-2 md:gap-4">
-                   <TimeInputLarge label="Morgens" value={formData.startM!} onChange={(v) => handleChange('startM', v)} icon="☀️" suggestions={suggestions.startM} roundingMode="down" />
-                   <TimeInputLarge label="Mittag" value={formData.lunch!} onChange={(v) => handleChange('lunch', v)} icon="🥗" suggestions={suggestions.lunch} roundingMode="up" />
-                   <TimeInputLarge label="Nachmittag" value={formData.startN!} onChange={(v) => handleChange('startN', v)} placeholder="Opt." icon="☕" suggestions={suggestions.startN} roundingMode="down" />
-                   <TimeInputLarge label="Ende" value={formData.end!} onChange={(v) => handleChange('end', v)} icon="🌙" placeholder={!formData.startN ? "Opt." : undefined} suggestions={suggestions.end} roundingMode="up" />
+                   <TimeInputLarge label="Morgens" value={formData.startM!} onChange={(v) => handleChange('startM', v)} icon="☀️" suggestions={suggestions.startM} roundingMode="down" error={timeErrors.startM} />
+                   <TimeInputLarge label="Mittag" value={formData.lunch!} onChange={(v) => handleChange('lunch', v)} icon="🥗" suggestions={suggestions.lunch} roundingMode="up" error={timeErrors.lunch} />
+                   <TimeInputLarge label="Nachmittag" value={formData.startN!} onChange={(v) => handleChange('startN', v)} placeholder="Opt." icon="☕" suggestions={suggestions.startN} roundingMode="down" error={timeErrors.startN} />
+                   <TimeInputLarge label="Ende" value={formData.end!} onChange={(v) => handleChange('end', v)} icon="🌙" placeholder={!formData.startN ? "Opt." : undefined} suggestions={suggestions.end} roundingMode="up" error={timeErrors.end} />
                  </div>
+                 {Object.keys(timeErrors).length > 0 && (
+                   <div className="p-3 bg-red-50 border border-red-100 rounded-xl flex items-center space-x-2 text-red-600 animate-in fade-in slide-in-from-top-2">
+                     <AlertTriangle className="w-4 h-4 shrink-0" />
+                     <p className="text-[10px] font-bold uppercase tracking-tight">Die Zeiten sind unlogisch (Ende vor Beginn).</p>
+                   </div>
+                 )}
               </motion.div>
             )}
 
@@ -479,20 +503,21 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
   );
 };
 
-const TimeInputLarge = ({ label, value, onChange, placeholder, icon, suggestions, roundingMode }: { 
+const TimeInputLarge = ({ label, value, onChange, placeholder, icon, suggestions, roundingMode, error }: { 
   label: string, 
   value: string, 
   onChange: (v: string) => void, 
   placeholder?: string, 
   icon: string,
   suggestions?: string[],
-  roundingMode?: 'up' | 'down'
+  roundingMode?: 'up' | 'down',
+  error?: boolean
 }) => (
   <div className="space-y-2">
     <div className="flex items-center justify-between ml-1">
       <div className="flex items-center space-x-2">
         <span className="text-lg">{icon}</span>
-        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{label}</label>
+        <label className={`text-[10px] font-black uppercase tracking-widest ${error ? 'text-red-400' : 'text-gray-400'}`}>{label}</label>
       </div>
       {value && (
         <button 
@@ -511,6 +536,7 @@ const TimeInputLarge = ({ label, value, onChange, placeholder, icon, suggestions
       placeholder={placeholder}
       suggestions={suggestions}
       roundingMode={roundingMode}
+      error={error}
     />
   </div>
 );

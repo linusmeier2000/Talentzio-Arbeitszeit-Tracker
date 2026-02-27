@@ -11,6 +11,8 @@ import {
   Bell
 } from 'lucide-react';
 
+import { getLocalDateString, formatDate, getWeekday } from '../utils';
+
 interface LayoutProps {
   children: React.ReactNode;
   activeTab: string;
@@ -19,6 +21,7 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, notifications }) => {
+  const todayStr = getLocalDateString(new Date());
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'track', label: 'Erfassung', icon: Clock },
@@ -89,9 +92,14 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, noti
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 print:block print:w-full print:static">
         <header className="bg-white/80 backdrop-blur-md border-b h-14 md:h-16 flex items-center px-4 md:px-8 sticky top-0 z-40 justify-between no-print">
-           <h2 className="text-xs md:text-sm font-black text-gray-900 uppercase tracking-widest">
-             {menuItems.find(m => m.id === activeTab)?.label}
-           </h2>
+           <div className="flex flex-col">
+             <h2 className="text-xs md:text-sm font-black text-gray-900 uppercase tracking-widest leading-tight">
+               {menuItems.find(m => m.id === activeTab)?.label}
+             </h2>
+             <p className="text-[8px] md:text-[10px] font-bold text-brand-600 uppercase tracking-[0.15em] mt-0.5">
+               {getWeekday(todayStr)}, {formatDate(todayStr)}
+             </p>
+           </div>
            
            {/* Mobile Notification Bell */}
            <div className="md:hidden flex items-center">
