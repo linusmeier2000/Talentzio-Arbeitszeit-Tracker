@@ -148,6 +148,12 @@ const App: React.FC = () => {
         const existing = notifications.find(n => n.id === id);
         const hasPlanned = entries.some(e => e.date >= nextMondayStr);
         
+        // Remove any old planning notifications that are not for this week
+        const oldPlanningNotifs = notifications.filter(n => n.type === 'planning' && n.id !== id);
+        for (const old of oldPlanningNotifs) {
+          await fetch(`/api/notifications/${old.id}`, { method: 'DELETE' });
+        }
+        
         const planningTitle = 'Wochenplanung';
         const planningMessage = hasPlanned 
           ? 'Deine Planung für nächste Woche ist bereit. Du kannst sie hier jederzeit noch anpassen.'
@@ -177,6 +183,17 @@ const App: React.FC = () => {
           });
           const res = await fetch('/api/notifications');
           if (res.ok) setNotifications(await res.json());
+        }
+      } else {
+        // If not in planning window, we can optionally remove the planning notification
+        // but it's safer to just let it be if it's already there, or remove it if it's Monday/Tuesday
+        if (day === 1 || day === 2) {
+          const currentPlanning = notifications.find(n => n.type === 'planning');
+          if (currentPlanning) {
+            await fetch(`/api/notifications/${currentPlanning.id}`, { method: 'DELETE' });
+            const res = await fetch('/api/notifications');
+            if (res.ok) setNotifications(await res.json());
+          }
         }
       }
       // 3. Draft Ready Notification

@@ -29,7 +29,10 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
   onMarkAsDone,
   onPlanNextWeek
 }) => {
-  const activeNotifications = notifications.filter(n => !n.isRead);
+  // De-duplicate notifications by ID to be safe
+  const activeNotifications = notifications
+    .filter(n => !n.isRead)
+    .filter((n, index, self) => index === self.findIndex((t) => t.id === n.id));
 
   const getPlannedDaysForNextWeek = () => {
     const now = new Date();
