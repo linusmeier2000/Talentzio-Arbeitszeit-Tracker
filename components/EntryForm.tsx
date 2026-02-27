@@ -31,6 +31,16 @@ interface EntryFormProps {
 type Step = 'basis' | 'times' | 'splits' | 'final';
 
 const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onCancel, onDelete }) => {
+  useEffect(() => {
+    // Prevent scrolling on body when form is open on mobile
+    if (window.innerWidth < 768) {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = 'unset';
+      };
+    }
+  }, []);
+
   const [currentStep, setCurrentStep] = useState<Step>('basis');
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<Partial<TimeEntry>>(() => {
@@ -252,7 +262,7 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
   };
 
   return (
-    <div className="bg-white rounded-xl md:rounded-[2.5rem] shadow-2xl border border-gray-100 overflow-hidden max-w-2xl mx-auto flex flex-col min-h-[400px] md:min-h-[600px]">
+    <div className="fixed inset-0 md:relative md:inset-auto z-[100] md:z-0 bg-white md:bg-white md:rounded-[2.5rem] md:shadow-2xl md:border md:border-gray-100 overflow-hidden max-w-2xl mx-auto flex flex-col h-full md:h-auto md:min-h-[600px]">
       {/* Header with Progress */}
       <div className="bg-slate-900 p-4 md:p-8 text-white">
         <div className="flex justify-between items-center mb-3 md:mb-6">
@@ -282,7 +292,7 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 p-4 md:p-8 overflow-y-auto">
+      <div className="flex-1 p-4 md:p-8 overflow-y-auto pb-32 md:pb-8">
         <form id="entry-form" onSubmit={handleSubmit} className="h-full flex flex-col">
           <AnimatePresence mode="wait">
             {currentStep === 'basis' && (

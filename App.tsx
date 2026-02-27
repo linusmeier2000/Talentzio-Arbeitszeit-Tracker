@@ -569,9 +569,10 @@ const App: React.FC = () => {
 
     if (showForm) return (
       <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 1.1 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[100] md:relative md:inset-auto md:z-0"
       >
         <EntryForm 
           initialData={editingEntry || undefined} 
