@@ -262,9 +262,9 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
   };
 
   return (
-    <div className="fixed inset-0 md:relative md:inset-auto z-[100] md:z-0 bg-white md:bg-white md:rounded-[2.5rem] md:shadow-2xl md:border md:border-gray-100 overflow-hidden max-w-2xl mx-auto flex flex-col h-full md:h-auto md:min-h-[600px]">
+    <div className="fixed inset-0 md:relative md:inset-auto z-[100] md:z-0 bg-white md:rounded-[2.5rem] md:shadow-2xl md:border md:border-gray-100 overflow-hidden max-w-2xl mx-auto flex flex-col h-[100dvh] md:h-auto md:min-h-[600px]">
       {/* Header with Progress */}
-      <div className="bg-slate-900 p-4 md:p-8 text-white">
+      <div className="bg-slate-900 p-4 pt-[calc(1rem+env(safe-area-inset-top))] md:p-8 text-white shrink-0">
         <div className="flex justify-between items-center mb-3 md:mb-6">
           <div className="flex items-center space-x-2 md:space-x-3">
              <div className="p-1.5 md:p-2 bg-brand-500 rounded-lg md:rounded-xl shadow-lg shadow-brand-500/20">
@@ -292,7 +292,7 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 p-4 md:p-8 overflow-y-auto pb-32 md:pb-8">
+      <div className="flex-1 p-4 md:p-8 overflow-y-auto">
         <form id="entry-form" onSubmit={handleSubmit} className="h-full flex flex-col">
           <AnimatePresence mode="wait">
             {currentStep === 'basis' && (
@@ -423,7 +423,7 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
       </div>
 
       {/* Footer Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 md:relative md:bottom-auto z-[60] p-4 md:p-8 bg-white/95 backdrop-blur-md border-t border-gray-100 flex flex-col gap-2 shadow-[0_-10px_25px_rgba(0,0,0,0.05)]">
+      <div className="shrink-0 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] md:p-8 bg-white border-t border-gray-100 flex flex-col gap-2 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] md:shadow-none">
          <div className="flex gap-2">
            {currentStepIndex > 0 && (
              <button 
