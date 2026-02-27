@@ -413,7 +413,7 @@ const EntryForm: React.FC<EntryFormProps> = ({ initialData, entries, onSave, onC
       </div>
 
       {/* Footer Navigation */}
-      <div className="p-4 md:p-8 bg-gray-50/50 border-t border-gray-100 flex flex-col gap-2">
+      <div className="fixed bottom-0 left-0 right-0 md:relative md:bottom-auto z-[60] p-4 md:p-8 bg-white/95 backdrop-blur-md border-t border-gray-100 flex flex-col gap-2 shadow-[0_-10px_25px_rgba(0,0,0,0.05)]">
          <div className="flex gap-2">
            {currentStepIndex > 0 && (
              <button 
